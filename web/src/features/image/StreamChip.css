@@ -1,0 +1,21 @@
+/* 流式开关。前缀 strm-，独占。 */
+
+.strm { display: inline-flex; align-items: center; gap: 4px; }
+
+.strm-chip {
+  padding: 4px 10px; border-radius: var(--radius-full);
+  border: 1px solid var(--border); background: var(--bg-sunken);
+  color: var(--ink-muted); font-size: 11px; cursor: pointer; white-space: nowrap;
+}
+.strm-chip:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.strm-chip:disabled { opacity: 0.6; cursor: default; }
+
+.strm-chip.strm-on { border-color: var(--accent); color: var(--accent); }
+/* 不支持不是错误，是事实：用中性色，别报红吓人 */
+.strm-chip.strm-off { color: var(--ink-muted); border-style: dashed; }
+
+.strm-off {
+  border: 0; background: none; cursor: pointer;
+  color: var(--ink-muted); font-size: 11px; padding: 2px 4px;
+}
+.strm-off:hover { color: var(--ink); }

@@ -1,0 +1,121 @@
+name: lingua-next
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: lingua
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lingua}
+      POSTGRES_DB: lingua
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lingua -d lingua"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:16379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  migrate:
+    build: ../server
+    command: ["uv", "run", "--no-sync", "alembic", "upgrade", "head"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      LINGUA_DATABASE_URL: postgresql+asyncpg://lingua:${POSTGRES_PASSWORD:-lingua}@postgres:5432/lingua
+
+  api:
+    build: ../server
+    # 复用服务端本机密钥文件；下面 environment 中的容器地址仍具有更高优先级。
+    env_file:
+      - ../server/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      LINGUA_DATABASE_URL: postgresql+asyncpg://lingua:${POSTGRES_PASSWORD:-lingua}@postgres:5432/lingua
+      LINGUA_REDIS_URL: redis://redis:6379/0
+      LINGUA_MEDIA_ROOT: /media
+      # 媒体文件交给 nginx 发（FR-389）。留空则应用自己发，本机 pnpm dev 即如此
+      LINGUA_XACCEL_PREFIX: /__media/
+      LINGUA_SCENARIOS_DIR: /scenarios
+      LINGUA_VOLC_APP_ID: ${LINGUA_VOLC_APP_ID:-}
+      LINGUA_VOLC_ACCESS_KEY: ${LINGUA_VOLC_ACCESS_KEY:-}
+      LINGUA_WHISPER_MODEL: ${LINGUA_WHISPER_MODEL:-small}
+      LINGUA_YTDLP_PROXY: ${LINGUA_YTDLP_PROXY:-}
+      LINGUA_YTDLP_COOKIES_BROWSER: ""
+      # 语法讲义 vault 在本机 Obsidian 目录，容器里看不到宿主机路径，
+      # 挂载后把根路径指到容器内挂载点；apply 改稿要写回，所以不能 :ro
+      LINGUA_GRAMMAR_DOCS_ROOT: /grammar-docs
+      LINGUA_GRAMMAR_DOCS_BACKUP_DIR: /grammar-doc-backups
+    volumes:
+      - ../server/data/media:/media
+      - ../data/scenarios:/scenarios:ro
+      - ${GRAMMAR_DOCS_ROOT:-/Users/your-user/Documents/知识库/obsidian_en/12.软实力与英语/01.英语学习/02.英语基础语法}:/grammar-docs
+      - ../server/data/grammar_doc_backups:/grammar-doc-backups
+      - hf_cache:/root/.cache/huggingface
+
+  worker:
+    build: ../server
+    env_file:
+      - ../server/.env
+    command: ["uv", "run", "--no-sync", "arq", "worker.main.WorkerSettings"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      LINGUA_DATABASE_URL: postgresql+asyncpg://lingua:${POSTGRES_PASSWORD:-lingua}@postgres:5432/lingua
+      LINGUA_REDIS_URL: redis://redis:6379/0
+      LINGUA_MEDIA_ROOT: /media
+      # 媒体文件交给 nginx 发（FR-389）。留空则应用自己发，本机 pnpm dev 即如此
+      LINGUA_XACCEL_PREFIX: /__media/
+      LINGUA_SCENARIOS_DIR: /scenarios
+      LINGUA_VOLC_APP_ID: ${LINGUA_VOLC_APP_ID:-}
+      LINGUA_VOLC_ACCESS_KEY: ${LINGUA_VOLC_ACCESS_KEY:-}
+      LINGUA_WHISPER_MODEL: ${LINGUA_WHISPER_MODEL:-small}
+      LINGUA_YTDLP_PROXY: ${LINGUA_YTDLP_PROXY:-}
+      LINGUA_YTDLP_COOKIES_BROWSER: ""
+    volumes:
+      - ../server/data/media:/media
+      - ../data/scenarios:/scenarios:ro
+      - hf_cache:/root/.cache/huggingface
+
+  web:
+    build: ../web
+    depends_on:
+      - api
+    ports:
+      - "${NEXUS_BIND_ADDRESS:-127.0.0.1}:8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # X-Accel-Redirect 要 nginx 自己读文件；路径与 api 侧保持一致，
+      # DB 里存的 key 两边都能解析。只读挂载，写入只走应用
+      - ../server/data/media:/media:ro
+
+volumes:
+  pg_data:
+  redis_data:
+  hf_cache:

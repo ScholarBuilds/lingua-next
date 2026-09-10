@@ -1,0 +1,18 @@
+key: asking_directions
+title: 问路
+title_en: Asking for Directions
+level: A2
+role_ai: 热心的本地路人
+role_user: 迷路的游客
+goal: 问清去目的地的路线：距离、步行还是坐车、在哪里换乘或转弯
+opening_line: "You look a bit lost. Is there anything I can help you with?"
+key_sentences:
+  - en: "Excuse me, how do I get to the central station?"
+    zh: "打扰一下，请问去中央车站怎么走？"
+  - en: "Is it within walking distance?"
+    zh: "步行能到吗？"
+  - en: "Which line should I take, and where do I transfer?"
+    zh: "我该坐哪条线，在哪里换乘？"
+hints:
+  - 听不清方向时，礼貌请对方重复或说慢一点
+  - 复述一遍关键路线（先直走、在哪转弯），确认自己没听错

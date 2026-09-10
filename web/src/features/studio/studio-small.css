@@ -1,0 +1,352 @@
+/* 工坊小工具：全景预览（FR-481）与宫格工具（FR-481）。
+   类名前缀 ssm- 独占（pnpm check:css 守着），颜色一律取 tokens.css 的 var()，不新增色值。
+
+   页壳、两栏骨架、参数块（stl-page / stl-body / stl-side / stl-block…）沿用
+   studio-tools.css——四个工具页同一副骨架，这里只补两页各自新增的部件。 */
+
+/* ── 舞台（球面画布 / 切分预览 / 拼接预览共用） ── */
+
+.ssm-stage {
+  position: relative;
+  width: 100%;
+  height: min(58vh, 560px);
+  min-height: 300px;
+  overflow: hidden;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+/* 拼接那档不用绝对定位摆图，画布直接居中 */
+.ssm-stage-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.ssm-msg {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  font-size: var(--text-sm);
+  line-height: 1.9;
+  color: var(--ink-muted);
+}
+.ssm-msg-bad { color: var(--err); }
+
+.ssm-tip {
+  margin-top: 8px;
+}
+
+/* ── 全景：WebGL 画布 ── */
+
+.ssm-gl-host {
+  position: absolute;
+  inset: 0;
+}
+/* renderer 自己造的 canvas，类名在 JS 里挂上。尺寸由 setSize 写在 style 上，
+   这里只管定位与光标；抓手光标是「这块可以拖」的唯一提示 */
+.ssm-gl {
+  display: block;
+  cursor: grab;
+  touch-action: none;
+  outline: none;
+}
+.ssm-gl:active { cursor: grabbing; }
+.ssm-gl:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.ssm-hud {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--backdrop);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+/* 进不了球面模式时的平面回落图 */
+.ssm-flat {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  padding: 12px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.ssm-flat img {
+  max-width: 100%;
+  max-height: 52vh;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+.ssm-flat-tag {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+/* ── 识别不通过 / WebGL 不可用的告知条 ── */
+
+.ssm-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--warn-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.ssm-warn-bad { background: var(--err-soft); }
+.ssm-warn-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  color: var(--warn);
+}
+.ssm-warn-bad .ssm-warn-icon { color: var(--err); }
+.ssm-warn-icon svg { width: 17px; height: 17px; }
+.ssm-warn-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--text-xs);
+  line-height: 1.75;
+  color: var(--ink-secondary);
+}
+.ssm-warn-body b {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ── 模式说明条 ── */
+
+.ssm-cost {
+  padding: 8px 12px;
+  background: var(--ok-soft);
+  color: var(--ok);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+}
+.ssm-cost b { font-weight: 700; margin-right: 4px; }
+
+/* ── 切分预览 ── */
+
+/* 图面：位置与尺寸由 JS 按容器实测尺寸算好后写在 style 上 */
+.ssm-plate {
+  position: absolute;
+  user-select: none;
+  box-shadow: var(--shadow-md);
+}
+.ssm-plate img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+.ssm-line {
+  position: absolute;
+  background: var(--accent);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* ── 拼接预览 ── */
+
+.ssm-canvas {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  box-shadow: var(--shadow-md);
+}
+
+/* 备选图。grid 里用 aspect-ratio 是安全的，
+   被压扁的那条坑发生在 flex 列 + width:100% 的组合上 */
+.ssm-pool {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 54px), 1fr));
+  gap: 6px;
+  max-height: 230px;
+  overflow-y: auto;
+}
+.ssm-cell {
+  position: relative;
+  display: block;
+  padding: 0;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.ssm-cell img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.ssm-cell:disabled { opacity: 0.5; cursor: not-allowed; }
+.ssm-cell-on { border-color: var(--accent); }
+.ssm-cell-idx {
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ── 参数控件 ── */
+
+.ssm-nums {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.9;
+  color: var(--ink-secondary);
+}
+
+.ssm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.ssm-chip {
+  height: 26px;
+  min-width: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  color: var(--ink-secondary);
+  transition: all var(--dur-fast) var(--ease);
+}
+.ssm-chip:hover:not(:disabled) { border-color: var(--ink-faint); color: var(--ink); }
+.ssm-chip:disabled { opacity: 0.45; cursor: not-allowed; }
+.ssm-chip-on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.ssm-numrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ssm-numbox {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+.ssm-num {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  outline: none;
+}
+.ssm-num:focus { border-color: var(--accent); }
+
+.ssm-range {
+  width: 100%;
+  height: 4px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* 全局 .seg 没有禁用态，处理中要看得出来点不动 */
+.ssm-pane .seg button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── 产物网格 ── */
+
+/* min(100%, N) 兜住「容器比一格还窄」的极端档：不加的话轨道仍按 N 排，整块顶出容器 */
+.ssm-shots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 120px), 1fr));
+  gap: 8px;
+}
+.ssm-shot {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.ssm-shot img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+}
+.ssm-shot figcaption {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ssm-shot-id {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-muted);
+}
+.ssm-shot-id svg { flex: 0 0 auto; width: 12px; height: 12px; }
+
+/* ── 两档面板的显隐 ── */
+
+/* display:contents 让包裹层对布局透明：里面的 .stl-body 照旧当 .stl-page 的
+   flex 子项，不会因为多包一层就丢掉 flex:1 */
+.ssm-pane { display: contents; }
+.ssm-pane-off { display: none; }
+
+@media (max-width: 720px) {
+  .ssm-stage { height: min(46vh, 380px); }
+  .ssm-shots { grid-template-columns: repeat(auto-fill, minmax(min(100%, 96px), 1fr)); }
+}

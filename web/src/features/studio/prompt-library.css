@@ -1,0 +1,1249 @@
+/* 提示词库（FR-478）。前缀 spl- 独占（scripts/check-css.mjs 守卫），颜色一律走 tokens。
+
+   覆盖全局 .field-textarea 的两处写成 `.field-textarea.spl-xxx` 复合选择器：
+   同为单类时特异性一样，谁赢只看打包器先发射谁，dev 与 build 还可能不一致
+   （app.css 里 .overlay-card 那段记的坑）。 */
+
+/* ==================== 页面骨架 ==================== */
+
+.spl-page {
+  position: relative;
+  display: flex;
+  /* .page 基础规则带 overflow-y:auto；这里各栏自己滚，页面本身不滚 */
+  overflow: hidden;
+}
+
+.spl-side {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 10px 20px;
+  border-right: 1px solid var(--border);
+  background: var(--bg-sunken);
+  overflow-y: auto;
+}
+
+.spl-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.spl-flex { flex: 1; }
+
+/* ==================== 左栏 ==================== */
+
+/* 顶部库切换（系统模板 / 我的）。蓝本那边是个下拉，这里做成分段控件：
+   只有三档，下拉要点两下才看得见有哪些选项 */
+.spl-lib {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  margin-bottom: 6px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+}
+
+.spl-lib-btn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: var(--ctl-h-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.spl-lib-btn:hover { color: var(--ink); }
+.spl-lib-on { background: var(--bg-active); color: var(--accent); font-weight: 600; }
+
+.spl-lib-n {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+.spl-side-sec {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 14px 6px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+}
+.spl-side-sec span { flex: 1; }
+
+.spl-side-note {
+  margin: 4px 6px;
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--ink-muted);
+}
+.spl-side-err { color: var(--err); }
+
+.spl-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  color: var(--ink-secondary);
+  text-align: left;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.spl-item:hover { background: var(--bg-hover); color: var(--ink); }
+.spl-item-on { background: var(--bg-active); color: var(--accent); font-weight: 600; }
+
+.spl-item-sub { padding-left: 24px; }
+
+.spl-item-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spl-item-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+/* 行内操作平时不占视觉，hover 或键盘聚焦到行内才露出来 */
+.spl-item-acts {
+  display: none;
+  align-items: center;
+  gap: 2px;
+}
+.spl-item:hover .spl-item-acts,
+.spl-item:focus-within .spl-item-acts { display: flex; }
+
+.spl-act {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+}
+.spl-act:hover { background: var(--bg-surface); color: var(--ink); }
+.spl-act:disabled { opacity: 0.35; cursor: not-allowed; }
+.spl-act svg { width: 13px; height: 13px; }
+
+.spl-rename {
+  flex: 1;
+  min-width: 0;
+  height: 24px;
+  padding: 0 6px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-sm);
+  outline: none;
+}
+
+.spl-new {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+.spl-new:hover { background: var(--bg-hover); color: var(--ink); }
+.spl-new svg { width: 13px; height: 13px; }
+
+.spl-newbox { padding: 2px 8px 6px; }
+.spl-newbox input {
+  width: 100%;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-sm);
+  outline: none;
+}
+.spl-newbox p {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+/* ==================== 主区工具条 ==================== */
+
+.spl-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px 10px;
+}
+.spl-head h1 { font-size: var(--text-lg); font-weight: 700; }
+.spl-head p { font-size: var(--text-xs); color: var(--ink-muted); margin-top: 2px; }
+
+.spl-head-text { min-width: 0; }
+
+/* 窄屏下左栏收成抽屉，这个按钮是唯一入口。宽屏下左栏一直在，它不该占位置 */
+.spl-rail-toggle {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  height: var(--ctl-h-sm);
+  padding: 0 10px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  font-size: var(--text-xs);
+  color: var(--ink-secondary);
+}
+.spl-rail-toggle:hover { color: var(--ink); }
+.spl-rail-toggle svg { width: 14px; height: 14px; }
+
+/* 抽屉打开时盖在列表上的那层。宽屏永远不渲染 */
+.spl-scrim {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 24;
+  background: var(--backdrop);
+}
+
+.spl-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px 10px;
+}
+
+.spl-search {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 250px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius-md);
+  background: var(--bg-sunken);
+  color: var(--ink-faint);
+}
+.spl-search svg { width: 15px; height: 15px; flex-shrink: 0; }
+.spl-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  outline: none;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  color: var(--ink);
+}
+.spl-search input::placeholder { color: var(--ink-faint); }
+
+.spl-sorts {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-md);
+  background: var(--bg-sunken);
+}
+
+.spl-sort {
+  height: var(--ctl-h-sm);
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.spl-sort:hover { color: var(--ink); }
+.spl-sort-on { background: var(--bg-surface); color: var(--ink); font-weight: 600; box-shadow: var(--shadow-sm); }
+
+.spl-count {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+}
+
+.spl-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px 8px;
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--ink-muted);
+}
+.spl-note-err { color: var(--err); }
+
+/* ==================== 中栏：条目列表 ==================== */
+
+.spl-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 14px 24px;
+}
+
+/* 一行一条，不再是卡片网格：正文全文在右栏看，列表只负责认出「是哪一条」。
+   卡片网格里每张卡都要塞三行正文摘要，而这些模板的正文有两三百词，摘要看不出差别 */
+.spl-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.spl-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 11px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  text-align: left;
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.spl-row:hover { background: var(--bg-hover); }
+.spl-row-on {
+  border-color: var(--accent);
+  background: var(--bg-active);
+}
+
+.spl-row-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.spl-row-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* 场景一行截断：它是「什么时候用」，不是正文 */
+.spl-row-scene {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  color: var(--ink-secondary);
+}
+
+.spl-row-meta {
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+/* 没写「适用场景」时列表显示的是正文摘要。标一下，否则用户会以为这是自己写的说明 */
+.spl-row-excerpt { color: var(--ink-muted); }
+
+.spl-row-mark {
+  margin-right: 5px;
+  padding: 0 5px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+/* 收藏星标是**只读徽标**（两处都是 `<span aria-label="已收藏">`），
+   不是按钮——所以不受 --ctl-hit 命中区下限约束，18px 只影响观感。
+   哪天它又变回可点的，记得把命中区按 `.bk-del` 那套用伪元素补回 32。 */
+.spl-star {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  color: var(--ink-faint);
+}
+.spl-star:hover { color: var(--warn); }
+.spl-star:disabled { opacity: 0.5; }
+.spl-star svg { width: 14px; height: 14px; }
+.spl-star-on { color: var(--warn); }
+
+.spl-badge {
+  flex-shrink: 0;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: var(--radius-full);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.spl-badge-source {
+  background: var(--bg-active);
+  color: var(--ink-secondary);
+}
+
+/* 分类是内置模板自带的属性，和「内置」徽标并排出现，颜色要压得住不抢眼 */
+.spl-badge-cat {
+  background: var(--bg-sunken);
+  color: var(--ink-muted);
+}
+
+.spl-badge-hidden {
+  background: var(--bg-sunken);
+  color: var(--warn);
+}
+
+.spl-empty {
+  padding: 40px 0;
+  text-align: center;
+  font-size: var(--text-sm);
+  line-height: 1.8;
+  color: var(--ink-muted);
+}
+
+/* ==================== 右栏：详情 ==================== */
+
+.spl-detail {
+  flex: 0 0 380px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.spl-detail-head {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.spl-detail-titlerow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.spl-detail-title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-md);
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--ink);
+  word-break: break-word;
+}
+
+/* 宽屏下这一栏一直在，关不关无所谓；窄屏下它盖住列表，那时才需要一条回去的路 */
+.spl-detail-close { display: none; }
+
+.spl-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.spl-detail-meta {
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+.spl-detail-scene {
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--ink-secondary);
+}
+
+.spl-detail-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.spl-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.spl-sec-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.spl-sec-head label {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+
+/* 正文**不截断**：这一栏存在的理由就是把两三百词的提示词摊开给人读。
+
+   等宽字体不是审美选择：提示词里挤着 `{{占位}}`、`85mm`、`F0EDE8` 这类
+   要一个字符一个字符看准的片段，比例字体下 `l`/`1`/`I`、`0`/`O` 糊成一团。
+   `overflow-wrap: anywhere` 是给那种一整行不带空格的长参数串兜底的——
+   只有 `word-break: break-word` 时，`--no-text--no-letters--no-watermark`
+   这样的串会把整栏顶宽，横向滚动条一出，右边的按钮就被推出可视区。 */
+.spl-full {
+  padding: 9px 11px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.9;
+  color: var(--ink-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+.spl-full-neg { color: var(--warn); }
+
+.spl-varlist {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.spl-varlist li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  font-size: var(--text-xs);
+  color: var(--ink-secondary);
+}
+
+.spl-varlist-label { font-weight: 600; color: var(--ink); }
+
+.spl-varlist-desc {
+  flex: 1;
+  min-width: 120px;
+  color: var(--ink-muted);
+}
+
+.spl-varlist-req {
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+.spl-detail-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.spl-why {
+  padding: 7px 9px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  font-size: 11px;
+  line-height: 1.75;
+  color: var(--ink-muted);
+}
+
+/* 「多长」这件事在提示词库里是要看的：三百词和三十词是两种东西 */
+.spl-ed-len {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+/* 窄屏先压两侧的固定宽度，别让中间的列表被挤成一条。
+   详情栏是这一版的重点（正文全文要在这看），压到 300 还读得动，就不做成可折叠的了 */
+@media (max-width: 1180px) {
+  .spl-side { flex-basis: 176px; }
+  .spl-detail { flex-basis: 300px; }
+}
+
+/* ==================== 新建 / 编辑器 ==================== */
+
+/* 铺满整页而不是 440px 的右侧抽屉。
+
+   这些正文动辄两三百词，在一条窄缝里改长提示词是这一版之前最难受的一件事：
+   一屏看得见十来行，改一处要上下翻两回才对得上前后文。铺满之后正向正文能占到
+   一半屏宽、随窗口拉满高度，标题/场景/分组这些一行写完的东西挪到右侧窄栏。 */
+.spl-editor {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface);
+}
+
+.spl-ed-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.spl-ed-head h2 { font-size: var(--text-md); font-weight: 600; }
+
+.spl-ed-tip {
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+/* 窗口矮到装不下「正文 200 + 负向 84 + 说明」时整块自己滚。
+   不给的话内容被 .spl-page 的 overflow:hidden 直接切掉，底下的保存按钮还在，
+   中间那截负向框却看不见——比出现一条滚动条糟得多 */
+.spl-ed-grid {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 16px;
+  padding: 14px 16px 0;
+  overflow-y: auto;
+}
+
+.spl-ed-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.spl-ed-side {
+  flex: 0 0 320px;
+  min-width: 0;
+  overflow-y: auto;
+  padding-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.spl-ed-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 0;
+}
+
+/* 正向正文吃掉这一栏剩下的全部高度：窗口越高，一屏能看到的正文越多 */
+.spl-ed-grow { flex: 1; }
+
+/* 等宽 + 不硬性限高：编辑框跟着 .spl-ed-grow 撑满，`resize:none` 是因为
+   高度已经由布局给足，手动拖只会把下面的负向框挤没 */
+.field-textarea.spl-body-input {
+  flex: 1;
+  min-height: 200px;
+  resize: none;
+  font-family: var(--font-mono);
+  line-height: 1.9;
+}
+
+.field-textarea.spl-neg-input {
+  min-height: 84px;
+  resize: vertical;
+  font-family: var(--font-mono);
+  line-height: 1.9;
+}
+
+.spl-ed-err { margin: 0 16px; }
+
+.spl-ed-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.spl-ed-state {
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+}
+
+/* ==================== AI 写一条 ==================== */
+
+.spl-ai {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-sunken);
+}
+
+.spl-ai-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-secondary);
+}
+.spl-ai-head svg { width: 14px; height: 14px; color: var(--accent); }
+
+.field-textarea.spl-ai-intent {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.spl-ai-opts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.spl-ai-lang { flex: 1; min-width: 120px; }
+
+.spl-ai-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  color: var(--ink-secondary);
+  white-space: nowrap;
+}
+
+.spl-ai-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.spl-ai-note {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ok);
+}
+
+.spl-ai-why {
+  font-size: 11px;
+  line-height: 1.75;
+  color: var(--ink-muted);
+}
+.spl-ai-why b { color: var(--ink-secondary); }
+
+/* ==================== 全屏读正文 ==================== */
+
+.spl-reader {
+  width: min(920px, 94vw);
+  height: 84vh;
+  /* 基础 .overlay-card 带 overflow-y:auto，不关掉的话卡片和正文各滚一层 */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* `<pre>` 默认 `white-space: pre`，一行不折就是一条横向滚动条到天边。
+   这一层存在的理由是通读，所以强制折行，长参数串也从中间断开 */
+.spl-reader-text {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 12px 0;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-sunken);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 2;
+  color: var(--ink-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+/* ==================== 放弃改动 / 失败说明 ==================== */
+
+.spl-discard {
+  flex: 1;
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  color: var(--warn);
+}
+
+.spl-fail {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--err);
+}
+
+/* ==================== 删除确认 ==================== */
+
+.spl-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: var(--text-sm);
+  line-height: 1.8;
+  color: var(--ink-secondary);
+}
+/* 不钉尺寸的话 svg 会按容器宽度铺开，撑成半屏的大图标 */
+.spl-warn svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 4px; color: var(--warn); }
+.spl-warn b { color: var(--ink); }
+
+.spl-warn-note {
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--ink-muted);
+}
+
+/* ==================== 套用面板（右侧滑入） ==================== */
+
+/* 贴右侧而不是居中弹窗：挑提示词是「看着画布挑」的事，哪张图要重画、上一版的
+   构图长什么样都在画布中央摆着，居中弹窗把它们全盖住。宽度由组件用内联样式给
+   （拖拽 + localStorage 记忆，钳制规则在 prompt-panel.ts），这里只定形与位置。
+
+   没有遮罩层是有意的：面板开着时画布仍然要能拖能点，那正是它存在的理由。 */
+.spl-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  /* 压过 .theme-toggle(90)，让开 .overlay(100)：删除确认与编辑器要盖在它上面 */
+  z-index: 96;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  animation: spl-panel-in var(--dur-base) var(--ease);
+}
+
+@keyframes spl-panel-in {
+  from { transform: translateX(24px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+/* 面板高度由视口钉死，列表之外的几块都不该被压缩：压缩的表现不是出现滚动条，
+   而是底部那行说明被裁掉半行，看着像写漏了 */
+.spl-panel > :not(.spl-picker-body):not(.spl-picker-fill) { flex-shrink: 0; }
+
+/* 拖的时候关掉过渡与文字选中，否则指针一动就把列表整段选蓝 */
+.spl-panel-drag {
+  user-select: none;
+  cursor: col-resize;
+}
+
+/* 左边缘那条拖拽线。视觉上只有 1px，命中区靠内边距补到 --ctl-hit 的一半以上——
+   再窄的话按住它比按住画布边缘还难 */
+.spl-panel-grip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -3px;
+  width: 7px;
+  cursor: col-resize;
+  touch-action: none;
+}
+.spl-panel-grip:hover::after,
+.spl-panel-grip:focus-visible::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 2px;
+  background: var(--accent);
+}
+
+.spl-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.spl-panel-head h3 { font-size: var(--text-md); font-weight: 600; }
+
+/* 排序档 + 「含已隐藏」+ 条数摆一行。三样都是「现在在看什么」的说明，
+   混进上面那条搜索行会把搜索框挤成一条缝 */
+.spl-panel-sorts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.spl-panel-hidden {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+/* 编辑器铺满视口的那层壳。
+
+   `.spl-editor` 是 `position:absolute; inset:0`，铺的是最近的定位祖先：库页那边
+   是整页，挂进 420 宽的面板里就会缩成一条缝——而「长提示词在窄缝里改不动」
+   正是这一版要解决的问题。所以面板这边自己给一层 fixed 的壳，把它撑回整屏。 */
+.spl-ed-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 102;
+  background: var(--bg-surface);
+}
+
+.spl-ed-loading {
+  padding: 24px;
+}
+
+.spl-picker-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 库页那边搜索框是固定 250 宽（那一行还很宽松）；面板最窄只有 320，
+   固定宽会把旁边的分类下拉挤出去。只在面板里改成弹性，不动基础规则 */
+.spl-panel .spl-search { flex: 1; width: auto; min-width: 0; }
+.spl-panel .spl-sel { flex-shrink: 0; max-width: 46%; }
+
+.spl-sel {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  outline: none;
+}
+.spl-sel:disabled { opacity: 0.5; }
+
+.spl-picker-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 面板只有一栏，卡片改成上下摞：标题/摘要一整行铺满，动作按钮另起一行。
+   横着摆的话，420 宽里动作占掉 120，长标题永远只剩半行 */
+.spl-picker-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.spl-picker-row:hover { border-color: var(--accent); }
+
+.spl-picker-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+}
+
+/* 词数 / 变量数 / 带负向 / 套用次数。挑长提示词时这几个数比截断的正文有用得多 */
+.spl-picker-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+.spl-picker-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.spl-picker-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--ink-faint);
+}
+
+.spl-picker-scene {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--ink-secondary);
+}
+
+/* 「全文」展开的那一段。截断的两行英文谁也分不出谁，所以这里不再截——
+   给一个高度上限让它自己滚，长到十几屏的模板不至于把整个列表顶下去 */
+.spl-picker-text {
+  max-height: 40vh;
+  overflow-y: auto;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.8;
+  color: var(--ink-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 负向那段与正向区分开：两段等宽等色摞在一起，看的人分不出哪段是要避开的 */
+.spl-picker-text-neg { color: var(--ink-muted); border-left: 2px solid var(--warn); }
+
+.spl-picker-acts {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+/* 删除按钮平时是灰的，悬停才变红：一列图标里唯一不可逆的那个要认得出来，
+   但也不该一进列表就有一排红图标在那儿 */
+.spl-picker-del:hover { color: var(--err); background: var(--err-soft); }
+
+.spl-picker-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--ink-muted);
+}
+/* 排在 .spl-picker-note 后面才压得住它的 color——两条特异性相同，靠顺序决胜 */
+.spl-picker-err { color: var(--err); }
+
+/* ---- 模板变量：抽屉里的声明区与卡片上的徽标 ---- */
+
+.spl-vars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.spl-var {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr auto;
+  gap: 6px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+}
+
+.spl-var-name {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.spl-var-label {
+  min-width: 0;
+}
+
+.spl-var-default {
+  min-width: 0;
+}
+
+.spl-var-req {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  color: var(--ink-secondary);
+  white-space: nowrap;
+}
+
+.spl-var-desc {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.spl-vartag {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  color: var(--ink-muted);
+  line-height: var(--ctl-h-sm);
+}
+
+.spl-vartag-req {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ---- 填变量浮层 ---- */
+
+.spl-fill {
+  width: min(620px, 92vw);
+}
+
+.spl-fill-out {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+/* ---- 套用浮层里的库切换 ---- */
+
+.spl-scope {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-md);
+  background: var(--bg-sunken);
+}
+
+.spl-scope-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: var(--ctl-h-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.spl-scope-btn:hover { color: var(--ink); }
+.spl-scope-on { background: var(--bg-surface); color: var(--ink); font-weight: 600; box-shadow: var(--shadow-sm); }
+
+.spl-scope-n {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+/* ---- 面板里的填变量步骤 ---- */
+
+.spl-picker-fill {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+/* ==================== 窄屏退化 ==================== */
+
+/* 三栏在窄屏上是活不下去的：176 + 300 的两侧固定宽度之外，中间的列表只剩
+   两三百像素，标题一律截断，挑不出东西。这一档把两侧都变成盖在列表上的层——
+   左栏由「分类」按钮唤出，详情栏在点中某一条时才盖上来，右上角给一条回去的路。
+
+   为什么不是「压得更窄」：详情栏是这一版的主角（正文全文在这看），压到 240
+   之后一行放不下十个英文词，三百词的提示词要滚十几屏，等于没有。 */
+@media (max-width: 960px) {
+  .spl-rail-toggle { display: inline-flex; }
+  .spl-scrim { display: block; }
+
+  .spl-side {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 26;
+    width: 236px;
+    flex-basis: auto;
+    transform: translateX(-100%);
+    transition: transform var(--dur-base) var(--ease);
+    box-shadow: var(--shadow-lg);
+  }
+  .spl-side-open { transform: none; }
+
+  /* 没主动点过某一条就不盖上来：列表页一进来就被详情糊住的话，
+     用户连自己在哪个分类里都看不见 */
+  .spl-detail {
+    position: absolute;
+    inset: 0;
+    z-index: 22;
+    display: none;
+    flex-basis: auto;
+    border-left: none;
+  }
+  .spl-detail-open { display: flex; }
+  .spl-detail-close { display: inline-flex; }
+
+  /* 编辑器上下摞，正向仍排最上面——它才是要写的东西。
+     整块改成自己滚，各段回到内容高度：列内 flex:1 在自动高度的容器里会塌成 0 */
+  .spl-ed-grid {
+    flex-direction: column;
+    overflow-y: auto;
+    padding-bottom: 14px;
+  }
+  .spl-ed-main { flex: none; }
+  .spl-ed-side { flex: none; overflow: visible; padding-bottom: 0; }
+  .spl-ed-grow { flex: none; }
+  .field-textarea.spl-body-input { flex: none; min-height: 280px; }
+}
+
+/* 手机竖屏：左栏抽屉按视口宽给，236 在 360 宽的屏上会把列表挤成一条缝 */
+@media (max-width: 560px) {
+  .spl-head { flex-wrap: wrap; }
+  .spl-head-text { flex: 1 0 100%; }
+  .spl-bar { flex-wrap: wrap; }
+  .spl-side { width: min(280px, 84vw); }
+  .spl-detail-foot { padding: 10px 12px; }
+
+  /* 这一档没有「一边看画布一边挑」可言：屏幕本来就放不下两样东西。
+     面板改成整屏铺开，拖拽线也收掉（内联宽度用 max-width 压过去，
+     JS 那边的钳制在这个视口下只会给出最小宽） */
+  .spl-panel {
+    max-width: 100vw;
+    border-left: none;
+  }
+  .spl-panel-grip { display: none; }
+}

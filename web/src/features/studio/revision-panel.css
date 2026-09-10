@@ -1,0 +1,109 @@
+/* 版本历史面板（RevisionPanel）。提示词库与工作流中心共用这一套，别在各自的
+   样式表里再写一份同名类——CSS 是合并不是替换，两份撞上只看打包顺序谁赢。 */
+
+.shv-card {
+  width: min(560px, 92vw);
+}
+
+.shv-note {
+  margin: 12px 0;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shv-note-err {
+  color: var(--danger);
+}
+
+.shv-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  max-height: 52vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shv-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+}
+
+.shv-row-now {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.shv-ver {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-secondary);
+  min-width: 40px;
+}
+
+.shv-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.shv-note-text {
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shv-time {
+  color: var(--ink-faint);
+  font-size: var(--text-xs);
+}
+
+.shv-badge {
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: var(--text-xs);
+  line-height: var(--ctl-h-sm);
+}
+
+.shv-pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ctl-hit);
+  height: var(--ctl-hit);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.shv-pin:hover {
+  background: var(--bg-hover);
+}
+
+.shv-pin-on {
+  color: var(--accent);
+}
+
+.shv-keep {
+  margin: 12px 0 0;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+}

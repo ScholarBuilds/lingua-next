@@ -1,0 +1,652 @@
+/* 模型调用账本。前缀 mdl- / ledger- 独占（check:css 守卫）。
+
+   页面只剩可观测：页头 + 试调 + 账本。配置相关的表单（部署、协议、LoRA、绑定汇总）
+   连同它们的样式一起搬去了设置页，这里不再保留半套。 */
+
+.mdl-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 28px 34px 48px;
+  overflow-y: auto;
+}
+
+/* ---- 页头 ---- */
+
+.mdl-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mdl-head-text {
+  min-width: 0;
+}
+
+.mdl-head-text h1 {
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.mdl-head-text p {
+  max-width: 66ch;
+  margin-top: 5px;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+}
+
+.mdl-head-text a {
+  color: var(--accent);
+}
+
+/* ---- 测一下 ---- */
+
+.mdl-probe {
+  display: flex;
+  flex: none;
+  gap: 10px;
+  align-items: flex-start;
+  max-width: 480px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+}
+
+.mdl-probe > svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+  margin-top: 3px;
+  color: var(--accent);
+  flex: none;
+}
+
+.mdl-probe-body {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.mdl-probe-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.mdl-probe-row strong {
+  font-size: var(--text-sm);
+}
+
+.mdl-probe-row [data-slot='select-trigger'] {
+  min-width: 0;
+  max-width: 200px;
+}
+
+.mdl-probe-note {
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+}
+
+.mdl-probe-note a {
+  color: var(--accent);
+}
+
+.mdl-probe-ok,
+.mdl-probe-bad {
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.mdl-probe-ok {
+  color: var(--ink-secondary);
+}
+
+.mdl-probe-bad {
+  color: var(--err);
+}
+
+/* ---- 账本 ---- */
+
+.ledger {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.ledger-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ledger-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 26px;
+}
+
+.ledger-figure {
+  display: grid;
+  gap: 1px;
+}
+
+.ledger-figure b {
+  color: var(--ink);
+  font-size: var(--text-lg);
+  font-variant-numeric: tabular-nums;
+}
+
+.ledger-figure span {
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+}
+
+.ledger-side {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.ledger-side .btn {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.ledger-side .btn svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.ledger-live {
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-size: var(--text-xs);
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.ledger-tallies {
+  display: grid;
+  gap: 6px;
+}
+
+.ledger-tally-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+}
+
+.ledger-tally-label {
+  color: var(--ink-faint);
+  font-size: var(--text-xs);
+  font-weight: 650;
+}
+
+.ledger-tally {
+  display: inline-flex;
+  gap: 5px;
+  align-items: baseline;
+  /* 是可点的筛选芯片，高度对齐控件基线而不是靠内边距凑 */
+  min-height: var(--ctl-h-sm);
+  padding: 2px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  color: var(--ink-secondary);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+button.ledger-tally:not(.ledger-tally-on):hover {
+  border-color: var(--border-strong);
+  color: var(--ink);
+}
+
+.ledger-tally em {
+  color: var(--ink-faint);
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.ledger-tally-on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.ledger-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: flex-end;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-sunken);
+}
+
+.ledger-filters label {
+  display: grid;
+  gap: 4px;
+  min-width: 120px;
+}
+
+.ledger-filters label > span {
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  font-weight: 650;
+}
+
+.ledger-filters input {
+  width: 130px;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--ink);
+  font-size: var(--text-sm);
+}
+
+/* Radix 触发器自带 width:fit-content + nowrap，min-content 就是整行文字宽，
+   放进定宽列里会把列撑破。统一按列宽收住，超出交给触发器自己的 line-clamp。 */
+.ledger-filters [data-slot='select-trigger'] {
+  width: 100%;
+  min-width: 0;
+}
+
+.ledger-filters [data-slot='select-value'] {
+  min-width: 0;
+}
+
+.ledger-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.ledger-layout-split {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+}
+
+.ledger-table-wrap {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-xs);
+}
+
+.ledger-table th,
+.ledger-table td {
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.ledger-table th {
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  font-weight: 650;
+}
+
+.ledger-table code {
+  color: var(--ink-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.ledger-table small {
+  display: block;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+}
+
+.ledger-row {
+  cursor: pointer;
+}
+
+.ledger-row:hover {
+  background: var(--bg-hover);
+}
+
+.ledger-row-active {
+  background: var(--bg-active);
+}
+
+.ledger-model {
+  max-width: 220px;
+  overflow: hidden;
+  color: var(--ink);
+  font-weight: 600;
+  text-overflow: ellipsis;
+}
+
+.ledger-num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.ledger-dim {
+  color: var(--ink-muted);
+}
+
+.ledger-status {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  background: var(--bg-sunken);
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.ledger-status-running {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.ledger-status-succeeded {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.ledger-status-failed {
+  background: var(--err-soft);
+  color: var(--err);
+}
+
+.ledger-status-cancelled,
+.ledger-status-abandoned {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.ledger-more {
+  margin-top: 12px;
+}
+
+.ledger-empty {
+  margin: 12px 0 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+.ledger-error {
+  margin: 10px 0 0;
+  color: var(--err);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* ---- 逐条检视器 ---- */
+
+.ledger-inspector {
+  position: sticky;
+  top: 16px;
+  min-width: 0;
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-paper);
+}
+
+.ledger-inspector-head {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ledger-inspector-head > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ledger-inspector-head strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ledger-inspector-head span,
+.ledger-inspector-head code {
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+}
+
+.ledger-inspector-head code {
+  font-family: var(--font-mono);
+}
+
+.ledger-inspector-head .btn svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.ledger-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.ledger-tabs button {
+  padding: 6px 10px;
+  border-bottom: 2px solid transparent;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  font-weight: 650;
+}
+
+.ledger-tabs button:hover {
+  color: var(--ink);
+}
+
+.ledger-tab-active {
+  border-bottom-color: var(--accent);
+  color: var(--accent);
+}
+
+.ledger-pane {
+  display: grid;
+  gap: 12px;
+  padding: 12px 14px;
+  overflow: auto;
+}
+
+.ledger-pane h4 {
+  margin: 0 0 6px;
+  color: var(--ink-secondary);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.ledger-pane details > summary {
+  color: var(--ink-secondary);
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+
+.ledger-message {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.ledger-message-role {
+  color: var(--accent-ink);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.ledger-pre {
+  max-height: 360px;
+  margin: 0;
+  padding: 10px 12px;
+  overflow: auto;
+  border-radius: var(--radius-md);
+  background: var(--bg-sunken);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ledger-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ledger-stat {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+}
+
+.ledger-stat span {
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+}
+
+.ledger-stat strong {
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.ledger-phases {
+  position: relative;
+  height: 10px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--bg-sunken);
+}
+
+.ledger-phase {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: block;
+}
+
+.ledger-phase-ttft {
+  background: var(--warn);
+}
+
+.ledger-phase-decode {
+  background: var(--accent);
+}
+
+.ledger-phase-tool {
+  background: var(--mark-phrase);
+  opacity: .85;
+}
+
+.ledger-phase-tail {
+  background: var(--ink-faint);
+}
+
+.ledger-timeline {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-xs);
+}
+
+.ledger-timeline li {
+  display: grid;
+  grid-template-columns: 28px 120px 56px minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+  color: var(--ink-secondary);
+}
+
+.ledger-timeline code {
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.ledger-timeline em {
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (width < 64rem) {
+  .ledger-layout-split {
+    grid-template-columns: 1fr;
+  }
+
+  .ledger-inspector {
+    position: static;
+    max-height: none;
+  }
+
+  .ledger-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width < 48rem) {
+  .mdl-page {
+    gap: 14px;
+    padding: 20px 16px 32px;
+  }
+
+  .mdl-head {
+    flex-direction: column;
+  }
+
+  .mdl-probe {
+    max-width: none;
+    width: 100%;
+  }
+}

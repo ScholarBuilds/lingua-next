@@ -1,0 +1,8 @@
+.git
+**/.DS_Store
+**/node_modules
+**/dist
+**/.vite
+server/.venv
+server/data/media
+deploy/pg_data

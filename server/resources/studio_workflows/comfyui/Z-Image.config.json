@@ -1,0 +1,55 @@
+{
+  "title": "Z-Image 生图",
+  "fields": [
+    {
+      "id": "f_prompt",
+      "node": "23",
+      "input": "text",
+      "name": "提示词",
+      "type": "textarea",
+      "default": "",
+      "required": true,
+      "bind_prompt": true
+    },
+    {
+      "id": "f_width",
+      "node": "144",
+      "input": "width",
+      "name": "宽度",
+      "type": "number",
+      "default": 1024,
+      "min": 256,
+      "max": 4096,
+      "step": 64
+    },
+    {
+      "id": "f_height",
+      "node": "144",
+      "input": "height",
+      "name": "高度",
+      "type": "number",
+      "default": 1024,
+      "min": 256,
+      "max": 4096,
+      "step": 64
+    },
+    {
+      "id": "f_seed",
+      "node": "22",
+      "input": "seed",
+      "name": "随机种子",
+      "type": "number",
+      "default": 1,
+      "min": 1,
+      "max": 4294967295,
+      "step": 1,
+      "random_enabled": true,
+      "hidden": true
+    }
+  ],
+  "mini_cards": {
+    "prompt": { "x": 24, "y": 30 },
+    "custom": { "x": 280, "y": 78 },
+    "output": { "x": 540, "y": 120 }
+  }
+}

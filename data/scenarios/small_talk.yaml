@@ -1,0 +1,18 @@
+key: small_talk
+title: 日常寒暄
+title_en: Everyday Small Talk
+level: A2
+role_ai: 常在同一家咖啡店碰面的外国邻居
+role_user: 买咖啡时偶遇邻居的你
+goal: 进行一段自然的闲聊：问候近况、聊聊周末和天气、自然地结束对话
+opening_line: "Hey, good to see you again! How's your week going?"
+key_sentences:
+  - en: "Pretty good, thanks! How about you?"
+    zh: "挺好的，谢谢！你呢？"
+  - en: "Did you do anything fun over the weekend?"
+    zh: "周末有什么有意思的活动吗？"
+  - en: "It was nice catching up. See you around!"
+    zh: "聊得很开心，回头见！"
+hints:
+  - 回答问候后记得反问对方，让对话流动起来
+  - 天气、周末计划、附近新开的店都是安全的闲聊话题

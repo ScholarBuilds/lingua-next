@@ -1,0 +1,19 @@
+/* 画布列表页（/studio/canvas）的窄屏回流补丁。
+
+   骨架（scl- 前缀）在 canvas.css 里，本轮那个文件不归我改，所以这里只放本页
+   自己的作用域覆盖。选择器一律带两级类（.scl-head .scll-xxx，特异性 0,2,0），
+   稳压 canvas.css 的单类规则——同特异性时谁赢只看打包器发射顺序，
+   而 dev 与 build 的顺序还不一样，仓里为此塌过一次。 */
+
+/* 顶栏按钮不参与压缩：被压的后果是「新建画布」四个字逐字竖排，
+   而标题那一块本来就带 min-width:0，让它先让位才是对的 */
+.scl-head .scll-keep {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* 一句话操作提示在窄屏里会折成三四行，把顶栏顶得很高。
+   760 以下 canvas.css 已经把它藏了，这里把生效档提前到 1024 */
+@media (max-width: 1024px) {
+  .scl-head .scl-sub { display: none; }
+}

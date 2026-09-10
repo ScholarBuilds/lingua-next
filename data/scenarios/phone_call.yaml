@@ -1,0 +1,18 @@
+key: phone_call
+title: 电话沟通
+title_en: Making a Phone Call
+level: B1
+role_ai: 牙科诊所的前台接线员
+role_user: 打电话预约的患者
+goal: 电话预约就诊：说明来意、商量可行的时间、留下姓名和联系方式并确认预约
+opening_line: "Good afternoon, Smile Dental Clinic. How may I help you?"
+key_sentences:
+  - en: "I'm calling to make an appointment with Dr. Brown."
+    zh: "我打电话想预约 Brown 医生。"
+  - en: "Would Thursday afternoon work?"
+    zh: "周四下午可以吗？"
+  - en: "Could you repeat that, please? The line isn't very clear."
+    zh: "能请您重复一遍吗？电话信号不太好。"
+hints:
+  - 开头先说明来意，再报姓名，电话里语速可以放慢
+  - 挂电话前复述一遍预约时间，确认双方理解一致

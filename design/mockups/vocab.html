@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>词库 · lingua-next</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .body-row { flex: 1; display: flex; min-height: 0; }
+
+  /* ---- 左：词表栏 ---- */
+  .side {
+    width: 240px; flex-shrink: 0; overflow-y: auto;
+    border-right: 1px solid var(--border); background: var(--bg-app);
+    padding: 14px 12px; display: flex; flex-direction: column;
+  }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat { padding: 10px 12px; }
+  .stat.wide { grid-column: 1 / -1; }
+  .stat b {
+    display: block; font-size: 22px; font-weight: 700; line-height: 1.25;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+  }
+  .stat b i { font-style: normal; font-size: var(--text-sm); font-weight: 600; color: var(--ink-secondary); }
+  .stat.accent b { color: var(--accent); }
+  .stat.ok b { color: var(--ok); }
+  .stat span { display: block; font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+
+  .wl-group {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+    color: var(--ink-faint); padding: 16px 10px 6px; text-transform: uppercase;
+  }
+  .wl-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px; border-radius: var(--radius-sm);
+    font-size: var(--text-sm); color: var(--ink-secondary); cursor: pointer;
+    transition: background var(--dur-fast) var(--ease);
+  }
+  .wl-row:hover { background: var(--bg-hover); }
+  .wl-row.active { background: var(--bg-active); color: var(--ink); font-weight: 500; }
+  .wl-row svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--ink-faint); }
+  .wl-row.active svg { color: var(--accent); }
+  .wl-count { margin-left: auto; font-size: 11px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+
+  .side-foot { margin-top: auto; padding-top: 14px; }
+  .side-foot .btn {
+    width: 100%; justify-content: center;
+    border: 1px dashed var(--border-strong); border-radius: var(--radius-md);
+  }
+
+  /* ---- 右：复习区 ---- */
+  .review-wrap { flex: 1; min-width: 0; overflow-y: auto; background: var(--bg-paper); }
+  .review-col {
+    min-height: 100%; display: flex; flex-direction: column; align-items: center;
+    padding: 36px 32px 18px;
+  }
+
+  .progress-row {
+    width: 100%; max-width: 560px;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 24px;
+  }
+  .progress-track {
+    flex: 1; height: 4px; border-radius: var(--radius-full);
+    background: var(--bg-sunken); overflow: hidden;
+  }
+  .progress-fill { width: 40%; height: 100%; border-radius: var(--radius-full); background: var(--accent); }
+  .progress-num { font-size: var(--text-xs); color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+
+  .flashcard {
+    width: 100%; max-width: 560px; padding: 40px;
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+    text-align: center;
+  }
+  .fc-top { display: flex; align-items: center; gap: 6px; margin-bottom: 28px; }
+  .fc-top .icon-btn { margin-left: auto; }
+  .fc-word { font-family: var(--font-reading); font-size: 40px; font-weight: 700; line-height: 1.15; }
+  .fc-phon {
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    margin-top: 8px; font-family: var(--font-mono); font-size: var(--text-base); color: var(--ink-muted);
+  }
+  .fc-context {
+    font-family: var(--font-reading); font-size: 17px; line-height: 1.8;
+    color: var(--ink-secondary); margin: 24px auto 12px; max-width: 430px;
+  }
+  .fc-context b {
+    background: var(--wash-select); color: var(--ink);
+    font-weight: 600; border-radius: 3px; padding: 0 3px;
+  }
+  .chip.link { cursor: pointer; transition: background var(--dur-fast) var(--ease); }
+  .chip.link:hover { background: var(--bg-hover); color: var(--ink); }
+  .chip.link svg { width: 11px; height: 11px; }
+
+  .fc-divider {
+    position: relative; height: 1px; margin: 28px 0 22px;
+    border-top: 1px dashed var(--border-strong);
+  }
+  .fc-divider span {
+    position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+    background: var(--bg-surface); padding: 0 10px;
+    font-size: 11px; letter-spacing: 0.05em; color: var(--ink-faint);
+  }
+  .fc-def { font-size: var(--text-lg); font-weight: 600; line-height: 1.6; }
+  .fc-def .pos { font-style: italic; font-weight: 500; color: var(--ink-muted); margin-right: 6px; font-size: var(--text-md); }
+  .fc-def-src { font-size: 11px; color: var(--ink-muted); margin-top: 6px; }
+
+  .fc-actions { display: flex; gap: 10px; margin-top: 28px; }
+  .fc-act { flex: 1; min-width: 0; }
+  .fc-act button {
+    width: 100%; height: 44px; border-radius: var(--radius-md);
+    font-size: var(--text-md); font-weight: 600;
+    transition: filter var(--dur-fast) var(--ease);
+  }
+  .fc-act button:hover { filter: brightness(0.95); }
+  .fc-act .hint { font-size: 11px; color: var(--ink-muted); margin-top: 6px; text-align: center; }
+  .act-forgot { background: var(--err-soft); color: var(--err); }
+  .act-fuzzy { background: var(--warn-soft); color: var(--warn); }
+  .act-know { background: var(--ok-soft); color: var(--ok); }
+
+  .aux-row { display: flex; gap: 6px; margin-top: 18px; justify-content: center; }
+
+  .kbd-bar {
+    margin-top: auto; padding-top: 30px; text-align: center;
+    font-size: var(--text-xs); color: var(--ink-faint);
+  }
+  .kbd-bar b { font-family: var(--font-mono); font-weight: 500; color: var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 左侧导航栏 -->
+  <nav class="rail">
+    <div class="rail-logo"><img src="../../web/public/brand/logo-96.png" alt="Lingua" /></div>
+    <button class="rail-item" title="书架">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    </button>
+    <button class="rail-item active" title="词库">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 20h10"/><path d="M8 8h8M8 12h5"/></svg>
+    </button>
+    <button class="rail-item" title="视频学习">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polygon points="10 9 15 12 10 15 10 9" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <button class="rail-item" title="AI 对话">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+    </button>
+    <button class="rail-item" title="场景学习">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
+    <div class="rail-spacer"></div>
+    <button class="rail-item" title="设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </nav>
+
+  <div class="main">
+    <!-- 顶栏 -->
+    <header class="topbar">
+      <div class="crumb">
+        <span>词库</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <b>今日复习</b>
+      </div>
+      <div style="flex:1"></div>
+      <div class="seg">
+        <button class="active">复习</button><button>词表</button><button>统计</button>
+      </div>
+    </header>
+
+    <div class="body-row">
+      <!-- 左：词表列表 -->
+      <aside class="side">
+        <div class="stats">
+          <div class="card stat accent">
+            <b>47</b>
+            <span>待复习</span>
+          </div>
+          <div class="card stat ok">
+            <b>20 / 20</b>
+            <span>今日新学</span>
+          </div>
+          <div class="card stat wide">
+            <b>12 <i>天</i></b>
+            <span>连续学习</span>
+          </div>
+        </div>
+
+        <div class="wl-group">我的词表</div>
+        <div class="wl-row active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          生词本<span class="wl-count">128</span>
+        </div>
+        <div class="wl-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          考研核心<span class="wl-count">4,528</span>
+        </div>
+        <div class="wl-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          CET-6<span class="wl-count">2,076</span>
+        </div>
+        <div class="wl-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          牛津 3000<span class="wl-count">3,000</span>
+        </div>
+
+        <div class="side-foot">
+          <button class="btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            导入词表
+          </button>
+        </div>
+      </aside>
+
+      <!-- 右：复习卡 -->
+      <div class="review-wrap">
+        <div class="review-col">
+          <div class="progress-row">
+            <div class="progress-track"><div class="progress-fill"></div></div>
+            <span class="progress-num">19 / 47</span>
+          </div>
+
+          <div class="card flashcard">
+            <div class="fc-top">
+              <span class="chip accent">FSRS · 第 4 次复习</span>
+              <span class="chip">来自阅读</span>
+              <button class="icon-btn" title="播放发音">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>
+              </button>
+            </div>
+
+            <div class="fc-word">meticulous</div>
+            <div class="fc-phon">
+              /məˈtɪk.jə.ləs/
+              <button class="icon-btn" title="播放发音" style="width:24px;height:24px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+              </button>
+            </div>
+
+            <p class="fc-context"><em>"She kept <b>meticulous</b> records of every expense."</em></p>
+            <span class="chip link" title="跳转到原文">
+              傲慢与偏见 · 第 3 章
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+            </span>
+
+            <div class="fc-divider"><span>释义</span></div>
+
+            <div class="fc-def"><span class="pos">adj.</span>一丝不苟的；细致入微的</div>
+            <div class="fc-def-src">ECDICT · 柯林斯 ★★★ · 考研/雅思</div>
+
+            <div class="fc-actions">
+              <div class="fc-act">
+                <button class="act-forgot">忘记了</button>
+                <div class="hint">10 分钟</div>
+              </div>
+              <div class="fc-act">
+                <button class="act-fuzzy">模糊</button>
+                <div class="hint">1 天</div>
+              </div>
+              <div class="fc-act">
+                <button class="act-know">认识</button>
+                <div class="hint">4 天</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="aux-row">
+            <button class="btn-ghost-sm">拼写模式</button>
+            <button class="btn-ghost-sm">标记已掌握</button>
+            <button class="btn-ghost-sm">跳过</button>
+            <button class="btn-ghost-sm">编辑</button>
+          </div>
+
+          <div class="kbd-bar"><b>空格</b> 显示答案 · <b>1/2/3</b> 评分 · <b>S</b> 拼写 · <b>P</b> 发音</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="theme-toggle" onclick="toggleTheme()" title="切换深浅色">
+  <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+</button>
+<script>
+  const saved = localStorage.getItem('ln-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? '' : 'dark';
+    cur ? document.documentElement.setAttribute('data-theme', cur) : document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('ln-theme', cur);
+  }
+</script>
+</body>
+</html>

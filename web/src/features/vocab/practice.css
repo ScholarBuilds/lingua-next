@@ -1,0 +1,102 @@
+.vp-tabs { display:flex; gap:24px; padding:0 24px; flex-shrink:0; border-bottom:1px solid var(--border); background:var(--bg-paper); }
+.vp-tabs button { padding:14px 0; color:var(--ink-secondary); border-bottom:2px solid transparent; }
+.vp-tabs button[aria-current] { color:var(--accent); border-color:var(--accent); }
+.vp-hub, .vp-session { width:100%; min-width:0; overflow:auto; padding:24px; background:var(--bg-paper); }
+.vp-hub header { margin-bottom:24px; }
+.vp-hub h2, .vp-result h2 { font-size:var(--text-xl); font-weight:600; margin-bottom:12px; }
+.vp-hub p, .vp-hub header p { color:var(--ink-secondary); }
+.vp-quick-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:28px; }
+.vp-quick-actions > button { display:grid; gap:5px; padding:14px 16px; text-align:left; border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--bg-surface); }
+.vp-quick-actions > button:not(:disabled):hover { border-color:var(--accent); }
+.vp-quick-actions span { font-size:var(--text-xs); color:var(--ink-muted); }
+.vp-mode-groups { display:grid; gap:22px; margin-bottom:32px; }
+.vp-mode-groups section { display:grid; grid-template-columns:140px minmax(0,1fr); gap:16px; align-items:start; }
+.vp-mode-groups h3 { padding-top:11px; font-size:var(--text-sm); color:var(--ink-secondary); }
+.vp-mode-groups section > div { border-top:1px solid var(--border); }
+.vp-mode-groups button { width:100%; display:flex; align-items:center; justify-content:space-between; gap:18px; padding:11px 4px; text-align:left; border-bottom:1px solid var(--border); }
+.vp-mode-groups button > span { display:grid; gap:3px; }
+.vp-mode-groups button small { color:var(--ink-secondary); }
+.vp-mode-groups button b { color:var(--accent); font-size:var(--text-sm); white-space:nowrap; }
+.vp-history-head { display:flex; align-items:baseline; justify-content:space-between; gap:16px; }
+.vp-history-head span { color:var(--ink-muted); font-size:var(--text-xs); }
+.vp-history { margin-top:16px; }
+.vp-history > button { display:flex; width:100%; gap:20px; align-items:center; flex-wrap:wrap; text-align:left; padding:18px 0; border-bottom:1px solid var(--border); }
+.vp-history time { color:var(--ink-secondary); margin-left:auto; }
+.vp-history-main { display:grid; gap:4px; min-width:min(360px,100%); }
+.vp-history-main small { color:var(--ink-secondary); }
+.vp-prepare { width:min(720px,calc(100vw - 32px)); max-width:720px; background:var(--bg-paper); color:var(--ink); }
+.vp-field { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.vp-books { max-height:240px; overflow:auto; border:1px solid var(--border); padding:12px; border-radius:8px; }
+.vp-books label { display:flex; gap:10px; padding:8px; align-items:center; }
+.vp-books small { margin-left:auto; color:var(--ink-secondary); }
+.vp-prepare-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.vp-actions { display:flex; align-items:center; justify-content:flex-end; gap:12px; flex-wrap:wrap; }
+.vp-actions small { display:block; margin-left:8px; color:var(--ink-secondary); }
+.vp-session-head { display:flex; justify-content:space-between; gap:16px; align-items:center; flex-wrap:wrap; }
+.vp-session-head > div:first-child { display:flex; gap:16px; align-items:center; }
+.vp-session-head span { color:var(--ink-secondary); font-size:var(--text-sm); }
+.vp-progress { width:100%; height:4px; margin-top:20px; accent-color:var(--accent); }
+.vp-stage { width:min(760px,100%); margin:36px auto; }
+.vp-question { min-height:340px; display:flex; flex-direction:column; justify-content:center; gap:20px; padding:24px 0; text-align:center; }
+.vp-question h2 { font-size:clamp(24px,2.8vw,40px); overflow-wrap:anywhere; }
+.vp-question h3 { font-size:30px; }
+.vp-question > .vp-actions { justify-content:center; }
+.vp-question form { display:flex; gap:12px; flex-wrap:wrap; }
+.vp-answer-input { flex:1; min-width:180px; }
+.vp-answer-input, .vp-field input { padding:12px 14px; border:1px solid var(--border); border-radius:6px; background:var(--bg-surface); color:var(--ink); }
+.vp-answer-input:focus, .vp-field input:focus { outline:2px solid var(--accent); outline-offset:2px; }
+.vp-session .btn:not(.btn-primary), .vp-prepare .btn:not(.btn-primary) { border:1px solid var(--border); }
+.vp-question .vp-listen { align-self:center; padding:20px; }
+.vp-listen svg { width:36px; height:36px; }
+.vp-eyebrow { font-size:var(--text-sm); color:var(--ink-secondary); }
+.vp-feedback { min-height:96px; padding:16px 0; border-top:1px solid var(--border); color:var(--ink-secondary); }
+.vp-hint { display:grid; gap:6px; }
+.vp-hint strong { color:var(--ink); }
+.vp-inline-error { margin:0; color:var(--err); font-size:var(--text-xs); }
+.vp-actions kbd, .vp-options kbd { margin-right:5px; font:inherit; font-size:var(--text-xs); color:var(--ink-muted); }
+.vp-options button { display:flex; align-items:center; gap:6px; }
+.vp-options button small { margin-left:auto; color:var(--ink-muted); }
+.vp-shortcut-list { display:grid; grid-template-columns:1fr 1fr; gap:0 24px; }
+.vp-shortcut-list > div { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:10px 0; border-bottom:1px solid var(--border); }
+.vp-shortcut-list kbd { min-width:78px; color:var(--ink-secondary); font-size:var(--text-xs); }
+.vp-options { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.vp-options button { white-space:normal; text-align:left; min-height:52px; }
+.vp-error { padding:16px; margin-top:16px; border:1px solid var(--danger); }
+.vp-state { display:flex; min-height:400px; width:100%; align-items:center; justify-content:center; flex-direction:column; gap:20px; }
+.vp-result { margin:32px 0; }
+.vp-result-stats { display:flex; flex-wrap:wrap; gap:32px; margin:24px 0; }
+.vp-result-stats > div { display:flex; flex-direction:column; gap:6px; }
+.vp-result-stats strong { font-size:28px; }
+.vp-result-stats span { color:var(--ink-secondary); }
+.vp-answer-list { margin:24px 0; }
+.vp-answer-list > div { display:flex; align-items:center; gap:20px; flex-wrap:wrap; padding:16px 0; border-bottom:1px solid var(--border); }
+.vp-answer-list > div > strong { min-width:120px; }
+.vp-answer-list > div > span { color:var(--ink-secondary); }
+.vp-word-text button { display:inline; font:inherit; color:inherit; text-decoration:underline; text-decoration-color:var(--border); text-underline-offset:4px; }
+.vp-word-text button:hover { color:var(--accent); }
+.vp-resume { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px; }
+.vp-plan-form { display:grid; gap:16px; }
+.vp-backlog { margin:12px 0; color:var(--ink-secondary); }
+.vp-pack { margin:24px 0; padding:24px 0; border-block:1px solid var(--border); display:grid; gap:16px; }
+.vp-pack details { padding:12px 0; }
+.vp-pack summary { cursor:pointer; }
+.vp-due-badge { position:absolute; right:8px; bottom:8px; padding:4px 8px; border-radius:6px; background:var(--bg-surface); color:var(--ink); font-size:var(--text-xs); }
+.vp-density-compact .shelf-grid { grid-template-columns:repeat(auto-fill,164px); gap:12px; }
+.vp-density-compact .shelf-grid > * { width:164px; }
+.vp-density-comfortable .shelf-grid { grid-template-columns:repeat(auto-fill,190px); gap:16px; }
+.vp-density-comfortable .shelf-grid > * { width:190px; }
+.vp-deck-head { background:var(--bg-surface); border:1px solid var(--border); color:var(--ink); gap:20px; flex-wrap:wrap; }
+.vp-deck-head .dd-head-desc, .vp-deck-head .dd-head-stats { color:var(--ink-secondary); }
+.vp-deck-head .dd-head-stats span { color:var(--ink-secondary); }
+.vp-deck-head .dd-head-title { text-shadow:none; }
+.vp-deck-thumbnail { position:relative; width:96px; aspect-ratio:6/5; flex-shrink:0; overflow:hidden; border-radius:6px; }
+.vp-deck-thumbnail img { width:100%; height:100%; object-fit:cover; }
+@media(max-width:720px) {
+  .vp-session, .vp-hub { padding:16px; }
+  .vp-options, .vp-prepare-row { grid-template-columns:1fr; }
+  .vp-session-head > div:first-child { flex-wrap:wrap; }
+  .vp-stage { margin:16px auto; }
+  .vp-quick-actions { grid-template-columns:1fr; }
+  .vp-mode-groups section { grid-template-columns:1fr; gap:4px; }
+  .vp-shortcut-list { grid-template-columns:1fr; }
+}

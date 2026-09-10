@@ -1,0 +1,88 @@
+/* ============================================================
+   看板娘 + 驻页语音陪读样式（只用 tokens.css 的 var(--token)）
+   ============================================================ */
+
+/* ---------- 看板娘悬浮容器 ---------- */
+.mascot-root {
+  position: fixed;
+  z-index: 70;
+  width: 180px;
+  height: 240px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+.mascot-root:active { cursor: grabbing; }
+.mascot-root.br { right: 14px; bottom: 64px; }
+.mascot-root.bl { left: 14px; bottom: 14px; }
+.mascot-canvas-holder { width: 180px; height: 240px; }
+.mascot-canvas { display: block; width: 180px; height: 240px; }
+.mascot-root.speaking .mascot-canvas-holder {
+  filter: drop-shadow(0 0 14px var(--accent-soft));
+}
+
+
+/* hover 工具条 */
+.mascot-tools {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease);
+  white-space: nowrap;
+}
+.mascot-root:hover .mascot-tools {
+  opacity: 1;
+  pointer-events: auto;
+}
+.mascot-select {
+  height: 22px;
+  max-width: 110px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--ink-secondary);
+  font-size: 11px;
+  outline: none;
+}
+.mascot-tool-btn {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  color: var(--ink-muted);
+  transition: all var(--dur-fast) var(--ease);
+}
+.mascot-tool-btn:hover { background: var(--bg-hover); color: var(--ink); }
+
+.mascot-loading,
+.mascot-error {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+.mascot-error { color: var(--err); }
+
+/* 右栏驻页语音陪读的 .vc-* 样式已随 v11.2 语音优先改版删除，见 features/companion/companion.css */

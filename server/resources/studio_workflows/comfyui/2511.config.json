@@ -1,0 +1,43 @@
+{
+  "title": "2511 角度控制",
+  "fields": [
+    {
+      "id": "f_image",
+      "node": "31",
+      "input": "image",
+      "name": "输入图片",
+      "type": "image",
+      "default": "",
+      "required": true
+    },
+    {
+      "id": "f_prompt",
+      "node": "11",
+      "input": "prompt",
+      "name": "机位指令",
+      "type": "textarea",
+      "default": "",
+      "required": true,
+      "bind_prompt": true
+    },
+    {
+      "id": "f_seed",
+      "node": "14",
+      "input": "seed",
+      "name": "随机种子",
+      "type": "number",
+      "default": 1,
+      "min": 0,
+      "max": 999999999999999,
+      "step": 1,
+      "random_enabled": true,
+      "hidden": true
+    }
+  ],
+  "mini_cards": {
+    "prompt": { "x": 24, "y": 30 },
+    "image": { "x": 24, "y": 210 },
+    "custom": { "x": 280, "y": 78 },
+    "output": { "x": 540, "y": 120 }
+  }
+}

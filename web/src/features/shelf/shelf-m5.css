@@ -1,0 +1,149 @@
+/* 书架进度化（M5）：继续阅读横幅、封面进度条、分组小标题、删除按钮与确认层 */
+
+/* 继续阅读横幅。窄屏放不下时整行换行，而不是把「继续阅读」按钮压扁 */
+.resume-banner {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 12px 16px; margin-bottom: 24px;
+  background: var(--accent-soft); border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+}
+.resume-banner .rb-icon {
+  width: 36px; height: 36px; border-radius: var(--radius-md); flex-shrink: 0;
+  background: var(--accent); color: var(--on-accent);
+  display: grid; place-items: center;
+}
+.resume-banner .rb-icon svg { width: 17px; height: 17px; }
+.rb-main { flex: 1; min-width: 0; }
+.rb-title {
+  font-size: var(--text-sm); font-weight: 600; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.rb-meta { font-size: var(--text-xs); color: var(--accent-ink); margin-top: 2px; }
+.rb-bar {
+  margin-top: 6px; height: 3px; max-width: 260px;
+  border-radius: var(--radius-full); background: var(--bg-surface); overflow: hidden;
+}
+.rb-bar i { display: block; height: 100%; background: var(--accent); border-radius: var(--radius-full); }
+
+/* 状态分组小标题 */
+.shelf-sub {
+  display: flex; align-items: center; gap: 6px;
+  margin: 22px 0 12px; font-size: var(--text-xs); font-weight: 600;
+  color: var(--ink-muted);
+}
+.shelf-sub:first-of-type { margin-top: 0; }
+.shelf-sub .dot-state {
+  width: 7px; height: 7px; border-radius: var(--radius-full); flex-shrink: 0;
+}
+.shelf-sub .dot-state.reading { background: var(--accent); }
+.shelf-sub .dot-state.unstarted { background: var(--ink-faint); }
+.shelf-sub .dot-state.finished { background: var(--ok); }
+.shelf-sub .chip { height: 18px; }
+
+/* 封面底部进度条 */
+.cover-progress {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+  height: 4px; background: rgba(0, 0, 0, 0.22);
+}
+.cover-progress i {
+  display: block; height: 100%; background: var(--accent);
+  transition: width var(--dur-base) var(--ease);
+}
+
+/* 书卡 hover 删除按钮（左上角，避开右上角状态角标） */
+.bk-del {
+  position: absolute; top: 8px; left: 8px; z-index: 3;
+  width: 26px; height: 26px; border-radius: var(--radius-sm);
+  display: grid; place-items: center;
+  background: rgba(0, 0, 0, 0.45); color: #fff;
+  opacity: 0; transition: opacity var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+
+/* 角标压在书封上，视觉不能再大；命中区用伪元素补到 --ctl-hit（32） */
+.bk-del::after { content: ''; position: absolute; inset: -3px; }
+.book:hover .bk-del, .bk-del:focus-visible { opacity: 1; }
+.bk-del:hover { background: var(--err); }
+.bk-del svg { width: 14px; height: 14px; }
+
+/* 删除确认层（复用全局 .overlay/.overlay-card 骨架） */
+.confirm-card { max-width: 400px; }
+.confirm-text { font-size: var(--text-sm); line-height: 1.8; color: var(--ink-secondary); }
+.confirm-text b { color: var(--ink); }
+.confirm-conflict {
+  padding: 10px 14px; border-radius: var(--radius-md);
+  background: var(--err-soft); color: var(--err);
+  font-size: var(--text-sm); line-height: 1.8;
+}
+.confirm-conflict b { font-variant-numeric: tabular-nums; }
+
+/* 文章行进度 */
+.art-progress { color: var(--accent-ink); font-variant-numeric: tabular-nums; }
+
+/* ══ 内置馆藏的难度与题材（FR-386）══ */
+
+.sh-levels em {
+  margin-left: 5px; font-style: normal; font-size: 10px;
+  color: var(--ink-faint); font-variant-numeric: tabular-nums;
+}
+.sh-levels button.active em { color: inherit; opacity: .75; }
+
+/* 难度徽章：三档统一中性玻璃风。彩色档（绿/蓝/砖红）在一墙封面上太吵，
+   难度信息靠文字传达，不靠颜色区分（两端共用）。 */
+.bk-level {
+  position: absolute; left: 6px; top: 6px; z-index: 2;
+  padding: 1px 7px; border-radius: 999px;
+  font-size: 10px; font-weight: 600; letter-spacing: .02em;
+  background: rgb(15 13 10 / .55); color: #EDE9DE; backdrop-filter: blur(4px);
+}
+
+/* 留固定高度：有标签与没标签的卡片等高，栅格行不会参差
+   （不然下一个分组标题会被顶得贴上来） */
+.bk-tags { display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap; min-height: 15px; }
+.bk-tags span {
+  padding: 0 5px; border-radius: 3px;
+  background: var(--bg-sunken); color: var(--ink-faint); font-size: 10px;
+}
+
+/* 分组之间留出呼吸：在读 / 未开始 / 已读完 要一眼分得开 */
+.sec .book-grid { margin-bottom: 30px; }
+.sec > div:last-child .book-grid { margin-bottom: 0; }
+
+/* ══ 窄屏回流（全局 .topbar / .sec-head / .seg 归 app.css 与 tokens.css，
+      这里只加书架自己的作用域覆盖，不去动那两个共享文件）══ */
+
+/* 顶栏：搜索框可收缩，导入按钮不许被压。真放不下时整条换行，
+   而不是把「导入」两个字挤成竖排 */
+.sh-topbar {
+  height: auto;
+  min-height: var(--topbar-h);
+  flex-wrap: wrap;
+  row-gap: 8px;
+  padding-block: 9px;
+}
+.sh-topbar .crumb { flex: 0 0 auto; }
+.sh-topbar .search { flex: 1 1 150px; min-width: 0; max-width: 240px; }
+.sh-topbar .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* 分段标题行：标题与难度筛选放不下就让筛选整条掉到下一行 */
+.sh-sec-head { flex-wrap: wrap; row-gap: 8px; }
+
+/* 难度筛选（全部 / 入门 / 进阶 / 精读）：按钮宁可滚出去也不能被压成逐字竖排。
+   标签行横滚是这类筛选条的通行做法 */
+.sh-levels {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.sh-levels::-webkit-scrollbar { height: 0; }
+.sh-levels button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* 继续阅读横幅里的按钮同理不参与压缩（换行规则写在文件开头那条上） */
+.resume-banner .btn { flex: 0 0 auto; white-space: nowrap; }

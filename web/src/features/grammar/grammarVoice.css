@@ -1,0 +1,11 @@
+.grammar-voice-overlay { z-index: 160; }
+.sentence-analysis-head { flex-wrap: wrap; gap: 8px; }
+.grammar-voice-dialog { z-index: 161; width: min(720px, calc(100vw - 32px)); max-width: none; gap: 12px; }
+.grammar-voice-context { border-block: 1px solid var(--border); padding-block: 12px; }
+.grammar-voice-context p { margin-block: 8px; overflow-wrap: anywhere; }
+.grammar-voice-context pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 180px; overflow-y: auto; font: inherit; }
+.grammar-voice-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.grammar-voice-transcript { max-height: 30dvh; min-height: 80px; overflow-y: auto; overflow-wrap: anywhere; }
+.grammar-voice-transcript p { margin-block: 10px; }
+.grammar-voice-compose { display: flex; align-items: end; gap: 8px; }
+.grammar-voice-compose textarea { flex: 1; min-width: 0; min-height: 64px; resize: vertical; }

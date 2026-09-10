@@ -1,0 +1,56 @@
+.stt { padding: 24px 34px 48px; }
+.stt-tabs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.stt-tabs span { flex: 1; }
+.stt-tabs button { padding: 7px 11px; border-radius: var(--radius-md); color: var(--ink-muted); font-size: var(--text-xs); }
+.stt-tabs button:hover:not(:disabled), .stt-tabs button.active { background: var(--accent-soft); color: var(--accent); }
+.stt-tabs button { display: inline-flex; flex-shrink: 0; white-space: nowrap; align-items: center; gap: 5px; }
+.stt-tabs button svg { width: 13px; }
+.stt-tabs .stt-clean:not(:disabled) { color: var(--err); }
+.stt-tabs-sep { width: 1px; height: 16px; margin: 0 4px; background: var(--border); }
+.stt-search { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-block: 14px; border-bottom: 1px solid var(--border); }
+.stt-search label { display: flex; align-items: center; gap: 10px; flex: 1 1 280px; }
+.stt-search input { flex: 1; min-width: 0; }
+
+/* 主体分组：创作任务 / 工作流运行 / 管线运行 */
+.stt-group { margin-top: 20px; }
+.stt-group-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.stt-group-head > svg { width: 15px; height: 15px; align-self: center; color: var(--accent); }
+.stt-group-head h2 { font-size: var(--text-sm); font-weight: 650; }
+.stt-group-head b { color: var(--accent); font-size: 11px; }
+.stt-group-head span { color: var(--ink-faint); font-size: 11px; }
+.stt-group-head em { margin-left: auto; color: var(--err); font-size: 11px; font-style: normal; }
+
+.stt-list { display: flex; flex-direction: column; gap: 10px; }
+.stt-row { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; gap: 13px; align-items: start; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-surface); }
+.stt-row-err { border-color: color-mix(in srgb, var(--err) 30%, var(--border)); }
+.stt-row-warn { border-color: color-mix(in srgb, var(--warn) 30%, var(--border)); }
+.stt-row-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: var(--radius-md); background: var(--accent-soft); color: var(--accent); }
+.stt-row-icon svg { width: 20px; height: 20px; }
+.stt-row-head { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.stt-row-head code { color: var(--ink-faint); font-size: 10px; }
+/* 统一状态芯片：按语气而不是按主体各写一套 */
+.stt-state { padding: 2px 7px; border-radius: var(--radius-full); background: var(--bg-sunken); color: var(--ink-muted); font-size: 10px; font-weight: 650; }
+.stt-tone-active { background: var(--accent-soft); color: var(--accent); }
+.stt-tone-err { background: color-mix(in srgb, var(--err) 10%, transparent); color: var(--err); }
+.stt-tone-warn { background: color-mix(in srgb, var(--warn) 12%, transparent); color: var(--warn); }
+.stt-tone-ok { background: color-mix(in srgb, var(--ok) 10%, transparent); color: var(--ok); }
+.stt-row-meta { margin-top: 5px; color: var(--ink-muted); font-size: 11px; display: flex; flex-wrap: wrap; gap: 4px; }
+.stt-bar { height: 4px; margin-top: 10px; overflow: hidden; border-radius: var(--radius-full); background: var(--bg-sunken); }
+.stt-bar i { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width var(--dur-fast) var(--ease); }
+.stt-error { margin-top: 8px; color: var(--err); font-size: 11px; line-height: 1.5; }
+.stt-row-side { min-width: 92px; display: flex; align-items: flex-end; flex-direction: column; gap: 8px; }
+.stt-row-side > b { color: var(--accent); font-size: var(--text-sm); }
+.stt-row-side .btn { display: inline-flex; align-items: center; gap: 5px; }
+.stt-row-side .btn svg { width: 13px; }
+.stt-row-side .stt-clean-one { color: var(--ink-faint); font-size: 10px; }
+.stt-row-side .stt-clean-one:hover:not(:disabled) { color: var(--err); }
+.stt-empty { min-height: 280px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: var(--ink-muted); text-align: center; }
+.stt-empty > svg { width: 32px; height: 32px; color: var(--ink-faint); }
+.stt-empty strong { color: var(--ink); }
+.stt-empty p { font-size: var(--text-xs); }
+
+@media (max-width: 760px) {
+  .stt { padding-inline: 18px; }
+  .stt-row { grid-template-columns: 38px minmax(0, 1fr); }
+  .stt-row-side { grid-column: 2; min-width: 0; align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+}

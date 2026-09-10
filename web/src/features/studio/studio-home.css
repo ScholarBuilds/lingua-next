@@ -1,0 +1,174 @@
+/* 创作工坊首页。前缀 sth- 独占（check:css 守卫）。
+
+   字号一律取 tokens 的 --text-*：仓里没有 --text-xl 这个令牌，上一版给 h1 写的
+   var(--text-xl) 是个空值，整条 font-size 作废，标题一直在按浏览器默认的 2em 渲染。 */
+
+.sth {
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+  padding: 24px 34px 48px;
+}
+
+
+
+
+
+
+
+
+
+/* ---- 分组 ---- */
+
+.sth-section {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.sth-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.sth-section-head h2 {
+  color: var(--ink-faint);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.sth-section-head p {
+  color: var(--ink-faint);
+  font-size: var(--text-xs);
+}
+
+/* 列数交给内在回流，不配断点 */
+.sth-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(212px, 1fr));
+  gap: 12px;
+}
+
+.sth-grid-lead {
+  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+  gap: 14px;
+}
+
+/* ---- 卡片 ---- */
+
+.sth-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  min-height: 116px;
+  padding: 15px 15px 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  text-align: left;
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+
+.sth-card:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.sth-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.sth-card-lead {
+  gap: 9px;
+  min-height: 150px;
+  padding: 19px 18px 20px;
+  background: var(--bg-paper);
+}
+
+.sth-card-lead:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.sth-card-planned {
+  opacity: .5;
+  cursor: default;
+}
+
+.sth-icon {
+  display: grid;
+  place-items: center;
+  width: var(--ctl-h-sm);
+  height: var(--ctl-h-sm);
+  border-radius: var(--radius-md);
+  background: var(--bg-sunken);
+  color: var(--ink-secondary);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+
+.sth-icon svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.sth-card:hover:not(:disabled) .sth-icon {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.sth-card-lead .sth-icon {
+  width: var(--ctl-h-lg);
+  height: var(--ctl-h-lg);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.sth-card-lead .sth-icon svg {
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+}
+
+.sth-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.sth-card-lead .sth-name {
+  font-size: var(--text-md);
+}
+
+.sth-hint {
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  line-height: 1.65;
+}
+
+/* 有缺口的工具只给一个小圆点，缺口原文在卡片 title 与它的 aria-label 里 */
+.sth-dot {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--ink-faint);
+}
+
+@media (width < 48rem) {
+  .sth {
+    gap: 26px;
+    padding: 20px 16px 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sth-card,
+  .sth-icon {
+    transition: none;
+  }
+}

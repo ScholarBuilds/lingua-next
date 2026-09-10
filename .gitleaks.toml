@@ -1,0 +1,23 @@
+title = "NEXUS secret scanning"
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Exact synthetic fixtures and documented public protocol identifier; no directory exclusions"
+regexTarget = "secret"
+regexes = [
+  '''^PlgvMymc7f3tQnJ6$''',
+  '''^sk-secret-1234567890$''',
+  '''^ark-api-key-1234567890$''',
+  '''^AKLTsecretsecret1234$''',
+  '''^sk-original-key-000111$''',
+  '''^sk-abc-1234567890$''',
+  '''^test-api-key-53cafe9876543210efde$''',
+  '''^sk-x-1234567890$''',
+  '''^sk-ds-1234567890$''',
+  '''^sk-deepseek-1234567890$''',
+  '''^sk-zhipu-1234567890$''',
+  '''^sk-gpt-1234567890$''',
+  '''^sk-live-0123456789abcdef$''',
+  '''^sk-1234567890abcd$''',
+]

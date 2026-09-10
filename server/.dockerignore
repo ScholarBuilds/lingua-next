@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+tests/
+# 媒体与缓存：运行时由卷挂载进来（LINGUA_MEDIA_ROOT=/media），
+# 不排除的话 2.4G 会白白进构建上下文，既拖慢构建又胀镜像层
+data/
+*.log
+.env
+.git/

@@ -1,0 +1,110 @@
+/* 拆开记（FR-321~329、FR-330）的样式。
+
+   单独成文件由组件自己 import：这个区块同时出现在阅读器右栏、词卡弹窗与学新词卡片，
+   挂在 reader-m5.css 里的话，dev 下没进过阅读页就不会被注入。
+
+   排版原则：卡片其余部分（词典释义）是朴素文字流，这里也走排版而不是控件——
+   首版每个音节、每个词素都做成带框的小盒子，块高还不齐，整块看着像另一个应用贴进来的。 */
+
+.wb { gap: 10px; }
+.wb-src { color: var(--ink-faint); font-weight: 400; }
+
+/* ---- 音节：音节与音标上下对齐的两行，重音只靠着色 + 底部细线 ---- */
+
+.wb-syl { display: flex; align-items: flex-end; gap: 6px; }
+.wb-syl-row { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 2px; min-width: 0; }
+.wb-cell {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 3px 7px 5px; border: 0; border-radius: var(--radius-sm);
+  background: none; transition: background var(--dur-fast) var(--ease);
+}
+.wb-cell-s {
+  font-family: var(--font-reading); font-size: var(--text-md); line-height: 1.25;
+  color: var(--ink-secondary);
+}
+.wb-cell-p {
+  font-family: var(--font-mono); font-size: 10px; line-height: 1.2; color: var(--ink-faint);
+}
+/* 音节之间的分隔点：不用边框把每块围起来 */
+.wb-cell:not(:last-child)::after {
+  content: '·'; position: absolute; right: -3px; top: 4px;
+  color: var(--ink-faint); font-size: 12px;
+}
+.wb-cell:hover { background: var(--bg-hover); }
+.wb-cell:hover .wb-cell-s { color: var(--accent); }
+/* 重读音节：着色加粗 + 一条底线，比整块填充安静 */
+.wb-cell.stress .wb-cell-s { color: var(--ink); font-weight: 700; }
+.wb-cell.stress .wb-cell-p { color: var(--accent-ink); }
+.wb-cell.stress::before {
+  content: ''; position: absolute; left: 6px; right: 6px; bottom: 0;
+  height: 2px; border-radius: 2px; background: var(--accent);
+}
+.wb-all {
+  width: 24px; height: 24px; flex-shrink: 0; margin-bottom: 3px;
+  border: 0; background: none; border-radius: var(--radius-sm);
+  display: grid; place-items: center; color: var(--ink-faint);
+}
+.wb-all svg { width: 13px; height: 13px; }
+.wb-all:hover { color: var(--accent); background: var(--bg-hover); }
+
+/* ---- 词素：一道构词式，块间用 + 连接 ---- */
+
+.wb-mor { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 2px 4px; }
+.wb-m-wrap { display: inline-flex; align-items: flex-start; gap: 4px; }
+.wb-plus {
+  font-style: normal; color: var(--ink-faint); font-size: var(--text-sm);
+  line-height: 1.5; margin-top: 1px;
+}
+.wb-m { display: inline-flex; flex-direction: column; gap: 1px; }
+.wb-m b {
+  font-family: var(--font-reading); font-size: var(--text-sm); font-weight: 600;
+  line-height: 1.4;
+}
+.wb-m-note {
+  font-size: 10.5px; color: var(--ink-muted); line-height: 1.45;
+  max-width: 13em; overflow-wrap: anywhere;
+}
+/* 类型只染词形本身，不做色块 */
+.wb-m.t-prefix b { color: var(--accent-ink); }
+.wb-m.t-root b { color: var(--ok); }
+.wb-m.t-suffix b { color: var(--mark-vocab); }
+.wb-m.t-linking b { color: var(--ink-muted); }
+
+/* ---- 构词 / 助记 / 同根词 ---- */
+
+.wb-line {
+  display: flex; align-items: baseline; gap: 5px;
+  font-size: 11.5px; color: var(--ink-muted); line-height: 1.7;
+}
+.wb-line i { font-style: normal; color: var(--ink-faint); flex-shrink: 0; }
+.wb-mne {
+  display: flex; align-items: flex-start; gap: 6px;
+  padding: 6px 9px; border-radius: var(--radius-sm);
+  background: var(--accent-soft); color: var(--accent-ink);
+  font-size: var(--text-xs); line-height: 1.65;
+}
+.wb-mne svg { width: 12px; height: 12px; flex-shrink: 0; margin-top: 3px; }
+
+/* 同根词走文字流，不是一排按钮：五个带框 chip 换行后比正文还抢眼 */
+.wb-fam {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px;
+  font-size: 11.5px; line-height: 1.9;
+}
+.wb-fam-label { color: var(--ink-faint); font-size: 10px; letter-spacing: .04em; }
+.wb-fam button {
+  display: inline-flex; align-items: baseline; gap: 4px;
+  padding: 0; border: 0; background: none;
+  font-family: var(--font-reading); font-size: 12.5px; color: var(--ink-secondary);
+  border-bottom: 1px solid transparent;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.wb-fam button em { font-style: normal; font-size: 10.5px; color: var(--ink-faint); }
+.wb-fam button:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+.wb-cta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.wb-err { font-size: 11px; color: var(--err); }
+
+/* 学新词卡片是居中版式，跟着居中 */
+.lc .wb-syl, .lc .wb-mor, .lc .wb-fam { justify-content: center; }
+.lc .wb-line, .lc .wb-mne { text-align: left; }

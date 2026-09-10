@@ -1,0 +1,178 @@
+.oni-page {
+  --oni-ink: #152019;
+  --oni-muted: #6f7a72;
+  --oni-line: color-mix(in srgb, var(--border) 72%, transparent);
+  --oni-green: #1b7f5d;
+  width: min(1500px, 100%);
+  margin: 0 auto;
+  padding: 34px clamp(18px, 3vw, 44px) 80px;
+  color: var(--foreground);
+}
+
+.oni-title { display: flex; align-items: end; justify-content: space-between; gap: 28px; margin-bottom: 36px; }
+.oni-title span, .oni-gallery header span { color: var(--oni-green); font-size: 10px; font-weight: 850; letter-spacing: .24em; }
+.oni-title h1, .oni-gallery h2 { margin: 5px 0 0; font-size: clamp(28px, 4vw, 46px); line-height: 1; letter-spacing: -.04em; }
+.oni-title p { max-width: 610px; margin: 0; color: var(--muted-foreground); font-size: 13px; line-height: 1.7; text-align: right; }
+
+.oni-workbench { display: grid; grid-template-columns: minmax(360px, 5fr) minmax(420px, 7fr); gap: clamp(24px, 4vw, 54px); align-items: stretch; }
+.oni-controls { display: flex; min-width: 0; flex-direction: column; gap: 18px; }
+.oni-prompt { display: grid; gap: 8px; }
+.oni-prompt > span, .oni-reference-head > span { color: var(--muted-foreground); font-size: 10px; font-weight: 850; letter-spacing: .2em; }
+.oni-prompt textarea, .oni-advanced textarea, .oni-advanced input:not([type='range']), .oni-custom-size input, .oni-model-catalog label {
+  border: 1px solid var(--oni-line); border-radius: 16px; background: color-mix(in srgb, var(--card) 92%, transparent); color: var(--foreground); outline: none;
+}
+.oni-prompt textarea { min-height: 124px; padding: 18px; resize: vertical; font: inherit; line-height: 1.55; }
+.oni-prompt textarea:focus, .oni-advanced textarea:focus, .oni-advanced input:focus, .oni-custom-size input:focus, .oni-model-catalog label:focus-within { border-color: color-mix(in srgb, var(--oni-green) 65%, var(--border)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--oni-green) 12%, transparent); }
+
+.oni-reference-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.oni-reference-head small { color: var(--muted-foreground); font-size: 10px; }
+.oni-references { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.oni-ref { position: relative; display: flex; aspect-ratio: 1; min-width: 0; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; border: 1px dashed var(--oni-line); border-radius: 18px; background: color-mix(in srgb, var(--muted) 35%, transparent); }
+.oni-ref > svg { width: 20px; color: var(--muted-foreground); }
+.oni-ref > strong { margin-top: 7px; font-size: 9px; letter-spacing: .15em; }
+.oni-ref > span:not(.oni-ref-label) { max-width: 88%; margin-top: 3px; color: var(--muted-foreground); font-size: 8px; text-align: center; }
+.oni-ref > button:first-of-type { position: absolute; inset: 0; z-index: 1; border: 0; background: transparent; cursor: pointer; }
+.oni-ref img { width: 100%; height: 100%; object-fit: cover; }
+.oni-ref-label { position: absolute; left: 8px; bottom: 8px; padding: 4px 6px; border-radius: 999px; background: rgb(0 0 0 / .68); color: white; font-size: 8px; font-weight: 800; letter-spacing: .12em; }
+.oni-ref-replace, .oni-ref-clear, .oni-ref-upload { position: absolute; z-index: 3; border: 0; border-radius: 9px; background: color-mix(in srgb, var(--card) 90%, transparent); color: var(--foreground); box-shadow: 0 5px 15px rgb(0 0 0 / .12); cursor: pointer; }
+.oni-ref-replace { right: 36px; top: 7px; padding: 5px 7px; font-size: 9px; }
+.oni-ref-clear { right: 7px; top: 7px; display: grid; width: 24px; height: 24px; place-items: center; padding: 0; }
+.oni-ref-clear svg, .oni-ref-upload svg { width: 13px; }
+.oni-ref-upload { right: 7px; bottom: 7px; display: grid; width: 25px; height: 25px; place-items: center; padding: 0; }
+
+.oni-model-panel, .oni-size-panel, .oni-advanced { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--oni-line); border-radius: 20px; background: color-mix(in srgb, var(--card) 94%, transparent); }
+.oni-panel-label { display: flex; align-items: center; gap: 7px; color: var(--muted-foreground); font-size: 9px; font-weight: 850; letter-spacing: .15em; }
+.oni-panel-label svg { width: 14px; }
+.oni-panel-label b { margin-left: auto; color: var(--oni-green); font-size: 9px; letter-spacing: .08em; }
+.oni-engine-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; padding: 4px; border: 1px solid var(--oni-line); border-radius: 13px; background: color-mix(in srgb, var(--muted) 32%, transparent); }
+.oni-engine-tabs button { min-height: 31px; border: 0; border-radius: 9px; background: transparent; color: var(--muted-foreground); font-size: 10px; font-weight: 750; cursor: pointer; }
+.oni-engine-tabs button.is-active { background: var(--card); color: var(--oni-green); box-shadow: 0 3px 12px rgb(0 0 0 / .08); }
+.oni-model-row, .oni-size-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 9px; align-items: center; }
+.oni-model-row > *, .oni-size-row > * { min-width: 0; width: 100%; }
+.oni-runninghub-row { display: grid; gap: 7px; }
+.oni-runninghub-row > * { min-width: 0; width: 100%; }
+.oni-runninghub-row small { color: var(--muted-foreground); font-size: 9px; line-height: 1.45; }
+.oni-model-catalog { display: grid; grid-template-columns: minmax(0, 1fr) auto 30px 30px; gap: 7px; align-items: center; }
+.oni-model-catalog label { display: flex; min-width: 0; align-items: center; padding: 0 9px; }
+.oni-model-catalog label svg { width: 14px; flex: 0 0 auto; color: var(--muted-foreground); }
+.oni-model-catalog input { min-width: 0; width: 100%; padding: 8px; border: 0; background: transparent; color: var(--foreground); outline: none; font-size: 11px; }
+.oni-model-catalog > span { color: var(--muted-foreground); font-size: 9px; white-space: nowrap; }
+.oni-model-catalog > button, .oni-config, .oni-gallery header button, .oni-advanced > button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--oni-line); border-radius: 10px; background: var(--card); color: var(--foreground); cursor: pointer; }
+.oni-model-catalog > button { width: 30px; height: 30px; padding: 0; }
+.oni-model-catalog > button svg { width: 13px; }
+.oni-model-catalog > button:disabled { opacity: .35; cursor: not-allowed; }
+.oni-model-panel > p { margin: 0; color: #b35f27; font-size: 10px; line-height: 1.4; }
+.oni-model-panel > p.is-ready { color: var(--oni-green); }
+.oni-config { width: fit-content; padding: 8px 10px; font-size: 10px; }
+.oni-config svg { width: 13px; }
+
+.oni-custom-size { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto; gap: 7px; align-items: center; }
+.oni-custom-size input { min-width: 0; width: 100%; padding: 9px 10px; font-size: 11px; }
+.oni-custom-size button { padding: 9px; border: 1px solid var(--oni-line); border-radius: 10px; background: var(--card); color: var(--foreground); font-size: 9px; white-space: nowrap; }
+.oni-custom-size button:disabled { opacity: .4; }
+.oni-adapter-note { display: flex; min-height: 36px; align-items: center; color: var(--muted-foreground); font-size: 10px; }
+
+.oni-advanced > button { justify-self: start; padding: 8px 10px; font-size: 10px; }
+.oni-advanced > button svg { width: 14px; }
+.oni-advanced > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.oni-advanced label { display: grid; gap: 6px; min-width: 0; color: var(--muted-foreground); font-size: 9px; }
+.oni-advanced textarea, .oni-advanced input:not([type='range']) { min-width: 0; width: 100%; padding: 9px 10px; resize: vertical; font: inherit; }
+.oni-advanced input[type='range'] { width: 100%; accent-color: var(--oni-green); }
+.oni-run { display: inline-flex; min-height: 52px; align-items: center; justify-content: center; gap: 9px; border: 0; border-radius: 18px; background: linear-gradient(135deg, #14271d, #1b7f5d); color: white; font-weight: 800; letter-spacing: .08em; box-shadow: 0 14px 30px rgb(27 127 93 / .2); cursor: pointer; }
+.oni-run svg { width: 17px; }
+.oni-run:disabled { opacity: .38; box-shadow: none; cursor: not-allowed; }
+
+.oni-result { position: relative; min-height: 620px; overflow: hidden; border: 1px solid var(--oni-line); border-radius: 30px; background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--oni-green) 9%, var(--card)), var(--card) 62%); }
+.oni-result-empty { display: flex; height: 100%; min-height: 620px; flex-direction: column; align-items: center; justify-content: center; color: var(--muted-foreground); }
+.oni-result-empty svg { width: 46px; opacity: .38; }
+.oni-result-empty strong { margin-top: 12px; letter-spacing: .28em; }
+.oni-result-empty span { margin-top: 7px; font-size: 10px; }
+.oni-result > button { width: 100%; height: 100%; min-height: 620px; padding: 24px; border: 0; background: transparent; cursor: zoom-in; }
+.oni-result > button img { width: 100%; height: 100%; max-height: 720px; object-fit: contain; }
+.oni-result > button span { position: absolute; left: 24px; bottom: 22px; padding: 7px 10px; border-radius: 999px; background: rgb(0 0 0 / .72); color: white; font-size: 9px; }
+.oni-result-running { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: color-mix(in srgb, var(--card) 86%, transparent); backdrop-filter: blur(18px); }
+.oni-result-running svg, .oni-card-loading > svg { width: 30px; animation: oni-spin 1s linear infinite; }
+.oni-result-running strong { margin-top: 10px; }
+.oni-result-running span { color: var(--muted-foreground); font-size: 11px; }
+
+.oni-failure { display: flex; align-items: center; gap: 10px; margin-top: 18px; padding: 12px 15px; border: 1px solid color-mix(in srgb, #c65454 32%, var(--border)); border-radius: 15px; background: color-mix(in srgb, #c65454 6%, var(--card)); font-size: 11px; }
+.oni-failure span { min-width: 0; flex: 1; overflow: hidden; color: var(--muted-foreground); text-overflow: ellipsis; white-space: nowrap; }
+.oni-failure button { border: 0; background: transparent; color: #a04444; font-weight: 800; cursor: pointer; }
+
+.oni-gallery { margin-top: 74px; }
+.oni-gallery > header { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 22px; }
+.oni-gallery h2 { font-size: 25px; }
+.oni-gallery header > div:last-child { display: flex; flex-wrap: wrap; align-items: center; justify-content: end; gap: 8px; }
+.oni-gallery header button { padding: 8px 10px; font-size: 10px; }
+.oni-gallery header button svg { width: 13px; }
+.oni-gallery header button.danger { border-color: color-mix(in srgb, #c65454 35%, var(--border)); color: #b34747; }
+.oni-gallery header button:disabled { opacity: .35; cursor: not-allowed; }
+.oni-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.oni-card { position: relative; min-width: 0; aspect-ratio: 1; overflow: hidden; border: 1px solid var(--oni-line); border-radius: 18px; background: var(--card); }
+button.oni-card { padding: 0; color: inherit; text-align: left; cursor: zoom-in; }
+.oni-card-image > img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+.oni-card-image:hover > img { transform: scale(1.035); }
+.oni-provider-badge { position: absolute; left: 9px; top: 9px; display: inline-flex; max-width: calc(100% - 18px); align-items: center; gap: 4px; overflow: hidden; padding: 5px 7px; border-radius: 999px; background: rgb(0 0 0 / .68); color: white; font-size: 8px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.oni-provider-badge svg { width: 11px; flex: 0 0 auto; }
+.oni-card-caption { position: absolute; inset: auto 0 0; display: grid; gap: 2px; padding: 36px 11px 10px; background: linear-gradient(transparent, rgb(0 0 0 / .78)); color: white; font-size: 9px; line-height: 1.3; }
+.oni-card-caption strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.oni-card.is-selecting { cursor: pointer; }
+.oni-card.is-selected { outline: 3px solid var(--oni-green); outline-offset: -3px; }
+.oni-pick { position: absolute; right: 9px; top: 9px; display: grid; width: 23px; height: 23px; place-items: center; border: 1px solid rgb(255 255 255 / .8); border-radius: 50%; background: rgb(0 0 0 / .35); color: white; }
+.oni-pick svg { width: 14px; }
+.oni-card-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; color: var(--oni-muted); text-align: center; }
+.oni-card-loading strong { margin-top: 10px; font-size: 11px; }
+.oni-card-loading span { margin-top: 3px; font-size: 9px; }
+.oni-card-loading i { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--oni-green); }
+.oni-empty { display: flex; min-height: 260px; flex-direction: column; align-items: center; justify-content: center; color: var(--muted-foreground); text-align: center; }
+.oni-empty svg { width: 35px; opacity: .45; }
+.oni-empty strong { margin-top: 11px; }
+.oni-empty p { max-width: 460px; margin: 6px 0 0; font-size: 11px; }
+.oni-more { display: block; margin: 24px auto 0; padding: 10px 18px; border: 1px solid var(--oni-line); border-radius: 999px; background: var(--card); color: var(--muted-foreground); font-size: 10px; cursor: pointer; }
+
+.oni-lightbox { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 28px; background: rgb(5 9 7 / .84); backdrop-filter: blur(18px); }
+.oni-lightbox-close { position: fixed; right: 24px; top: 22px; z-index: 2; display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid rgb(255 255 255 / .2); border-radius: 50%; background: rgb(255 255 255 / .08); color: white; cursor: pointer; }
+.oni-lightbox-close svg { width: 18px; }
+.oni-lightbox-card { position: relative; display: grid; width: min(1120px, 94vw); max-height: 92vh; grid-template-rows: minmax(0, 1fr) auto; overflow: hidden; border-radius: 26px; background: var(--card); box-shadow: 0 30px 90px rgb(0 0 0 / .45); }
+.oni-lightbox-stage { position: relative; display: grid; min-height: 58vh; overflow: hidden; place-items: center; background: #0b0e0c; cursor: grab; touch-action: none; }
+.oni-lightbox-stage:active { cursor: grabbing; }
+.oni-lightbox-stage > img { max-width: 88%; max-height: 68vh; object-fit: contain; transform-origin: center; user-select: none; }
+.oni-zoom { position: absolute; left: 50%; bottom: 14px; display: flex; gap: 5px; padding: 5px; border-radius: 999px; background: rgb(0 0 0 / .66); transform: translateX(-50%); }
+.oni-zoom button { display: grid; width: 29px; height: 29px; place-items: center; border: 0; border-radius: 50%; background: transparent; color: white; cursor: pointer; }
+.oni-zoom button:hover { background: rgb(255 255 255 / .13); }
+.oni-zoom svg { width: 14px; }
+.oni-lightbox-resolution { position: absolute; left: 18px; top: 16px; padding: 5px 8px; border-radius: 999px; background: rgb(0 0 0 / .65); color: white; font-size: 9px; }
+.oni-lightbox-download { position: absolute; right: 18px; top: 16px; display: inline-flex; align-items: center; gap: 5px; padding: 7px 9px; border-radius: 999px; background: rgb(255 255 255 / .92); color: #151915; font-size: 9px; font-weight: 800; text-decoration: none; }
+.oni-lightbox-download svg { width: 13px; }
+.oni-lightbox-meta { display: flex; align-items: end; justify-content: space-between; gap: 20px; padding: 18px 22px; }
+.oni-lightbox-meta > div { min-width: 0; }
+.oni-lightbox-meta span { color: var(--oni-green); font-size: 9px; font-weight: 800; letter-spacing: .08em; }
+.oni-lightbox-meta p { max-height: 74px; margin: 5px 0; overflow: auto; font-size: 12px; line-height: 1.5; }
+.oni-lightbox-meta small { color: var(--muted-foreground); font-size: 9px; }
+.oni-lightbox-meta > button { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 6px; padding: 10px 13px; border: 0; border-radius: 12px; background: var(--foreground); color: var(--background); font-size: 10px; font-weight: 800; cursor: pointer; }
+.oni-lightbox-meta > button svg { width: 14px; }
+
+@keyframes oni-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 980px) {
+  .oni-title { align-items: start; flex-direction: column; }
+  .oni-title p { text-align: left; }
+  .oni-workbench { grid-template-columns: 1fr; }
+  .oni-result, .oni-result-empty, .oni-result > button { min-height: 480px; }
+  .oni-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 660px) {
+  .oni-page { padding-inline: 14px; }
+  .oni-model-row, .oni-size-row { grid-template-columns: 1fr; }
+  .oni-model-catalog { grid-template-columns: minmax(0, 1fr) 30px 30px; }
+  .oni-model-catalog > span { grid-column: 1 / -1; grid-row: 2; }
+  .oni-advanced > div { grid-template-columns: 1fr; }
+  .oni-custom-size { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+  .oni-custom-size button { grid-column: 1 / -1; }
+  .oni-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .oni-gallery > header, .oni-lightbox-meta { align-items: start; flex-direction: column; }
+  .oni-gallery header > div:last-child { justify-content: start; }
+  .oni-lightbox { padding: 10px; }
+  .oni-lightbox-stage { min-height: 54vh; }
+}

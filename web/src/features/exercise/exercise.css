@@ -1,0 +1,215 @@
+/* 练习引擎的渲染层样式（[组件：练习引擎]）。
+
+   题型渲染件由音标与语法两个模块共用，所以样式跟着 Widgets.tsx 走、
+   不挂在任一模块的局部 css 上——挂错了就会出现「在语法页好好的、
+   在阅读器里全是裸标签」这种只在某条路径下复现的问题。 */
+
+/* ── 练习引擎共用件 ── */
+
+.ex-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.ex-play:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.ex-play svg {
+  width: 13px;
+  height: 13px;
+}
+
+.ex-play.big {
+  padding: 10px 22px;
+  font-size: var(--text-md);
+}
+
+.ex-play.big svg {
+  width: 17px;
+  height: 17px;
+}
+
+
+/* ── 练习引擎渲染件 ── */
+
+.ex-choices {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ex-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-paper);
+  color: var(--ink);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.ex-choice:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.ex-choice-key {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  color: var(--ink-muted);
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ex-choice.right {
+  border-color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.ex-choice.wrong {
+  border-color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.ex-choice.answer {
+  border-color: var(--ok);
+  border-style: dashed;
+}
+
+.ex-order {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.ex-order-slot {
+  min-height: 44px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-paper);
+  padding: 7px 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.ex-order-pool {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ex-token {
+  padding: 6px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.ex-token.placed {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.ex-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.ex-text textarea,
+.lab-input textarea,
+.we-input textarea {
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-paper);
+  color: var(--ink);
+  padding: 10px 12px;
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+  line-height: 1.7;
+  resize: vertical;
+}
+
+.ex-source {
+  font-family: var(--font-reading);
+  font-size: var(--text-lg);
+  margin: 0;
+}
+
+.ex-affective {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ex-statement {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.ex-locate {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.ex-locate-item {
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-paper);
+  color: var(--ink);
+  font-family: var(--font-reading);
+  font-size: var(--text-md);
+  line-height: 1.6;
+  cursor: pointer;
+}
+
+.ex-locate-item:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.ex-locate-item.right {
+  border-color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.ex-locate-item.wrong {
+  border-color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.ex-hint {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+

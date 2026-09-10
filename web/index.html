@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/logo-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/brand/logo-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/logo-180.png" />
+    <meta name="theme-color" content="#2d2bb4" />
+    <title>NEXUS</title>
+    <script>
+      // 提前应用主题，避免深色模式闪白
+      if (localStorage.getItem('ln-theme') === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark')
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

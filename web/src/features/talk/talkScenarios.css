@@ -1,0 +1,52 @@
+.talk-library .content-inner { padding: 28px 32px; }
+.talk-library-heading h2 { margin: 0 0 8px; font-size: 26px; font-weight: 600; }
+.talk-library-heading p { margin: 0; color: var(--ink-muted); font-size: var(--text-sm); }
+.talk-practice-settings { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding-block: 20px; }
+.talk-free-start { display: flex; align-items: center; gap: 20px; padding: 16px; margin-bottom: 28px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-surface); }
+.talk-free-start > div { flex: 1; min-width: 0; }
+.talk-free-start h3 { margin: 0 0 6px; font-size: var(--text-lg); }
+.talk-free-start p { margin: 0; color: var(--ink-secondary); font-size: var(--text-sm); line-height: 1.6; }
+.talk-cover-frame { position: relative; display: grid; place-items: center; flex: 0 0 108px; width: 108px; aspect-ratio: 6 / 5; overflow: hidden; border-radius: var(--radius-sm); background: var(--bg-app); }
+.talk-cover-frame > .vocab-cover-art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.talk-cover-frame svg { display: block; width: 100%; height: 100%; }
+.talk-library .talk-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 20px; }
+.talk-library .talk-card { display: flex; flex-direction: column; padding: 0; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-surface); }
+.talk-library .talk-card-hit { padding: 18px; gap: 14px; border: 0; border-radius: 0; background: none; }
+.talk-library .talk-card-hit:hover { background: var(--bg-hover); }
+.talk-library .talk-card-hit:focus-visible { outline-offset: -3px; }
+.talk-card-intro { display: flex; align-items: center; gap: 16px; width: 100%; min-height: 90px; }
+.talk-card-names { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.talk-library .talk-card-title { font-size: 18px; }
+.talk-library .talk-card-level { color: var(--ink-muted); }
+.talk-library .talk-card-en { font-size: 13px; line-height: 1.4; }
+.talk-library .talk-card-goal { line-height: 1.65; }
+.talk-library .talk-card-roles { color: var(--ink-muted); }
+.talk-card-preview { font-size: var(--text-xs); color: var(--accent-ink); }
+.talk-card-footer { display: flex; align-items: center; gap: 8px; padding: 8px 18px; border-top: 1px solid var(--border); min-height: 42px; }
+.talk-library .talk-favorite { position: static; margin-right: auto; min-height: 30px; }
+.talk-library .talk-add-card { min-height: 200px; border-radius: var(--radius-md); }
+.talk-library .talk-scene-filters { align-items: center; }
+.talk-library .talk-scene-filters .input { padding: 10px 12px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.talk-result-count { margin-left: auto; font-size: var(--text-xs); color: var(--ink-muted); }
+.talk-library .hist-list { max-width: none; }
+.talk-library .hist-row { flex-wrap: wrap; }
+.talk-scenario-preview { width: min(620px, calc(100vw - 32px)); max-width: 620px; line-height: 1.7; }
+.talk-scenario-preview h2 { margin: 0; font-size: 22px; }
+.talk-scenario-preview h3 { margin: 20px 0 8px; font-size: var(--text-sm); }
+.talk-scenario-preview p { margin-block: 8px; }
+.talk-scenario-preview dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 20px; }
+.talk-scenario-preview dt { color: var(--ink-muted); }
+.talk-scenario-preview dd { margin: 0; }
+.talk-scenario-preview ul { padding-left: 20px; }
+.talk-scenario-preview li { margin-block: 10px; }
+.talk-scenario-preview small { display: block; color: var(--ink-muted); }
+.talk-preview-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; border-top: 1px solid var(--border); }
+.talk-preview-footer > span { font-size: var(--text-xs); color: var(--ink-muted); }
+@media (max-width: 700px) {
+  .talk-library .content-inner { padding: 20px 16px; }
+  .talk-free-start { flex-wrap: wrap; gap: 12px; }
+  .talk-free-start > .btn { width: 100%; }
+  .talk-cover-frame { flex-basis: 84px; width: 84px; }
+  .talk-practice-settings { gap: 8px; }
+  .talk-library .talk-scene-filters .input { width: 100%; }
+}

@@ -1,0 +1,7 @@
+packages:
+  - '.'
+
+allowBuilds:
+  electron: true
+  # Windows 安装器的 postinstall 只是下载 Squirrel 二进制，只出 mac 包用不到
+  electron-winstaller: false

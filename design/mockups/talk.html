@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 对话 · lingua-next</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .body-row { flex: 1; display: flex; min-height: 0; }
+
+  /* ---- 左：对话主区 ---- */
+  .stage { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--bg-paper); }
+  .stream { flex: 1; overflow-y: auto; }
+  .stream-inner {
+    max-width: 640px; margin: 0 auto; padding: 32px 24px;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+
+  .msg { display: flex; gap: 10px; }
+  .msg.user { justify-content: flex-end; }
+  .avatar {
+    width: 32px; height: 32px; border-radius: var(--radius-full); flex-shrink: 0;
+    background: var(--accent-soft); color: var(--accent);
+    display: grid; place-items: center;
+  }
+  .avatar svg { width: 16px; height: 16px; }
+  .msg-body { max-width: 80%; display: flex; flex-direction: column; align-items: flex-start; }
+  .msg.user .msg-body { align-items: flex-end; }
+
+  .bubble {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); border-top-left-radius: 0;
+    padding: 12px 16px;
+    font-family: var(--font-reading); font-size: 15px; line-height: 1.65;
+  }
+  .msg.user .bubble {
+    background: var(--accent-soft); border-color: transparent;
+    border-radius: var(--radius-lg); border-top-right-radius: 0;
+  }
+
+  /* 可折叠中文提示 */
+  .hint {
+    display: flex; align-items: center; gap: 4px; margin-top: 6px;
+    font-size: var(--text-xs); color: var(--ink-muted);
+    transition: color var(--dur-fast) var(--ease);
+  }
+  .hint:hover { color: var(--ink-secondary); }
+  .hint svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+  /* 气泡下方反馈行 */
+  .note { display: flex; align-items: center; gap: 5px; margin-top: 6px; font-size: var(--text-xs); }
+  .note svg { width: 12px; height: 12px; flex-shrink: 0; }
+  .note.warn { color: var(--warn); }
+  .note.ok { color: var(--ok); }
+
+  /* AI 正在说话：波形气泡 */
+  .bubble.speaking { display: flex; align-items: center; gap: 12px; }
+  .wave { display: flex; align-items: center; gap: 3px; height: 18px; }
+  .wave span {
+    width: 3px; border-radius: 2px; background: var(--accent);
+    transform-origin: center; animation: wavebar 1.1s ease-in-out infinite;
+  }
+  .wave span:nth-child(1) { height: 10px; animation-delay: 0s; }
+  .wave span:nth-child(2) { height: 16px; animation-delay: 0.15s; }
+  .wave span:nth-child(3) { height: 18px; animation-delay: 0.3s; }
+  .wave span:nth-child(4) { height: 14px; animation-delay: 0.45s; }
+  .wave span:nth-child(5) { height: 8px;  animation-delay: 0.6s; }
+  @keyframes wavebar {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
+  }
+  .speaking-tip { font-family: var(--font-ui); font-size: var(--text-xs); color: var(--ink-muted); }
+
+  /* ---- 底部控制区 ---- */
+  .controls {
+    flex-shrink: 0; border-top: 1px solid var(--border); background: var(--bg-app);
+    padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+  .ctrl-row { display: flex; align-items: center; justify-content: center; gap: 24px; }
+  .ctrl-row .icon-btn { width: 38px; height: 38px; border-radius: var(--radius-md); }
+  .mic {
+    position: relative; width: 64px; height: 64px; border-radius: var(--radius-full);
+    background: var(--accent); color: var(--on-accent);
+    display: grid; place-items: center; box-shadow: var(--shadow-md);
+    transition: background var(--dur-fast) var(--ease);
+  }
+  .mic:hover { background: var(--accent-hover); }
+  .mic svg { width: 26px; height: 26px; position: relative; z-index: 1; }
+  .mic::before, .mic::after {
+    content: ''; position: absolute; inset: 0; border-radius: var(--radius-full);
+    border: 2px solid var(--accent); opacity: 0; pointer-events: none;
+    animation: pulse 2.2s var(--ease) infinite;
+  }
+  .mic::after { animation-delay: 1.1s; }
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 0.55; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+  .ctrl-status { font-size: var(--text-sm); color: var(--ink-muted); text-align: center; }
+
+  /* ---- 右：场景面板 ---- */
+  .scene {
+    width: 320px; flex-shrink: 0; overflow-y: auto;
+    border-left: 1px solid var(--border); background: var(--bg-app);
+    display: flex; flex-direction: column; gap: 14px; padding: 16px;
+  }
+  .sec-title { display: flex; align-items: center; gap: 6px; font-size: var(--text-sm); font-weight: 600; }
+  .sec-title svg { width: 14px; height: 14px; color: var(--ink-muted); }
+
+  .task-card { padding: 12px; display: flex; flex-direction: column; gap: 2px; }
+  .task { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: var(--text-sm); }
+  .task svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .task.done { color: var(--ok); text-decoration: line-through; }
+  .task.now { color: var(--accent); font-weight: 600; }
+  .task.todo { color: var(--ink-muted); }
+
+  .key { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
+  .key-text { flex: 1; min-width: 0; }
+  .key-en { font-family: var(--font-reading); font-size: 14px; line-height: 1.5; }
+  .key-zh { font-size: 11px; color: var(--ink-muted); margin-top: 1px; }
+  .key .icon-btn { width: 24px; height: 24px; flex-shrink: 0; }
+  .key .icon-btn svg { width: 13px; height: 13px; }
+
+  .word { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
+  .word b { font-family: var(--font-reading); font-size: 14px; font-weight: 600; }
+  .word .phon { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--ink-muted); }
+  .word .icon-btn { width: 24px; height: 24px; margin-left: auto; flex-shrink: 0; }
+  .word .icon-btn svg { width: 13px; height: 13px; }
+
+  .scene-foot {
+    margin-top: auto; padding: 10px 12px;
+    background: var(--accent-soft); border-radius: var(--radius-md);
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: var(--text-xs); line-height: 1.6; color: var(--accent-ink);
+  }
+  .scene-foot svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* 顶栏右侧 */
+  .timer { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--ink-muted); }
+  .btn-end { background: var(--err-soft); color: var(--err); }
+  .btn-end:hover { background: var(--err-soft); color: var(--err); filter: brightness(0.96); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 左侧导航栏 -->
+  <nav class="rail">
+    <div class="rail-logo"><img src="../../web/public/brand/logo-96.png" alt="Lingua" /></div>
+    <button class="rail-item" title="书架">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    </button>
+    <button class="rail-item" title="词库">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 20h10"/><path d="M8 8h8M8 12h5"/></svg>
+    </button>
+    <button class="rail-item" title="视频学习">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polygon points="10 9 15 12 10 15 10 9" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <button class="rail-item active" title="AI 对话">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+    </button>
+    <button class="rail-item" title="场景学习">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
+    <div class="rail-spacer"></div>
+    <button class="rail-item" title="设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </nav>
+
+  <div class="main">
+    <!-- 顶栏 -->
+    <header class="topbar">
+      <div class="crumb">
+        <span>对话</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <b>酒店入住</b>
+      </div>
+      <span class="chip accent">中级</span>
+      <span class="chip">双语辅助</span>
+      <div style="flex:1"></div>
+      <span class="timer">12:36 / 30:00</span>
+      <button class="btn btn-end">结束会话</button>
+    </header>
+
+    <div class="body-row">
+      <!-- 左：对话主区 -->
+      <section class="stage">
+        <div class="stream">
+          <div class="stream-inner">
+
+            <!-- 1. AI 消息 -->
+            <div class="msg ai">
+              <div class="avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h2"/><path d="M7 8v8"/><path d="M11 5v14"/><path d="M15 8v8"/><path d="M19 12h2"/></svg>
+              </div>
+              <div class="msg-body">
+                <div class="bubble">Good evening! Welcome to the Grand Plaza. Do you have a reservation with us?</div>
+                <button class="hint">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  晚上好！欢迎来到广场大酒店…
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. 用户消息 + 纠错 -->
+            <div class="msg user">
+              <div class="msg-body">
+                <div class="bubble">Yes, I booked a room... uh, I have booking for tonight.</div>
+                <div class="note warn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3L12 3z"/></svg>
+                  表达优化：I have a booking for tonight
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. AI 消息 -->
+            <div class="msg ai">
+              <div class="avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h2"/><path d="M7 8v8"/><path d="M11 5v14"/><path d="M15 8v8"/><path d="M19 12h2"/></svg>
+              </div>
+              <div class="msg-body">
+                <div class="bubble">Perfect. May I have your name and confirmation number, please?</div>
+                <button class="hint">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  太好了。请提供您的姓名和确认号…
+                </button>
+              </div>
+            </div>
+
+            <!-- 4. 用户消息 + 自然反馈 -->
+            <div class="msg user">
+              <div class="msg-body">
+                <div class="bubble">Sure, my name is Zhang Wei. The confirmation number is 8-4-2-9.</div>
+                <div class="note ok">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  表达自然
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. AI 正在说话 -->
+            <div class="msg ai">
+              <div class="avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h2"/><path d="M7 8v8"/><path d="M11 5v14"/><path d="M15 8v8"/><path d="M19 12h2"/></svg>
+              </div>
+              <div class="msg-body">
+                <div class="bubble speaking">
+                  <div class="wave"><span></span><span></span><span></span><span></span><span></span></div>
+                  <span class="speaking-tip">正在说话 · 开口即可打断</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 底部控制区 -->
+        <div class="controls">
+          <div class="ctrl-row">
+            <button class="icon-btn" title="切换文字输入">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M18 14h.01M9 14h6"/></svg>
+            </button>
+            <button class="mic" title="按住说话">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            </button>
+            <button class="icon-btn active" title="字幕开关">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 12h2M11 12h6M7 15.5h6M15 15.5h2"/></svg>
+            </button>
+          </div>
+          <div class="ctrl-status">正在聆听…</div>
+        </div>
+      </section>
+
+      <!-- 右：场景面板 -->
+      <aside class="scene">
+        <div class="sec-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          场景任务
+        </div>
+        <div class="card task-card">
+          <div class="task done">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            说明预订信息
+          </div>
+          <div class="task now">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            询问早餐时间
+          </div>
+          <div class="task todo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/></svg>
+            索要发票
+          </div>
+        </div>
+
+        <div class="sec-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          关键句
+        </div>
+        <div class="key">
+          <div class="key-text">
+            <div class="key-en">I'd like to check in.</div>
+            <div class="key-zh">我想办理入住。</div>
+          </div>
+          <button class="icon-btn" title="朗读">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+          </button>
+        </div>
+        <div class="key">
+          <div class="key-text">
+            <div class="key-en">Is breakfast included?</div>
+            <div class="key-zh">房费含早餐吗？</div>
+          </div>
+          <button class="icon-btn" title="朗读">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+          </button>
+        </div>
+        <div class="key">
+          <div class="key-text">
+            <div class="key-en">Could I have an invoice, please?</div>
+            <div class="key-zh">请问可以开发票吗？</div>
+          </div>
+          <button class="icon-btn" title="朗读">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+          </button>
+        </div>
+
+        <div class="sec-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 20h10"/><path d="M8 8h8M8 12h5"/></svg>
+          本轮生词
+        </div>
+        <div class="word">
+          <b>reservation</b>
+          <span class="phon">/ˌrez.əˈveɪ.ʃən/</span>
+          <button class="icon-btn" title="收藏">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </button>
+        </div>
+        <div class="word">
+          <b>confirmation</b>
+          <span class="phon">/ˌkɒn.fəˈmeɪ.ʃən/</span>
+          <button class="icon-btn" title="收藏">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </button>
+        </div>
+
+        <div class="scene-foot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+          会话结束后生成完整转写与纠错汇总
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<button class="theme-toggle" onclick="toggleTheme()" title="切换深浅色">
+  <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+</button>
+<script>
+  const saved = localStorage.getItem('ln-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? '' : 'dark';
+    cur ? document.documentElement.setAttribute('data-theme', cur) : document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('ln-theme', cur);
+  }
+</script>
+</body>
+</html>

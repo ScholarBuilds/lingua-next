@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>组件样张 · lingua-next</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  body { background: var(--bg-app); }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 48px 32px 96px; }
+  h1 { font-family: var(--font-reading); font-size: 30px; font-weight: 700; margin-bottom: 6px; }
+  .lede { color: var(--ink-muted); font-size: var(--text-sm); margin-bottom: 40px; }
+  section { margin-bottom: 40px; }
+  h2 { font-size: 12px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .demo-note { font-size: var(--text-xs); color: var(--ink-faint); width: 130px; flex-shrink: 0; }
+  .swrow { display: flex; gap: 8px; }
+  .sw { width: 84px; height: 56px; border-radius: var(--radius-md); border: 1px solid var(--border); position: relative; }
+  .sw span { position: absolute; left: 7px; bottom: 5px; font-size: 10px; font-family: var(--font-mono); color: var(--ink-muted); }
+  input[type="text"] {
+    height: 32px; padding: 0 12px; border-radius: var(--radius-md);
+    border: 1px solid var(--border-strong); background: var(--bg-surface);
+    font-family: var(--font-ui); font-size: var(--text-sm); color: var(--ink); width: 220px;
+  }
+  input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+  input[type="text"]::placeholder { color: var(--ink-faint); }
+  .switch { width: 36px; height: 21px; border-radius: 99px; background: var(--border-strong); position: relative; transition: background var(--dur-fast) var(--ease); }
+  .switch::after { content: ''; position: absolute; top: 2.5px; left: 2.5px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: var(--shadow-sm); transition: transform var(--dur-fast) var(--ease); }
+  .switch.on { background: var(--accent); }
+  .switch.on::after { transform: translateX(15px); }
+  .slider { width: 180px; height: 4px; border-radius: 2px; background: var(--bg-sunken); position: relative; }
+  .slider .fill { position: absolute; inset: 0 auto 0 0; width: 60%; border-radius: 2px; background: var(--accent); }
+  .slider .knob { position: absolute; top: 50%; left: 60%; transform: translate(-50%,-50%); width: 14px; height: 14px; border-radius: 50%; background: var(--bg-surface); border: 2px solid var(--accent); box-shadow: var(--shadow-sm); }
+  .prose-demo { background: var(--bg-paper); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px 26px; }
+  .toast { display: inline-flex; align-items: center; gap: 10px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: 10px 14px; font-size: var(--text-sm); }
+  .toast svg { width: 16px; height: 16px; }
+  .skeleton { border-radius: var(--radius-sm); background: linear-gradient(90deg, var(--bg-sunken) 25%, var(--bg-hover) 50%, var(--bg-sunken) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>组件样张</h1>
+  <p class="lede">按钮体系、控件、标记、反馈的规范样式。开发实现 = shadcn/ui 组件 + 本令牌重皮，此页为视觉验收基准。</p>
+
+  <section>
+    <h2>按钮层级 · 一个界面同屏至多一个 Primary</h2>
+    <div class="row"><span class="demo-note">主操作 primary</span>
+      <button class="btn btn-primary">继续阅读</button>
+      <button class="btn btn-primary btn-lg">开始对话</button>
+      <button class="btn btn-primary btn-sm">导入</button>
+    </div>
+    <div class="row"><span class="demo-note">强调轻底 soft</span>
+      <button class="btn btn-soft">AI 陪读</button>
+      <button class="btn btn-soft"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>收藏</button>
+    </div>
+    <div class="row"><span class="demo-note">次级轮廓 outline</span>
+      <button class="btn btn-outline">收藏句子</button>
+      <button class="btn btn-outline btn-sm">导出</button>
+    </div>
+    <div class="row"><span class="demo-note">幽灵 ghost</span>
+      <button class="btn">标熟</button>
+      <button class="btn-ghost-sm">重新分析</button>
+      <button class="btn-ghost-sm">1.0×</button>
+    </div>
+    <div class="row"><span class="demo-note">危险 danger</span>
+      <button class="btn btn-danger">结束会话</button>
+      <button class="btn btn-danger-solid">确认删除</button>
+    </div>
+    <div class="row"><span class="demo-note">状态</span>
+      <button class="btn btn-primary" disabled>禁用</button>
+      <button class="btn btn-primary loading"><span class="spinner"></span>翻译中…</button>
+      <button class="btn btn-outline" style="outline:2px solid var(--accent);outline-offset:2px">焦点环</button>
+    </div>
+    <div class="row"><span class="demo-note">图标按钮</span>
+      <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      <button class="icon-btn active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h16"/><path d="M6 4h12M9 4v9a3 3 0 0 0 6 0V4" stroke-dasharray="3 2.5"/></svg></button>
+      <span style="font-size:11px;color:var(--ink-faint)">默认 30px · 命中区不小于 30px，触屏语境放大到 44px</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>选择与输入</h2>
+    <div class="row"><span class="demo-note">分段切换 seg</span>
+      <div class="seg"><button>原文</button><button class="active">双语</button><button>译文</button></div>
+      <div class="seg"><button class="active">复习</button><button>词表</button><button>统计</button></div>
+    </div>
+    <div class="row"><span class="demo-note">输入框</span>
+      <input type="text" placeholder="搜索书名、作者、文章…">
+      <input type="text" value="https://youtube.com/watch?v=…">
+    </div>
+    <div class="row"><span class="demo-note">开关 / 滑杆</span>
+      <div class="switch on"></div>
+      <div class="switch"></div>
+      <div class="slider"><div class="fill"></div><div class="knob"></div></div>
+      <span style="font-size:11px;color:var(--ink-faint)">语速 1.2×</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>标签 chips · 语义色只用于状态</h2>
+    <div class="row">
+      <span class="chip">CET6</span><span class="chip">考研</span><span class="chip">柯林斯 ★★★</span>
+      <span class="chip accent">FSRS · 第 4 次复习</span>
+      <span class="chip ok">字幕已缓存</span>
+      <span class="chip warn">生词 12</span>
+      <span class="chip" style="background:var(--err-soft);color:var(--err)">额度 92%</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>正文标记体系（五层）</h2>
+    <div class="prose-demo prose" style="font-size:18px">
+      Plain text, a <span class="w vocab">vocabulary</span> word, a <span class="phrase">phrasal verb</span>,
+      <span class="s-reading">the sentence being read aloud,</span>
+      a <span class="w w-selected">selected</span> word, and
+      <span class="hl-y">a highlighted note</span> with <span class="hl-g">another color</span>.
+      <span class="trans">五层标记各占一个视觉通道：点线（生词）、虚线（词组）、底色洗（朗读句）、深底加粗（选中）、色块（批注）。</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>反馈</h2>
+    <div class="row"><span class="demo-note">toast</span>
+      <div class="toast"><svg viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>已加入生词本 · <b style="font-weight:600">meticulous</b><button class="btn-ghost-sm">撤销</button></div>
+    </div>
+    <div class="row"><span class="demo-note">进行中</span>
+      <div class="toast"><span class="spinner" style="display:inline-block;width:14px;height:14px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite"></span>正在转写字幕 · 3 / 8 分钟<button class="btn-ghost-sm">查看任务</button></div>
+    </div>
+    <div class="row"><span class="demo-note">骨架屏</span>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="skeleton" style="width:280px;height:14px"></div>
+        <div class="skeleton" style="width:220px;height:14px"></div>
+        <div class="skeleton" style="width:250px;height:14px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>表面层级</h2>
+    <div class="swrow">
+      <div class="sw" style="background:var(--bg-sunken)"><span>sunken</span></div>
+      <div class="sw" style="background:var(--bg-app)"><span>app</span></div>
+      <div class="sw" style="background:var(--bg-paper)"><span>paper</span></div>
+      <div class="sw" style="background:var(--bg-surface)"><span>surface</span></div>
+      <div class="sw" style="background:var(--accent);border:none"><span style="color:var(--on-accent)">accent</span></div>
+    </div>
+  </section>
+</div>
+<button class="theme-toggle" onclick="toggleTheme()" title="切换深浅色">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+</button>
+<script>
+  const saved = localStorage.getItem('ln-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? '' : 'dark';
+    cur ? document.documentElement.setAttribute('data-theme', cur) : document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('ln-theme', cur);
+  }
+</script>
+</body>
+</html>

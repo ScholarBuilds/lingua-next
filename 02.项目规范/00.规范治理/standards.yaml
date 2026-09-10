@@ -1,0 +1,243 @@
+schema_version: "1.0"
+standards_version: "1.5.0"
+rules:
+  - id: STD-GOV-001
+    name: 项目事实来源
+    status: active
+    version: "1.0.0"
+    scope: 全项目
+    source: "02.项目规范/00.规范治理/README.md"
+    enforcement: audit + code-review
+    owner: 待确认
+    replaces: []
+    exceptions: []
+  - id: STD-GOV-002
+    name: 复用现行风格优先
+    status: active
+    version: "1.0.0"
+    scope: 全项目
+    source: "02.项目规范/00.规范治理/README.md"
+    enforcement: before-change + code-review
+    owner: 待确认
+    replaces: []
+    exceptions: []
+  - id: STD-STACK-001
+    name: 前端唯一栈 React 18 + TypeScript（本项目内不引入 Vue 惯例）
+    status: active
+    version: "0.1.0"
+    scope: web/
+    source: "01.项目文档/02.架构/ADR/ADR-002-前端技术栈React18.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-STACK-002
+    name: 服务端唯一主栈 Python 3.12（api 与 worker 共库，引入新语言须走 ADR）
+    status: active
+    version: "0.1.0"
+    scope: server/
+    source: "01.项目文档/02.架构/ADR/ADR-003-后端技术栈Python单主栈.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-AI-001
+    name: LLM 调用只经语义别名路由，业务代码禁止硬编码供应商与模型名
+    status: active
+    version: "0.1.0"
+    scope: server/
+    source: "01.项目文档/02.架构/ADR/ADR-004-LLM网关采用LiteLLM动态配置.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-DATA-001
+    name: AI 与翻译产物一律按内容指纹持久化寻址，禁止绕过缓存层直调供应商
+    status: active
+    version: "0.1.0"
+    scope: server/
+    source: "01.项目文档/02.架构/ADR/ADR-006-AI解释与翻译结果持久化寻址.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-001
+    name: 浮层只准用 components/Overlay 或 components/ui/dialog（radix），禁止手写 div.overlay，两者不在同一摞里混用
+    status: active
+    version: "1.1.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-002
+    name: Esc 只关最上面那一层浮层，禁止每个浮层各挂 window keydown
+    status: active
+    version: "1.0.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-003
+    name: 页面级 Esc 必须排除已被 Overlay 接管的层次，带输入框的浮层让出 Esc
+    status: active
+    version: "1.0.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-004
+    name: 同一类信息的浮层形态全域统一（管线三域节点详情共用居中大弹窗）
+    status: active
+    version: "1.0.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-005
+    name: 常驻挂载的浮层每次打开都要把内部状态同步回当前值（指向数据的状态必须同步，纯视图偏好可保留）
+    status: active
+    version: "1.0.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-006
+    name: 设置项在当前状态下不生效时界面必须说出来（能自动恢复就自动恢复并告知，不能就说明原因并给出恢复路径）
+    status: active
+    version: "1.0.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-007
+    name: 常驻工作区的会话状态放 store 不随路由卸载而丢（含正在跑的任务 id）；切换重置要能分辨换对象与页面重进
+    status: active
+    version: "1.0.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-012
+    name: 说明性小字只写标签讲不清的事（约束用控件表达；JSX 文本不解析 markdown）
+    status: active
+    version: "1.0.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: "pnpm check:jsx + code-review"
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-010
+    name: 页壳铺满工作区，不写页面级 max-width；限宽的是正文列（讲义库 760px / 阅读器 --prose-width）
+    status: active
+    version: "1.0.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-009
+    name: 下拉一律走 components/ui/picker（四形态：Picker/PillPicker/PopoverPicker/ActionPicker），不留原生 select
+    status: active
+    version: "1.0.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: "pnpm check:select"
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-008
+    name: 基础样式的特异性要低于它的覆盖入口（基础类套 :where() 归零），不把结果交给打包顺序
+    status: active
+    version: "1.0.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-002a
+    name: 非 Overlay 结构的层用 useEscapeClose 加入同一浮层栈
+    status: active
+    version: "1.0.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-002b
+    name: 带输入框的浮层用两段式 Esc（先失焦再关闭），不得因有输入框就不给 Esc
+    status: active
+    version: "1.0.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-003a
+    name: 类名必须独占，一个类只能有一个主人（浮层类同时决定定位，撞名双向破坏布局）；守卫 pnpm check:css
+    status: active
+    version: "1.1.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: script
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-013
+    name: 程序化外链与下载只经 lib/shell 的 openExternal / saveFile（桌面壳的唯一接缝；声明式 <a target=_blank> 与 <a download> 不受此限）；壳有而浏览器没有的能力（全局快捷键、通知导航、状态上报）也只经 lib/shell 的 onShellHotkey / onShellNavigate / reportToShell，浏览器里空操作
+    status: active
+    version: "1.1.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-019a
+    name: 深链可达的页面必须自带出口——给 Topbar.back，或让 crumbs 的祖先带 to；侧栏菜单项（lib/railTarget）是最后兜底：点已激活模块的子页回模块首页，点模块首页本身保持原地
+    status: active
+    version: "1.0.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-020
+    name: 换模型只有 components/model-picker/ModelPicker 一个入口；按厂商分组（判据只认模型名，不认 provider_type）；非对话模型单列折叠；模型位一律上游真名，要带能力就写 <中文能力名> · <真实模型名>；走 Overlay 不走 radix Dialog
+    status: active
+    version: "1.0.0"
+    scope: web/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []
+  - id: STD-UI-021
+    name: 使用处换模型只影响这一次调用、绝不写回绑定；deployment_id 必须进缓存寻址（provider 加 #d<id>），否则换了模型仍命中旧结果且接口 200；收了模型字段就必须真的透传给上游
+    status: active
+    version: "1.0.0"
+    scope: web/, server/
+    source: "02.项目规范/02.前端与交互规范/README.md"
+    enforcement: code-review
+    owner: scholar
+    replaces: []
+    exceptions: []

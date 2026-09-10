@@ -1,0 +1,586 @@
+/* ============================================================
+   lingua-next 设计令牌 · 墨石与纸
+   双轨：工具壳（rail/topbar/appbar）深墨石灰 + 铜金点缀；
+   阅读与学习画布暖纸。浅色＝墨石壳 + 纸画布；深色＝暖黑壳 + 暖墨画布。
+   ============================================================ */
+/* 字体 @import 移至 app.css 顶部（打包后 @import 必须先于所有规则） */
+
+/* ============================================================
+   断点约定 · 唯一出处
+   ------------------------------------------------------------
+   直接沿用 Tailwind 4 的默认断点：本仓没有在 @theme 里改写 --breakpoint-*，
+   所以 tsx 里的 sm:/md:/lg:/xl:/2xl: 与下表是同一套数值。
+   feature CSS 写 @media 一律从这张表抄，不要再自定断点值。
+
+   | 档位 | 数值           | 这一档要解决什么                             |
+   | ---- | -------------- | -------------------------------------------- |
+   | sm   | 40rem / 640px  | 手机竖屏：单列；工具条收进溢出菜单           |
+   | md   | 48rem / 768px  | 平板竖屏、半屏窗口：侧栏收起，右栏改抽屉     |
+   | lg   | 64rem / 1024px | 紧凑桌面：三栏收成两栏，画布优先             |
+   | xl   | 80rem / 1280px | 标准桌面：完整三栏                           |
+   | 2xl  | 96rem / 1536px | 宽屏：内容区限宽居中，两侧留白               |
+
+   写法用范围语法，和 Tailwind 4 生成的变体逐字一致，省掉 0.02px 修边：
+     @media (width < 48rem)          { … }   ≡ max-md:
+     @media (width >= 48rem)         { … }   ≡ md:
+     @media (48rem <= width < 64rem) { … }   夹在两档之间
+
+   下面的 --bp-* 只能给 JS（matchMedia）和 clamp()/calc() 用。
+   自定义属性在 @media 条件里不参与求值，@media (width < var(--bp-md)) 恒为假。
+   容器宽度自适应优先 @container 与 clamp()，真需要整块换布局才写 @media。
+
+   唯一的例外是**组件自己量出来的档位梯子**：某个控件条的内容宽是多少就是多少，
+   跟视口档位没有对应关系。这类阈值允许自定义，但要满足两条——
+   数值旁边写明实测宽度，且 JS 与 CSS 用同一份常量（CSS 侧写 max-width 时取
+   min-width 减 1）。目前仅画布顶栏一处：canvas-topbar.tsx 的
+   TOPBAR_BREAKPOINTS = 1024/1280/1500/2200，canvas.css 对应 2199/1279。
+   ============================================================ */
+
+:root {
+  /* ---- 表面（纸轨：内容区与阅读画布） ---- */
+  --bg-app: #F3F0E8;          /* 内容区底 */
+  --bg-paper: #FFFCF4;        /* 阅读画布（暖纸） */
+  --bg-surface: #FFFEFA;      /* 卡片/面板 */
+  --bg-sunken: #E9E4DA;       /* 下沉区：侧栏、输入槽 */
+  --bg-hover: rgba(24, 40, 58, 0.055);
+  --bg-active: rgba(36, 86, 166, 0.09);
+
+  /* ---- 工具壳轨：rail/topbar/appbar 专用，不进内容区 ---- */
+  --bg-shell: #E9E4DA;
+  --bg-shell-hover: rgba(24, 40, 58, 0.06);
+  --bg-shell-active: rgba(36, 86, 166, 0.11);
+  --ink-shell: #18283A;
+  /* 4.88:1（AA 要 4.5），导航标签只有 10px，不能按大字放宽 */
+  --ink-shell-muted: #596676;
+  --border-shell: #D2CABD;
+  --accent-shell: #2456A6;
+
+  /* ---- 墨色 ---- */
+  --ink: #18283A;             /* 主文字（墨蓝） */
+  --ink-secondary: #465466;
+  --ink-muted: #727B86;
+  --ink-faint: #9DA4AA;
+
+  /* ---- 描边 ---- */
+  --border: #E0D9CC;
+  --border-strong: #C6BDAD;
+
+  /* ---- 主色（铜金） ---- */
+  --accent: #2456A6;
+  --accent-hover: #193F7E;
+  --accent-soft: #E4EBF7;
+  --accent-ink: #204E98;
+  --on-accent: #FFFFFF;
+
+  /* ---- 语义层（正文标记体系，五层不打架） ---- */
+  --mark-vocab: #B45309;            /* 生词：点状下划线 */
+  --mark-phrase: #0E7490;           /* 词组：虚线下划线 */
+  --wash-reading: #E3EBFA;          /* 朗读当前句底色 */
+  --wash-select: #D5E0F7;           /* 选中词底色 */
+  --hl-yellow: #F9EBB2; --hl-green: #D3EFD9; --hl-pink: #F9DEEA; --hl-blue: #D8E7F9;
+  /* 语法成分着色的封闭 9 色（见 features/reader/grammarRole.ts）。
+     原先只有 4 色，表语和宾语、定语和状语被迫共色；role 收敛成枚举后一一对应 */
+  --hl-teal: #CDEBEA; --hl-purple: #E6DEF7; --hl-orange: #FBE3CE; --hl-slate: #E4E6EA;
+
+  /* ---- 状态 ---- */
+  --ok: #15803D; --warn: #B45309; --err: #B91C1C;
+  --ok-soft: #E8F5EC; --warn-soft: #FBF0DF; --err-soft: #FBEAEA;
+  /* --danger 是 --err 的别名：pipeline.css 与 size-picker 一路按 --danger 写，
+     以前没人定义过，那些地方的红色一直是空值（.rail-badge.bad 干脆没有底色）。
+     写成 var(--err) 而不是复制色值，深色主题翻转 --err 时会一起跟。 */
+  --danger: var(--err);
+
+  /* ---- 字体 ---- */
+  --font-ui: 'Avenir Next', Avenir, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-reading: 'Literata', Georgia, 'Songti SC', 'Noto Serif SC', serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* ---- 字号 ---- */
+  --text-xs: 12px; --text-sm: 13px; --text-base: 14px; --text-md: 15px; --text-lg: 17px;
+  --reading-size: 19px;       /* 阅读正文，可调 16-24 */
+  --reading-leading: 1.9;
+
+  /* ---- 几何 ---- */
+  --radius-sm: 5px; --radius-md: 8px; --radius-lg: 12px; --radius-full: 999px;
+  --shadow-sm: 0 1px 2px rgba(24, 40, 58, 0.05);
+  --shadow-md: 0 5px 18px rgba(24, 40, 58, 0.09), 0 1px 2px rgba(24, 40, 58, 0.05);
+  --shadow-lg: 0 16px 44px rgba(24, 40, 58, 0.14), 0 2px 6px rgba(24, 40, 58, 0.08);
+  --backdrop: rgba(27, 30, 35, 0.38);   /* 覆盖层遮罩 */
+
+  /* ---- 动效 ---- */
+  --dur-fast: 150ms; --dur-base: 220ms; --ease: cubic-bezier(0.25, 0.8, 0.35, 1);
+
+  /* ---- 布局 ---- */
+  --rail-w: 232px; --rail-w-collapsed: 64px; --topbar-h: 50px;
+
+  /* ---- 断点（数值见文件顶部的表；这里只给 JS 与 clamp 用） ---- */
+  --bp-sm: 40rem; --bp-md: 48rem; --bp-lg: 64rem; --bp-xl: 80rem; --bp-2xl: 96rem;
+
+  /* ---- 控件尺寸基线 ----
+     桌面可点目标最小 32×32。纯图标按钮允许视觉更小，但要用 padding 或
+     ::before 把命中区补回 --ctl-hit（.icon-btn 已经内置这条补偿）。
+     feature CSS 不要另写高度，要新档位在这里加。 */
+  --ctl-h-sm: 32px;   /* 密集工具条里的次要按钮，最低合规高度 */
+  --ctl-h-md: 36px;   /* 表单输入、常规操作 */
+  --ctl-h-lg: 40px;   /* 主操作、对话框主按钮 */
+  --ctl-hit: 32px;    /* 命中区下限 */
+  --ctl-pad-sm: 10px; --ctl-pad-md: 12px; --ctl-pad-lg: 18px;
+  --icon-sm: 14px; --icon-md: 16px; --icon-lg: 18px;
+}
+
+[data-theme="dark"] {
+  --bg-app: #15171B;
+  --bg-paper: #1B1E24;
+  --bg-surface: #22252C;
+  --bg-sunken: #101318;
+  --bg-hover: rgba(233, 230, 223, 0.06);
+  --bg-active: rgba(143, 176, 255, 0.14);
+
+  --bg-shell: #0E1013;
+  --bg-shell-hover: rgba(236, 237, 239, 0.07);
+  --bg-shell-active: rgba(143, 176, 255, 0.18);
+  --ink-shell: #E7E9EC;
+  --ink-shell-muted: #8B919A;
+  --border-shell: rgba(236, 237, 239, 0.08);
+  --accent-shell: #8FB0FF;
+
+  --ink: #E7E9EC;
+  --ink-secondary: #A4AAB3;
+  --ink-muted: #79818B;
+  --ink-faint: #4E555E;
+
+  --border: #2E323A;
+  --border-strong: #424854;
+
+  --accent: #8FB0FF;
+  --accent-hover: #A9C3FF;
+  --accent-soft: rgba(143, 176, 255, 0.15);
+  --accent-ink: #C9D6F2;
+  --on-accent: #0E1420;
+
+  --mark-vocab: #D97706;
+  --mark-phrase: #22D3EE;
+  --wash-reading: rgba(143, 176, 255, 0.16);
+  --wash-select: rgba(143, 176, 255, 0.26);
+  --hl-yellow: rgba(202, 158, 33, 0.28); --hl-green: rgba(52, 168, 83, 0.24);
+  --hl-pink: rgba(232, 121, 165, 0.24); --hl-blue: rgba(66, 133, 244, 0.24);
+  --hl-teal: rgba(20, 184, 166, 0.26); --hl-purple: rgba(139, 92, 246, 0.28);
+  --hl-orange: rgba(249, 115, 22, 0.24); --hl-slate: rgba(148, 163, 184, 0.26);
+
+  --ok: #4ADE80; --warn: #FBBF24; --err: #F87171;
+  --ok-soft: rgba(74, 222, 128, 0.12); --warn-soft: rgba(251, 191, 36, 0.12); --err-soft: rgba(248, 113, 113, 0.12);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.35);
+  --backdrop: rgba(0, 0, 0, 0.55);
+}
+
+/* ============ 基础 ============ */
+/* 元素级重置放进 base 层：Tailwind 工具类（utilities 层）需要能覆盖它们，
+   否则 shadcn/ui 组件的 p-* / bg-* 等类会被无层级重置压制；
+   项目自有类选择器（.btn/.sel 等）保持无层级，优先级不受影响 */
+@layer base {
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    color: var(--ink);
+    background-color: var(--bg-app);
+    background-image: url('/brand/image2/paper-grid.webp');
+    background-size: 627px 627px;
+    -webkit-font-smoothing: antialiased;
+    transition: background var(--dur-base) var(--ease), color var(--dur-base) var(--ease);
+  }
+  button { font-family: inherit; border: none; background: none; color: inherit; cursor: pointer; }
+  ::selection { background: var(--wash-select); }
+}
+
+/* 只给辅助技术读、不占视觉空间。用 clip-path 而不是 display:none——
+   后者读屏也读不到，等于没写。 */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+/* 跳到主内容：键盘用户每次换页都要穿过 13 个导航项才够得着正文。
+   平时藏起来，一被聚焦就落到左上角。 */
+.skip-link {
+  position: fixed; top: 8px; left: 8px; z-index: 100;
+  padding: 8px 14px; border-radius: var(--radius-md);
+  background: var(--accent); color: var(--on-accent);
+  font-size: var(--text-sm); font-weight: 500;
+  transform: translateY(-200%);
+}
+.skip-link:focus-visible { transform: none; }
+
+/* ============ 应用外壳 ============ */
+/* 高度用 dvh 不用 vh：移动端与窄窗口下 `100vh` 取的是**地址栏收起后**的大视口，
+   比实际能看到的区域高一截。外壳又是 overflow:hidden，多出来的那一截直接被裁掉，
+   而且滚不出来——底部那一行内容用户永远够不着。
+   前一行 100vh 是给不认 dvh 的老浏览器兜底，认得的会用后一行覆盖掉。 */
+.app { display: flex; height: 100vh; height: 100dvh; overflow: hidden; }
+
+/* 跳转锚点那一层：它夹在 .app 与页面（.main/.page）之间，必须原样把
+   flex 契约传下去，否则页面拿不到高度当场塌成 0（本仓踩过 `flex:1` 放进
+   block 父容器的同款坑）。方向跟着 .app 走。 */
+.app-main { flex: 1; min-width: 0; min-height: 0; display: flex; position: relative; isolation: isolate; }
+.app.layout-top .app-main { flex-direction: column; }
+.app-main:focus { outline: none; }
+
+.nexus-icon {
+  display: block;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.nexus-icon-atlas { pointer-events: none; }
+.learning-icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  vertical-align: middle;
+}
+[data-theme="dark"] .nexus-icon-atlas {
+  filter: brightness(0) saturate(100%) invert(87%) sepia(8%) saturate(1012%) hue-rotate(184deg) brightness(101%);
+}
+
+.nexus-visual {
+  display: block;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+}
+.workspace-visual {
+  position: absolute;
+  z-index: 0;
+  top: 62px;
+  right: 24px;
+  width: clamp(120px, 12vw, 190px);
+  aspect-ratio: 1;
+  border-radius: 12%;
+  opacity: .075;
+  filter: saturate(.55) contrast(.9);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+[data-theme="dark"] .workspace-visual {
+  opacity: .06;
+  filter: grayscale(.35) brightness(.75);
+  mix-blend-mode: screen;
+}
+
+/* 左侧图标导航栏 */
+/* 侧栏默认展开带标签。
+
+   > [!danger] 10 项 + 中文标签装不进图标栏
+   >
+   > 原来是 64px 宽、图标 19px + 标签 **10px**。两个问题：
+   > ① 中文在 10px 下已经低于可读下限（Chrome 曾对中文 UI 强制 12px 最小值，
+   >    正是因为这个字号辨识困难）；
+   > ② 10 个主项按 56px 行高排下来是 560px，加 3 个工具项 720px+，
+   >    1080p 屏塞满且无余量——分组分隔线、徽章、滚动缓冲全没有位置。
+   >
+   > 更根本的是**图标分不清**：「内容库 / 词汇资产 / 视频资产」的差别在修饰语
+   > 不在中心词，画出来都是「一堆集合」。所以展开态给完整标签 + 组标题，
+   > 折叠态只作为次态存在，靠的是位置记忆而不是图标语义——
+   > 所以默认必须展开（`navCollapsed: false`）。 */
+.rail {
+  width: var(--rail-w); flex-shrink: 0;
+  background: var(--bg-shell);
+  border-right: 1px solid var(--border-shell);
+  display: flex; flex-direction: column;
+  /* 展开态要 stretch：组标题没有 width:100%，center 会让它缩成内容宽再居中，
+     读起来像居中标题而不是这一组的标签。折叠态才回到 center。 */
+  align-items: stretch;
+  padding: 10px 8px; gap: 2px;
+  overflow-y: auto; scrollbar-width: none;
+}
+.rail::-webkit-scrollbar { display: none; }
+/* 分组分隔：学习 / 创作 / 管理 */
+.rail-sep { width: 26px; height: 1px; flex-shrink: 0; margin: 5px 0; background: var(--border-shell); }
+.rail-logo {
+  width: 34px; height: 34px; border-radius: var(--radius-md);
+  overflow: hidden; flex-shrink: 0; margin-bottom: 10px;
+}
+.rail-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.rail-item {
+  /* 展开态是一行：图标 + 标签横排，标签用正常字号。
+     `text-align: left` 不能省：导航项是 <a>（默认左对齐），而主题/设置/退出/收起
+     是 <button>（UA 默认 text-align: center）——不写死的话只有那四项的文字
+     被推到 flex-1 标签的正中间，看着像随机跑偏。 */
+  width: 100%; padding: 7px 10px; border-radius: var(--radius-md); text-align: left;
+  display: flex; flex-direction: row; align-items: center; gap: 10px;
+  color: var(--ink-shell-muted);
+  transition: all var(--dur-fast) var(--ease); position: relative;
+}
+.rail-item:hover { background: var(--bg-shell-hover); color: var(--ink-shell); }
+.rail-item.active { background: var(--bg-shell-active); color: var(--accent-shell); }
+/* 当前项左缘指示条：贴在 rail 最左沿（item 宽 52 居中于 64 的 rail，左右各 6px） */
+.rail-item.active::before {
+  content: ''; position: absolute; left: -6px; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 22px; border-radius: 2px; background: var(--accent-shell);
+}
+.brand-icon {
+  display: block;
+  flex-shrink: 0;
+  opacity: .9;
+  border-radius: 22%;
+  filter: saturate(.62) contrast(.96);
+  transition: opacity var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+:is(.rail-item, .rail-cmd, .appbar-item, .icon-btn, .theme-toggle):hover .brand-icon,
+:is(.rail-item, .appbar-item).active .brand-icon {
+  opacity: 1;
+  filter: saturate(.95) contrast(1.03);
+}
+.rail-item :is(svg, .brand-icon) { width: 24px; height: 24px; }
+/* 13px：中文的可读下限是 12px（Chrome 曾按语言强制这条），
+   导航是每天点几十次的东西，不该压在下限上 */
+.rail-label {
+  flex: 1; min-width: 0; font-size: 13px; line-height: 1.3;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* 组标题：图标栏做不到的那件事 */
+.rail-group {
+  padding: 12px 10px 4px; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em; color: var(--ink-shell-muted);
+}
+.rail-group:first-of-type { padding-top: 4px; }
+
+/* 徽标在展开态靠右排，不再盖在图标上 */
+.rail:not(.collapsed) .rail-badge { position: static; margin-left: auto; }
+
+/* 折叠态：回到图标栏，标签走 .sr-only 留给读屏，视觉提示走 title */
+.rail.collapsed { width: var(--rail-w-collapsed); align-items: center; }
+.rail.collapsed .rail-item { width: 44px; justify-content: center; padding: 10px 0; }
+.rail.collapsed .rail-group { display: none; }
+
+.rail-toggle { color: var(--ink-shell-muted); }
+.rail-toggle svg { transform: rotate(90deg); transition: transform var(--dur-fast) var(--ease); }
+.rail.collapsed .rail-toggle svg { transform: rotate(-90deg); }
+.rail-toggle .brand-icon { transform: none; }
+.rail.collapsed .rail-toggle .brand-icon { transform: rotate(180deg); }
+.rail-badge {
+  position: absolute; top: 2px; right: 5px;
+  min-width: 14px; height: 14px; padding: 0 4px;
+  border-radius: var(--radius-full); background: var(--accent); color: #fff;
+  font-size: 9px; font-family: var(--font-mono); line-height: 14px; text-align: center;
+}
+.rail-badge.bad { background: var(--danger); }
+.rail-spacer { flex: 1; }
+
+/* 顶栏 */
+/* 顶栏：左边说「在哪」，右边说「能做什么」，中间的空隙由组件撑。
+   窄屏换行是默认行为——原来只有加了 `.sh-topbar` 的三个页面会换行，
+   其余在窄屏下被压扁。 */
+.topbar {
+  min-height: var(--topbar-h); flex-shrink: 0;
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 6px 10px; padding: 7px 16px;
+  border-bottom: 1px solid var(--border-shell);
+  background: var(--bg-shell);
+}
+
+/* 返回键：图标钮大小的热区，不是一行文字 */
+.tb-back {
+  flex-shrink: 0; width: 28px; height: 28px;
+  display: grid; place-items: center; border-radius: var(--radius-sm);
+  color: var(--ink-shell-muted); cursor: pointer;
+}
+.tb-back:hover { background: var(--bg-shell-hover); color: var(--ink-shell); }
+.tb-back svg { width: 16px; height: 16px; }
+
+/* 位置区：面包屑 + 标题 + 状态标记，整体可收缩 */
+.tb-where {
+  flex: 0 1 auto; min-width: 0;
+  display: flex; align-items: baseline; gap: 6px;
+  font-size: var(--text-sm); color: var(--ink-shell-muted);
+}
+.tb-crumb { display: flex; align-items: baseline; gap: 6px; flex-shrink: 0; }
+.tb-crumb svg {
+  width: 13px; height: 13px; opacity: 0.45; align-self: center;
+  color: var(--ink-shell-muted);
+}
+.tb-crumb-link {
+  color: var(--ink-shell-muted); cursor: pointer; border-radius: var(--radius-sm);
+  padding: 1px 3px; margin: -1px -3px;
+}
+.tb-crumb-link:hover { color: var(--ink-shell); background: var(--bg-shell-hover); }
+.tb-crumb-text { color: var(--ink-shell-muted); }
+
+/* 标题是这条栏存在的理由：它是页面的一级标题，字号要压得住
+   （原来只是 .crumb b，与面包屑同 13px，读起来分不出主次）。 */
+.tb-title {
+  margin: 0; min-width: 0;
+  font-size: 15px; font-weight: 600; line-height: 1.4; color: var(--ink-shell);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* 贴着标题的状态标记，不是动作：不给它按钮的分量 */
+.tb-meta { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+.tb-gap { flex: 1 1 0; min-width: 0; }
+
+/* 动作区：整体不换行内部各控件，放不下时整条掉到下一行 */
+.tb-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+/* 旧类名，迁移期间还在用（页面内的次级栏也复用它） */
+.crumb { display: flex; align-items: center; gap: 6px; font-size: var(--text-sm); color: var(--ink-shell-muted); }
+.crumb b { color: var(--ink-shell); font-weight: 600; }
+.crumb svg { width: 13px; height: 13px; opacity: 0.5; }
+
+/* 顶栏/侧栏已在墨石壳上：直接贴壳的控件（ghost 按钮、图标钮）必须用壳配色，
+   否则浅主题墨色压在墨石底上看不见。岛状控件（.seg/.chip/.btn-outline/
+   .btn-primary/.btn-soft 自带底色）不受影响。 */
+.topbar .btn, .appbar .btn { color: var(--ink-shell-muted); }
+.topbar .btn:hover, .appbar .btn:hover { background: var(--bg-shell-hover); color: var(--ink-shell); }
+.topbar .btn-primary, .appbar .btn-primary { background: var(--accent); color: var(--on-accent); }
+.topbar .btn-primary:hover, .appbar .btn-primary:hover { background: var(--accent-hover); color: var(--on-accent); }
+.topbar .btn-soft, .appbar .btn-soft { background: var(--accent-soft); color: var(--accent-ink); }
+.topbar .btn-outline, .appbar .btn-outline { background: var(--bg-surface); color: var(--ink); }
+.topbar .icon-btn, .appbar .icon-btn { color: var(--ink-shell-muted); }
+.topbar .icon-btn:hover, .appbar .icon-btn:hover { background: var(--bg-shell-hover); color: var(--ink-shell); }
+.topbar .icon-btn.active, .appbar .icon-btn.active { color: var(--accent-shell); background: var(--bg-shell-active); }
+.topbar .btn-ghost-sm, .appbar .btn-ghost-sm { color: var(--ink-shell-muted); }
+.topbar .btn-ghost-sm:hover, .appbar .btn-ghost-sm:hover { background: var(--bg-shell-hover); color: var(--ink-shell); }
+.topbar .btn-ghost-sm.active, .appbar .btn-ghost-sm.active { color: var(--accent-shell); background: var(--bg-shell-active); }
+
+/* ============ 通用组件 ============ */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: var(--ctl-h-sm); padding: 0 var(--ctl-pad-md);
+  border-radius: var(--radius-md); font-size: var(--text-sm); font-weight: 500;
+  color: var(--ink-secondary); transition: all var(--dur-fast) var(--ease);
+}
+.btn:hover { background: var(--bg-hover); color: var(--ink); }
+.btn svg { width: var(--icon-md); height: var(--icon-md); }
+.btn-primary { background: var(--accent); color: var(--on-accent); }
+.btn-primary:hover { background: var(--accent-hover); color: var(--on-accent); }
+.btn-soft { background: var(--accent-soft); color: var(--accent-ink); }
+.btn-soft:hover { background: var(--accent-soft); filter: brightness(0.97); }
+/* 只有图标时也要够 32×32，所以给 min-width；文字按钮不受影响 */
+.btn-ghost-sm {
+  height: var(--ctl-h-sm); min-width: var(--ctl-hit); padding: 0 9px;
+  font-size: var(--text-xs); border-radius: var(--radius-sm); color: var(--ink-muted);
+}
+.btn-ghost-sm:hover { background: var(--bg-hover); color: var(--ink); }
+/* 图标尺寸固定，避免只有图标的按钮在复杂布局中被压缩。 */
+.btn-ghost-sm > svg { width: 15px; height: 15px; flex-shrink: 0; }
+/* 轮廓按钮：次要但需要边界感的操作 */
+.btn-outline { border: 1px solid var(--border-strong); background: var(--bg-surface); color: var(--ink); }
+.btn-outline:hover { border-color: var(--ink-faint); background: var(--bg-surface); }
+/* 危险按钮：结束会话、删除 */
+.btn-danger { background: var(--err-soft); color: var(--err); }
+.btn-danger:hover { background: var(--err-soft); filter: brightness(0.96); }
+.btn-danger-solid { background: var(--err); color: #fff; }
+/* 尺寸：sm 与默认同高（32 是命中区下限，只能靠内边距和字号拉开密度差），lg 40 */
+.btn-sm { height: var(--ctl-h-sm); padding: 0 var(--ctl-pad-sm); font-size: var(--text-xs); border-radius: var(--radius-sm); }
+.btn-lg { height: var(--ctl-h-lg); padding: 0 var(--ctl-pad-lg); font-size: var(--text-md); border-radius: var(--radius-md); }
+/* 状态 */
+.btn:disabled, .btn[aria-disabled="true"] { opacity: 0.45; pointer-events: none; }
+.btn.loading { pointer-events: none; }
+.btn.loading .spinner { width: 14px; height: 14px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+/* 焦点环：键盘可达性，全部可交互元素统一 */
+:is(.btn, .icon-btn, .seg button, .rail-item, .toc-ch, a):focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius-sm);
+}
+.icon-btn {
+  position: relative;
+  width: var(--ctl-hit); height: var(--ctl-hit); border-radius: var(--radius-sm);
+  display: grid; place-items: center; color: var(--ink-muted);
+  transition: all var(--dur-fast) var(--ease);
+}
+/* 命中区补偿：不少地方把 .icon-btn 压到 22-26px 求密度，伪元素把可点范围补回
+   32×32。绝对定位不进 grid 流，图标位置和相邻间距都不会变。 */
+.icon-btn::before {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: var(--ctl-hit); height: var(--ctl-hit);
+  transform: translate(-50%, -50%);
+}
+.icon-btn:hover { background: var(--bg-hover); color: var(--ink); }
+.icon-btn.active { color: var(--accent); background: var(--bg-active); }
+.icon-btn :is(svg, .brand-icon) { width: 19px; height: 19px; }
+
+/* 内边距 3→2、按钮 26→28：控件整体仍是 32 高（和 .btn 对齐，不产生位移），
+   每一段的可点高度多 2px */
+.seg {
+  display: inline-flex; background: var(--bg-sunken);
+  border-radius: var(--radius-md); padding: 2px; gap: 2px;
+}
+.seg button {
+  height: 28px; padding: 0 12px; border-radius: 7px;
+  font-size: var(--text-xs); font-weight: 500; color: var(--ink-muted);
+  transition: all var(--dur-fast) var(--ease);
+}
+.seg button.active { background: var(--bg-surface); color: var(--ink); box-shadow: var(--shadow-sm); }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  height: 20px; padding: 0 8px; border-radius: var(--radius-full);
+  font-size: 11px; font-weight: 500;
+  background: var(--bg-sunken); color: var(--ink-secondary);
+}
+.chip.accent { background: var(--accent-soft); color: var(--accent-ink); }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+
+.card {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+}
+
+.divider { height: 1px; background: var(--border); }
+
+/* 滚动条 */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ============ 阅读正文标记体系 ============ */
+.prose {
+  font-family: var(--font-reading);
+  font-size: var(--reading-size);
+  line-height: var(--reading-leading);
+  color: var(--ink);
+  letter-spacing: 0.005em;
+}
+.prose .w { cursor: pointer; border-radius: 3px; padding: 0 1px; margin: 0 -1px; transition: background var(--dur-fast) var(--ease); }
+.prose .w:hover { background: var(--bg-active); }
+/* 生词（已收藏未掌握）：点状下划线 */
+.prose .vocab {
+  text-decoration: underline dotted var(--mark-vocab) 1.5px;
+  text-underline-offset: 5px; text-decoration-skip-ink: none;
+}
+/* 词组：虚线下划线 */
+.prose .phrase {
+  text-decoration: underline dashed var(--mark-phrase) 1.2px;
+  text-underline-offset: 6px; text-decoration-skip-ink: none;
+  cursor: pointer;
+}
+/* 朗读中的句子 */
+.prose .s-reading { background: var(--wash-reading); border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+/* 选中的词 */
+.prose .w-selected { background: var(--wash-select); font-weight: 600; }
+/* 句间译文 */
+.prose .trans {
+  display: block; font-family: var(--font-ui);
+  font-size: calc(var(--reading-size) * 0.78);
+  line-height: 1.7; color: var(--ink-secondary);
+  margin: 2px 0 10px;
+}
+
+/* 主题切换（右下角固定） */
+.theme-toggle {
+  position: fixed; right: 16px; bottom: 16px; z-index: 90;
+  width: 36px; height: 36px; border-radius: var(--radius-full);
+  background: var(--bg-surface); border: 1px solid var(--border);
+  box-shadow: var(--shadow-md); display: grid; place-items: center; color: var(--ink-secondary);
+}
+.theme-toggle:hover { color: var(--ink); }
+.theme-toggle :is(svg, .brand-icon) { width: 20px; height: 20px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

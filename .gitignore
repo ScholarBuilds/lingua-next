@@ -1,0 +1,79 @@
+# deps
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# build
+web/dist/
+*.egg-info/
+desktop/.build/
+desktop/runtime/
+desktop/release/
+
+# env & secrets
+.env
+.env.local
+.env.*
+!.env.example
+!**/.env.example
+*.key
+*.pem
+*.p12
+*.p8
+*.sqlite3
+*.sqlite3-*
+*.db
+seed-credentials.json
+bundle-config.*
+bundle-vault.*
+desktop/dist/
+tools/dist/
+*.local.yaml
+
+# runtime data
+data/desktop/
+data/software-english-capture/
+data/media/
+data/postgres/
+data/redis/
+*.log
+
+# os / ide
+.DS_Store
+.idea/
+.vscode/
+data/ecdict/
+
+# YouTube 内置登录持久化 profile（含登录态，永不入库）
+data/yt-profile/
+data/computer-profile/
+data/logs/
+data/run/
+# 候选视频预览片段：可再生的缓存，按 LRU 自动淘汰（BR-18）
+data/preview_cache/
+server/data/media/
+server/data/ecdict/
+
+# 音标与语法的原始数据集（可由 seed 脚本的 --download 重新拉取）
+# phonetics 里含 speechocean762 音频 520MB + 词典 20MB，grammar 里是 CEFR-J 官方 xlsx
+data/phonetics/
+data/grammar/
+# 本地模型目录。音素识别 ONNX 已于 2026-08-30 下线（ADR-012），
+# 目录留着给将来可能的本地模型；whisper 与 CTC 对齐走 HuggingFace 缓存不在这里
+server/data/models/
+
+# playwright MCP 的控制台日志（会话期工作文件）
+.playwright-mcp/
+.playwright-cli/
+output/playwright/
+
+# 贾维斯私有 daemon 渲染后的 manifest 与执行工作区
+data/jarvis-work/
+
+# Private historical workspace and learning export
+.workflow/
+归档/2026-09-02-非owner账号学习记录.json

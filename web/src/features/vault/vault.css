@@ -1,0 +1,55 @@
+/* ============ 账号与凭据（保险箱，模块 19） ============ */
+.vt-inner { padding: 24px 40px 80px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 8px 40px; align-items: start; }
+@media (width < 64rem) { .vt-inner { grid-template-columns: minmax(0, 1fr); } }
+
+.vt-sec { margin-bottom: 32px; min-width: 0; }
+.vt-sec-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+.vt-sec-head h2 { font-size: var(--text-md); font-weight: 600; }
+.vt-count { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--ink-muted); }
+.vt-sec-more { margin-left: auto; }
+.vt-setup { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+@media (width < 64rem) { .vt-setup { grid-template-columns: minmax(0, 1fr); } }
+.vt-form-inline { padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-surface); }
+.vt-table-wrap { padding: 8px 4px 4px; overflow-x: auto; }
+.vt-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+.vt-table th { text-align: left; font-weight: 500; font-size: 11px; color: var(--ink-muted); padding: 6px 12px 8px; letter-spacing: 0.02em; white-space: nowrap; }
+.vt-table td { padding: 10px 12px; border-top: 1px solid var(--border); vertical-align: middle; }
+.vt-table tr:hover td { background: var(--bg-hover); }
+.vt-off td { color: var(--ink-muted); }
+.vt-name { display: block; font-weight: 500; color: var(--ink); }
+.vt-sub { display: block; font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+.vt-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.vt-when { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--ink-muted); white-space: nowrap; }
+/* 行悬停才露操作：一行三四个按钮平铺会把表格变成按钮墙 */
+.vt-actions { text-align: right; white-space: nowrap; }
+.vt-actions .btn-ghost-sm { opacity: 0; }
+.vt-table tr:hover .vt-actions .btn-ghost-sm, .vt-table tr:focus-within .vt-actions .btn-ghost-sm { opacity: 1; }
+.vt-danger:hover { color: var(--err); }
+
+.vt-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 24px; border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); color: var(--ink-secondary); font-size: var(--text-sm); }
+.vt-empty svg { width: 20px; height: 20px; color: var(--ink-faint); }
+.vt-empty b { color: var(--ink); font-size: var(--text-base); }
+
+.vt-aside { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 0; }
+.vt-note { padding: 12px 14px; font-size: var(--text-xs); color: var(--ink-secondary); line-height: 1.65; background: var(--bg-sunken); border-radius: var(--radius-md); }
+.vt-note b { display: block; color: var(--ink); font-weight: 500; margin-bottom: 2px; }
+.vt-note code { font-family: var(--font-mono); font-size: 11px; word-break: break-all; }
+
+/* 弹窗：覆盖类要把 max-width 一起写全（STD-UI-008） */
+.overlay-card.vt-card { width: min(520px, 92vw); max-width: min(520px, 92vw); padding: 0; }
+.vt-form { display: flex; flex-direction: column; gap: 14px; padding: 22px 24px 20px; }
+.vt-form h2 { font-size: var(--text-lg); font-weight: 600; }
+.vt-form-note { font-size: var(--text-xs); color: var(--ink-muted); line-height: 1.6; }
+.vt-seg { align-self: flex-start; }
+.vt-field { display: flex; flex-direction: column; gap: 5px; font-size: var(--text-sm); }
+.vt-field > span { color: var(--ink-secondary); font-size: var(--text-xs); }
+.vt-field > span i { color: var(--err); font-style: normal; }
+.vt-field input, .vt-field textarea {
+  font: inherit; color: var(--ink); background: var(--bg-surface);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 7px 10px;
+}
+.vt-field textarea { font-family: var(--font-mono); font-size: 12px; resize: vertical; }
+.vt-field input:focus, .vt-field textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+.vt-form-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+.vt-secret { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg-sunken); border-radius: var(--radius-md); }
+.vt-secret code { flex: 1; min-width: 0; font-family: var(--font-mono); font-size: 12px; word-break: break-all; user-select: all; }

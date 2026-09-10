@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>配置中心 · lingua-next</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .body-row { flex: 1; display: flex; min-height: 0; }
+
+  /* 左：设置子导航 */
+  .snav { width: 220px; flex-shrink: 0; border-right: 1px solid var(--border); background: var(--bg-app); padding: 16px 10px; overflow-y: auto; }
+  .snav-title { font-size: 18px; font-weight: 700; padding: 2px 10px 14px; }
+  .snav-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 8px 10px; border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--ink-secondary); cursor: pointer; transition: background var(--dur-fast) var(--ease); }
+  .snav-item:hover { background: var(--bg-hover); }
+  .snav-item.active { background: var(--bg-active); color: var(--accent); font-weight: 600; }
+  .snav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .snav-item .warn-dot { margin-left: auto; width: 7px; height: 7px; border-radius: 50%; background: var(--warn); }
+
+  /* 右：内容区 */
+  .cwrap { flex: 1; min-width: 0; overflow-y: auto; background: var(--bg-paper); }
+  .cinner { max-width: 860px; margin: 0 auto; padding: 32px 36px 100px; }
+  .csec-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .csec-desc { font-size: var(--text-sm); color: var(--ink-muted); margin-bottom: 24px; }
+  .cgroup { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); margin: 28px 0 12px; display: flex; align-items: center; gap: 8px; }
+  .cgroup .line { flex: 1; height: 1px; background: var(--border); }
+
+  /* 凭据卡 */
+  .cred { display: flex; align-items: center; gap: 14px; padding: 14px 16px; margin-bottom: 10px; }
+  .cred-logo { width: 38px; height: 38px; border-radius: var(--radius-md); display: grid; place-items: center; font-weight: 700; font-size: 15px; color: #fff; flex-shrink: 0; }
+  .cred-info { flex: 1; min-width: 0; }
+  .cred-name { font-size: var(--text-md); font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .cred-meta { font-size: var(--text-xs); color: var(--ink-muted); margin-top: 3px; display: flex; gap: 10px; align-items: center; font-family: var(--font-mono); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .dot.ok { background: var(--ok); } .dot.bad { background: var(--err); } .dot.idle { background: var(--ink-faint); }
+  .cred-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .switch { width: 36px; height: 21px; border-radius: 99px; background: var(--border-strong); position: relative; cursor: pointer; transition: background var(--dur-fast) var(--ease); flex-shrink: 0; }
+  .switch::after { content: ''; position: absolute; top: 2.5px; left: 2.5px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: var(--shadow-sm); transition: transform var(--dur-fast) var(--ease); }
+  .switch.on { background: var(--accent); } .switch.on::after { transform: translateX(15px); }
+  .add-cred { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; border: 2px dashed var(--border-strong); border-radius: var(--radius-lg); color: var(--ink-muted); font-size: var(--text-sm); cursor: pointer; transition: all var(--dur-fast) var(--ease); }
+  .add-cred:hover { border-color: var(--accent); color: var(--accent); }
+  .add-cred svg { width: 16px; height: 16px; }
+
+  /* 能力绑定 */
+  .bind { padding: 14px 16px; margin-bottom: 10px; }
+  .bind-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .bind-name { font-size: var(--text-md); font-weight: 600; }
+  .bind-desc { font-size: var(--text-xs); color: var(--ink-muted); }
+  .bind-test { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .bind-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .sel { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-md); background: var(--bg-surface); font-size: var(--text-sm); cursor: pointer; }
+  .sel svg { width: 13px; height: 13px; color: var(--ink-faint); }
+  .sel b { font-weight: 600; }
+  .fb { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: var(--text-xs); color: var(--ink-muted); }
+  .fb .chip { cursor: grab; }
+
+  /* 音色 */
+  .scene-bind { display: grid; grid-template-columns: 130px 1fr auto auto; gap: 10px; align-items: center; padding: 10px 16px; }
+  .scene-bind + .scene-bind { border-top: 1px solid var(--border); }
+  .scene-name { font-size: var(--text-sm); font-weight: 600; }
+  .voice-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+  .voice { padding: 12px 14px; cursor: pointer; position: relative; }
+  .voice:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); }
+  .voice.selected { border-color: var(--accent); background: var(--accent-soft); }
+  .voice-name { font-weight: 600; font-size: var(--text-sm); display: flex; align-items: center; gap: 6px; }
+  .voice-meta { font-size: 11px; color: var(--ink-muted); margin-top: 3px; }
+  .voice .icon-btn { position: absolute; right: 8px; top: 10px; }
+  .star { color: var(--warn); }
+  .audit { font-size: var(--text-xs); color: var(--ink-muted); padding: 8px 4px; display: flex; gap: 10px; }
+  .audit time { font-family: var(--font-mono); color: var(--ink-faint); }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="rail">
+    <div class="rail-logo"><img src="../../web/public/brand/logo-96.png" alt="Lingua" /></div>
+    <button class="rail-item" title="书架"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></button>
+    <button class="rail-item" title="词库"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 20h10"/><path d="M8 8h8M8 12h5"/></svg></button>
+    <button class="rail-item" title="视频学习"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polygon points="10 9 15 12 10 15 10 9" fill="currentColor" stroke="none"/></svg></button>
+    <button class="rail-item" title="AI 对话"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
+    <button class="rail-item" title="场景学习"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+    <div class="rail-spacer"></div>
+    <button class="rail-item active" title="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+  </nav>
+
+  <div class="main">
+    <div class="body-row">
+      <!-- 设置子导航 -->
+      <aside class="snav">
+        <div class="snav-title">设置</div>
+        <button class="snav-item active" onclick="show('llm', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3L12 3z"/></svg>模型服务</button>
+        <button class="snav-item" onclick="show('voice', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>语音服务<span class="warn-dot" title="有能力缺少有效绑定"></span></button>
+        <button class="snav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>翻译引擎</button>
+        <button class="snav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>阅读与外观</button>
+        <button class="snav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>用量与预算</button>
+        <button class="snav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>数据管理</button>
+      </aside>
+
+      <!-- 模型服务视图 -->
+      <div class="cwrap" id="view-llm">
+        <div class="cinner">
+          <div class="csec-title">模型服务</div>
+          <div class="csec-desc">管理 LLM 供应商凭据与各 AI 能力的模型绑定。凭据加密存储，未来支持每位用户配置自己的密钥。</div>
+
+          <div class="cgroup">供应商凭据<span class="line"></span><button class="btn-ghost-sm">审计日志</button></div>
+
+          <div class="card cred">
+            <div class="cred-logo" style="background:#4D6BFE">DS</div>
+            <div class="cred-info">
+              <div class="cred-name">DeepSeek 官方 <span class="chip ok">正常 · 342ms</span></div>
+              <div class="cred-meta"><span class="dot ok"></span>sk-53…f2a1 · api.deepseek.com · 6 个模型 · 刚刚刷新</div>
+            </div>
+            <div class="cred-actions">
+              <button class="btn-ghost-sm">刷新模型</button>
+              <button class="btn-ghost-sm">测试</button>
+              <button class="icon-btn" title="编辑"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
+              <div class="switch on"></div>
+            </div>
+          </div>
+
+          <div class="card cred">
+            <div class="cred-logo" style="background:#0F6FDE">智</div>
+            <div class="cred-info">
+              <div class="cred-name">智谱中转 <span class="chip ok">正常 · 517ms</span></div>
+              <div class="cred-meta"><span class="dot ok"></span>sk-97…c8d3 · oc.tang…:8892 · 12 个模型 · 2 小时前</div>
+            </div>
+            <div class="cred-actions">
+              <button class="btn-ghost-sm">刷新模型</button><button class="btn-ghost-sm">测试</button>
+              <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
+              <div class="switch on"></div>
+            </div>
+          </div>
+
+          <div class="card cred" style="opacity:0.65">
+            <div class="cred-logo" style="background:#8B8378">GP</div>
+            <div class="cred-info">
+              <div class="cred-name">gpt 中转 <span class="chip">已停用</span></div>
+              <div class="cred-meta"><span class="dot idle"></span>sk-8d…41ce · ai.whyuz.com.cn · 13 个模型 · 昨天</div>
+            </div>
+            <div class="cred-actions">
+              <button class="btn-ghost-sm">刷新模型</button><button class="btn-ghost-sm">测试</button>
+              <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
+              <div class="switch"></div>
+            </div>
+          </div>
+
+          <div class="add-cred"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>添加供应商（DeepSeek / OpenAI / 智谱 / Ollama / 任意 OpenAI 兼容…）</div>
+
+          <div class="cgroup">能力绑定<span class="line"></span></div>
+
+          <div class="card bind">
+            <div class="bind-head">
+              <span class="bind-name">快速翻译</span><span class="bind-desc">句子点译、双语对照、字幕翻译 · 要快</span>
+              <div class="bind-test"><span class="chip ok">✓ 0.7s · "达西先生很快…"</span><button class="btn-ghost-sm">测一下</button></div>
+            </div>
+            <div class="bind-row">
+              <div class="sel"><b>DeepSeek 官方</b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+              <div class="sel">deepseek-chat<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+              <button class="btn-ghost-sm">高级参数</button>
+            </div>
+            <div class="fb">降级链：<span class="chip">智谱中转 · deepseek-v4-flash</span><span class="chip">＋ 添加降级</span></div>
+          </div>
+
+          <div class="card bind">
+            <div class="bind-head">
+              <span class="bind-name">词语解释</span><span class="bind-desc">AI 语境释义、词组解释、陪读问答</span>
+              <div class="bind-test"><span class="chip ok">✓ 1.9s</span><button class="btn-ghost-sm">测一下</button></div>
+            </div>
+            <div class="bind-row">
+              <div class="sel"><b>gpt 中转</b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+              <div class="sel">gpt-5.4-mini<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+              <button class="btn-ghost-sm">高级参数</button>
+            </div>
+            <div class="fb" style="color:var(--warn)">⚠ 所绑凭据已停用，正在走降级链 → <span class="chip">DeepSeek 官方 · deepseek-chat</span></div>
+          </div>
+
+          <div class="card bind">
+            <div class="bind-head">
+              <span class="bind-name">深度语法</span><span class="bind-desc">语法三级分析、句子精讲、整篇摘要 · 要准</span>
+              <div class="bind-test"><span class="chip warn">schema 未通过</span><button class="btn-ghost-sm">测一下</button></div>
+            </div>
+            <div class="bind-row">
+              <div class="sel"><b>智谱中转</b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+              <div class="sel">glm-5.1<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+              <button class="btn-ghost-sm">高级参数</button>
+            </div>
+          </div>
+
+          <div class="audit"><time>14:32</time>快速翻译 改绑 gpt-5.4-mini → deepseek-chat<span style="flex:1"></span><time>13:05</time>新增凭据 "DeepSeek 官方"</div>
+        </div>
+      </div>
+
+      <!-- 语音服务视图 -->
+      <div class="cwrap" id="view-voice" style="display:none">
+        <div class="cinner">
+          <div class="csec-title">语音服务</div>
+          <div class="csec-desc">TTS 朗读、实时语音与转写的供应商与默认音色。朗读处可临时换音色，默认取这里的配置。</div>
+
+          <div class="cgroup">TTS 供应商<span class="line"></span></div>
+          <div class="card cred">
+            <div class="cred-logo" style="background:#1664FF">火</div>
+            <div class="cred-info">
+              <div class="cred-name">火山豆包 TTS 2.0 <span class="chip ok">正常 · 首响 0.4s</span></div>
+              <div class="cred-meta"><span class="dot ok"></span>AppID 1478…795 · 32 个音色 · 昨天刷新</div>
+            </div>
+            <div class="cred-actions"><button class="btn-ghost-sm">刷新音色</button><div class="switch on"></div></div>
+          </div>
+          <div class="card cred">
+            <div class="cred-logo" style="background:#6B7280">E</div>
+            <div class="cred-info">
+              <div class="cred-name">Edge TTS（免费兜底） <span class="chip">免费</span></div>
+              <div class="cred-meta"><span class="dot ok"></span>无需密钥 · 30 个音色</div>
+            </div>
+            <div class="cred-actions"><button class="btn-ghost-sm">刷新音色</button><div class="switch on"></div></div>
+          </div>
+          <div class="add-cred"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>添加语音供应商（Azure / OpenAI TTS / Kokoro 本地…）</div>
+
+          <div class="cgroup">朗读场景默认音色<span class="line"></span></div>
+          <div class="card" style="overflow:hidden">
+            <div class="scene-bind"><span class="scene-name">查词发音</span><div class="sel"><b>火山</b> · Skye（美音女声）<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><button class="btn-ghost-sm">1.0×</button><button class="icon-btn" title="试听"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></div>
+            <div class="scene-bind"><span class="scene-name">句子朗读</span><div class="sel"><b>火山</b> · David（有声阅读）<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><button class="btn-ghost-sm">1.0×</button><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></div>
+            <div class="scene-bind"><span class="scene-name">整篇连读</span><div class="sel"><b>火山</b> · Knightley（沉稳叙述）<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><button class="btn-ghost-sm">1.25×</button><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></div>
+            <div class="scene-bind"><span class="scene-name">背单词发音</span><div class="sel"><b>火山</b> · Skye（美音女声）<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><button class="btn-ghost-sm">0.9×</button><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></div>
+            <div class="scene-bind"><span class="scene-name">视频字幕</span><div class="sel" style="color:var(--warn)">未绑定 · 点击选择<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><button class="btn-ghost-sm">1.0×</button><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></div>
+          </div>
+
+          <div class="cgroup">音色目录 · 火山豆包（32）<span class="line"></span><div class="seg"><button class="active">英语</button><button>中文</button><button>全部</button></div></div>
+          <div class="voice-grid">
+            <div class="card voice selected"><div class="voice-name"><span class="star">★</span>Skye</div><div class="voice-meta">美音女声 · 通用 · en-US</div><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></div>
+            <div class="card voice"><div class="voice-name">Dacey</div><div class="voice-meta">美音女声 · 清亮 · en-US</div><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></div>
+            <div class="card voice"><div class="voice-name">Tim</div><div class="voice-meta">美音男声 · 通用 · en-US</div><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></div>
+            <div class="card voice"><div class="voice-name">David</div><div class="voice-meta">美音男声 · 有声阅读 · en-US</div><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></div>
+            <div class="card voice"><div class="voice-name">Charlotte</div><div class="voice-meta">英伦腔女声 · 教学 · en-GB</div><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></div>
+            <div class="card voice"><div class="voice-name">Knightley</div><div class="voice-meta">男声 · 沉稳叙述 · en-GB</div><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></div>
+          </div>
+
+          <div class="cgroup">实时语音（火山豆包）<span class="line"></span></div>
+          <div class="card cred">
+            <div class="cred-logo" style="background:#1664FF">实</div>
+            <div class="cred-info">
+              <div class="cred-name">端到端实时对话 <span class="chip ok">已开通 · 首响 0.7s</span></div>
+              <div class="cred-meta"><span class="dot ok"></span>AppID 1478…795 · volc.speech.dialog</div>
+            </div>
+            <div class="cred-actions"><button class="btn-ghost-sm">会话参数</button><div class="switch on"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<button class="theme-toggle" onclick="toggleTheme()" title="切换深浅色"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></button>
+<script>
+  const saved = localStorage.getItem('ln-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? '' : 'dark';
+    cur ? document.documentElement.setAttribute('data-theme', cur) : document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('ln-theme', cur);
+  }
+  function show(id, el) {
+    document.getElementById('view-llm').style.display = id === 'llm' ? '' : 'none';
+    document.getElementById('view-voice').style.display = id === 'voice' ? '' : 'none';
+    document.querySelectorAll('.snav-item').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

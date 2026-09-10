@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lingua 本地工作台</title>
+<!-- 令牌直接读 web 侧那份（唯一事实源）。design/mockups/tokens.css 是 2026-08-17 的旧镜像，
+     壳色与侧栏宽度都还是墨石深底 + 64px 图标栏，不能拿来画新壳。
+     发布成在线可看的版本时由脚本把这一行替换成内联令牌（见 tools/ 或会话记录）。 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Literata:opsz,wght@7..72,400;7..72,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../web/src/styles/tokens.css">
+<style>
+  /* 令牌里的重置在 @layer base 里，宿主页面的无层级重置会压过它，这里再钉一次 */
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: var(--font-ui); font-size: var(--text-base); color: var(--ink);
+    background: var(--bg-app); -webkit-font-smoothing: antialiased;
+  }
+  button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+  a { color: inherit; text-decoration: none; cursor: pointer; }
+  h1, h2, h3, p { margin: 0; }
+  table { border-collapse: collapse; }
+  /* 作者样式里的 display:flex 会压过 UA 的 [hidden]，⌘K 与 HUD 卡片都靠这条才藏得住 */
+  [hidden] { display: none !important; }
+  .ic { display: inline-flex; flex-shrink: 0; line-height: 0; }
+  .ic svg { width: var(--ic, 18px); height: var(--ic, 18px); }
+  .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .serif { font-family: var(--font-reading); }
+  kbd {
+    font-family: var(--font-mono); font-size: 11px; padding: 1px 5px;
+    border: 1px solid var(--border-strong); border-bottom-width: 2px; border-radius: 4px;
+    background: var(--bg-surface); color: var(--ink-secondary);
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---- 侧栏：复用 tokens.css 的 .rail 系列，只补品牌行与命令入口 ---- */
+  .wb-brand { display: flex; align-items: center; gap: 10px; padding: 4px 6px 10px; }
+  .wb-brand .rail-logo { margin-bottom: 0; }
+  .wb-brand b { display: block; font-size: 15px; font-weight: 600; color: var(--ink-shell); line-height: 1.2; }
+  .wb-brand small { display: block; font-size: 11px; color: var(--ink-shell-muted); }
+  .rail-label { font-size: var(--text-sm); font-weight: 500; }
+  .wb-cmd {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    height: 34px; padding: 0 10px; margin: 2px 0 6px;
+    border: 1px solid var(--border-shell); border-radius: var(--radius-md);
+    background: var(--bg-surface); color: var(--ink-shell-muted); font-size: var(--text-sm);
+  }
+  .wb-cmd:hover { border-color: var(--border-strong); color: var(--ink-shell); }
+  .wb-cmd kbd { margin-left: auto; background: transparent; border-color: var(--border-shell); color: var(--ink-faint); }
+  .rail.collapsed .rail-label, .rail.collapsed .wb-brand-text, .rail.collapsed .wb-cmd kbd, .rail.collapsed .wb-cmd span { display: none; }
+  .rail.collapsed .wb-brand { padding: 4px 0 10px; justify-content: center; }
+  .rail.collapsed .wb-cmd { width: 44px; justify-content: center; padding: 0; }
+  .rail.collapsed .rail-item { justify-content: center; }
+  .rail-badge { font-size: 10px; }
+  .rail-badge.warn { background: var(--warn); color: #fff; }
+
+  /* ---- 主区 ---- */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
+  .content { flex: 1; min-height: 0; overflow-y: auto; }
+  .panel { display: none; }
+  .panel.on { display: block; }
+  .panel.fill.on { display: flex; height: 100%; }
+  .pad { padding: 28px 40px 80px; }
+  .tb-live { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-xs); color: var(--ink-shell-muted); }
+  .tb-live i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
+  .tb-mic { gap: 6px; }
+  .tb-mic kbd { background: transparent; border-color: var(--border-shell); color: var(--ink-faint); }
+
+  .sec { margin-bottom: 36px; min-width: 0; }
+  .sec-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; }
+  .sec-head h2 { font-size: var(--text-md); font-weight: 600; }
+  .sec-head .count { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--ink-muted); }
+  .sec-head a, .sec-head .more { margin-left: auto; font-size: var(--text-sm); color: var(--ink-muted); }
+  .sec-head a:hover { color: var(--ink); }
+  .bar { height: 3px; background: var(--bg-sunken); border-radius: 2px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .dot.ok { background: var(--ok); } .dot.warn { background: var(--warn); } .dot.err { background: var(--err); } .dot.idle { background: var(--ink-faint); }
+  .muted { color: var(--ink-muted); }
+  .sub { font-size: var(--text-xs); color: var(--ink-muted); }
+  .two { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 8px 40px; align-items: start; }
+  @media (width < 64rem) { .two { grid-template-columns: minmax(0, 1fr); } .aside { position: static; } }
+  .aside { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 0; }
+
+  /* AI 生成内容的统一身份：sparkle + accent-soft 底（设计系统 §4） */
+  .ai { background: var(--accent-soft); border-radius: var(--radius-md); padding: 12px 14px; color: var(--ink); }
+  .ai-head { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--accent-ink); font-weight: 600; margin-bottom: 6px; }
+  .ai-head .ic { --ic: 13px; }
+
+  /* 表格：账号、凭据、扩展共用 */
+  .tbl { width: 100%; font-size: var(--text-sm); }
+  .tbl th { text-align: left; font-weight: 500; font-size: 11px; color: var(--ink-muted); padding: 0 12px 8px; letter-spacing: 0.02em; }
+  .tbl td { padding: 10px 12px; border-top: 1px solid var(--border); vertical-align: middle; }
+  .tbl tr:hover td { background: var(--bg-hover); }
+  .tbl td.actions { text-align: right; white-space: nowrap; }
+  .tbl td.actions .btn-ghost-sm { opacity: 0; }
+  .tbl tr:hover td.actions .btn-ghost-sm, .tbl tr:focus-within td.actions .btn-ghost-sm { opacity: 1; }
+  .tbl .name { font-weight: 500; color: var(--ink); }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .chip.err { background: var(--err-soft); color: var(--err); }
+  .chip.mono { font-family: var(--font-mono); font-weight: 400; }
+
+  /* ---- 今天 ---- */
+  .wb-continue { display: grid; grid-template-columns: repeat(auto-fill, minmax(236px, 1fr)); gap: 14px; }
+  .wb-cc { display: flex; gap: 14px; padding: 14px; transition: box-shadow var(--dur-fast) var(--ease); }
+  .wb-cc:hover { box-shadow: var(--shadow-md); }
+  .wb-thumb { border-radius: var(--radius-sm); flex-shrink: 0; display: grid; place-items: center; overflow: hidden; }
+  .wb-thumb.book {
+    width: 54px; height: 76px; padding: 6px; text-align: center;
+    background: #2B3A55; color: #EDE9DE; font-family: var(--font-reading); font-size: 10px; line-height: 1.3;
+  }
+  .wb-thumb.video { width: 72px; height: 46px; background: var(--bg-sunken); color: var(--ink-muted); }
+  .wb-thumb.talk { width: 54px; height: 54px; background: var(--accent-soft); color: var(--accent-ink); align-self: center; }
+  .wb-cc-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .wb-kind { font-size: 11px; color: var(--ink-muted); }
+  .wb-cc-title { font-size: var(--text-base); font-weight: 600; line-height: 1.35; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .wb-cc-sub { font-size: var(--text-sm); color: var(--ink-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .wb-cc-foot { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 8px; font-size: var(--text-xs); color: var(--ink-muted); }
+  .wb-cc-foot .btn { margin-left: auto; }
+
+  .run { display: grid; grid-template-columns: 18px minmax(0, 1fr) 160px 48px 72px; align-items: center; gap: 14px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .run:last-child { border-bottom: none; }
+  .run .dot { justify-self: center; }
+  .run-title { font-size: var(--text-sm); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .run-sub { font-size: var(--text-xs); color: var(--ink-muted); margin-top: 2px; }
+  .run-pct { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--ink-secondary); text-align: right; }
+  .run a { font-size: var(--text-xs); color: var(--ink-muted); text-align: right; }
+  .run a:hover { color: var(--ink); }
+  .run.attn { background: var(--warn-soft); }
+  .run.attn .dot { background: var(--warn); }
+
+  .wb-recent { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+  .wb-rc { display: flex; align-items: center; gap: 10px; padding: 10px 12px; min-width: 0; }
+  .wb-rc-ic { width: 32px; height: 32px; border-radius: var(--radius-sm); flex-shrink: 0; display: grid; place-items: center; background: var(--bg-sunken); color: var(--ink-secondary); --ic: 16px; }
+  .wb-rc div { min-width: 0; }
+  .wb-rc b { display: block; font-size: var(--text-sm); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .wb-rc small { font-size: 11px; color: var(--ink-muted); }
+  .wb-rc.import { border: 1px dashed var(--border-strong); background: transparent; box-shadow: none; color: var(--ink-muted); justify-content: center; }
+  .wb-rc.import:hover { border-color: var(--accent); color: var(--accent); }
+
+  .wb-stat { padding: 14px 16px; }
+  .wb-stat-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; font-size: var(--text-sm); color: var(--ink-secondary); }
+  .wb-stat-head b { font-size: 22px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .wb-stat-head b small { font-size: var(--text-xs); font-weight: 400; color: var(--ink-muted); margin-left: 2px; }
+  .wb-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; align-items: end; height: 56px; }
+  .wb-week i { display: block; background: var(--accent-soft); border-radius: 3px 3px 0 0; }
+  .wb-week i.today { background: var(--accent); }
+  .wb-week-l { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 6px; font-size: 10px; color: var(--ink-faint); text-align: center; font-family: var(--font-mono); }
+  .wb-due { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+  .wb-due b { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .wb-due span { font-size: var(--text-sm); color: var(--ink-secondary); }
+  .wb-due .btn { margin-left: auto; }
+  .wb-keys { padding: 12px 16px; font-size: var(--text-xs); color: var(--ink-muted); display: grid; grid-template-columns: auto 1fr; gap: 7px 12px; align-items: center; }
+  .brief { padding: 14px 16px; }
+  .brief-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: var(--text-sm); font-weight: 600; }
+  .brief-head .sub { margin-left: auto; font-weight: 400; }
+  .brief ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm); color: var(--ink-secondary); }
+  .brief li { display: grid; grid-template-columns: 44px 1fr; gap: 8px; }
+  .brief li b { font-weight: 500; color: var(--ink-muted); font-size: var(--text-xs); padding-top: 2px; }
+  .brief li a { color: var(--ink); }
+  .brief li a:hover { color: var(--accent); }
+  .brief-foot { display: flex; gap: 6px; margin-top: 12px; }
+
+  /* ---- 阅读（简版书架） ---- */
+  .rd-banner { display: flex; align-items: center; gap: 18px; padding: 16px 20px; margin-bottom: 28px; }
+  .rd-banner .wb-thumb.book { width: 48px; height: 66px; }
+  .rd-banner h2 { font-family: var(--font-reading); font-size: 20px; font-weight: 600; }
+  .rd-banner p { font-size: var(--text-sm); color: var(--ink-secondary); margin-top: 3px; }
+  .rd-banner .btn { margin-left: auto; }
+  .rd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px 16px; }
+  .rd-item { display: flex; flex-direction: column; gap: 8px; }
+  .rd-cover { aspect-ratio: 2 / 3; border-radius: var(--radius-sm); padding: 12px 10px; display: flex; align-items: flex-end; font-family: var(--font-reading); font-size: 13px; line-height: 1.3; color: #EDE9DE; position: relative; overflow: hidden; box-shadow: var(--shadow-sm); }
+  .rd-cover .bar { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 0; height: 4px; background: rgba(0,0,0,.25); }
+  .rd-cover.article { background: var(--bg-surface); border: 1px solid var(--border); color: var(--ink); align-items: flex-start; font-size: 12px; }
+  .rd-item b { font-size: var(--text-sm); font-weight: 500; line-height: 1.3; }
+  .rd-item small { font-size: 11px; color: var(--ink-muted); }
+  .rd-import { aspect-ratio: 2 / 3; border: 1px dashed var(--border-strong); border-radius: var(--radius-sm); display: grid; place-items: center; text-align: center; color: var(--ink-muted); font-size: var(--text-xs); padding: 10px; gap: 6px; }
+  .rd-import:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ---- 邮件：三栏 ---- */
+  .ml { display: grid; grid-template-columns: 208px minmax(300px, 380px) minmax(0, 1fr); width: 100%; min-height: 0; }
+  .ml > * { min-height: 0; overflow-y: auto; }
+  .ml-side { padding: 18px 12px; border-right: 1px solid var(--border); background: var(--bg-app); }
+  .ml-group { padding: 10px 10px 4px; font-size: 11px; font-weight: 600; color: var(--ink-muted); letter-spacing: 0.02em; }
+  .ml-acct { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 10px; border-radius: var(--radius-sm); font-size: var(--text-sm); color: var(--ink-secondary); text-align: left; }
+  .ml-acct:hover { background: var(--bg-hover); color: var(--ink); }
+  .ml-acct.on { background: var(--bg-active); color: var(--ink); }
+  .ml-acct .n { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); }
+  .ml-acct span.a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .av { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 600; flex-shrink: 0; color: #fff; }
+  .av.s { background: #2B3A55; } .av.w { background: #5B6B3E; } .av.d { background: #7A4B3A; }
+  .ml-list { border-right: 1px solid var(--border); background: var(--bg-surface); }
+  .ml-tools { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg-surface); z-index: 2; }
+  .ml-search { flex: 1; display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: var(--radius-sm); background: var(--bg-sunken); color: var(--ink-muted); font-size: var(--text-xs); --ic: 14px; }
+  .ml-row { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 4px 10px; padding: 11px 14px; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .ml-row:hover { background: var(--bg-hover); }
+  .ml-row.on { background: var(--bg-active); }
+  .ml-row .from { font-size: var(--text-sm); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ml-row .t { font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); }
+  .ml-row .subj { grid-column: 2 / 4; font-size: var(--text-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ml-row .snip { grid-column: 2 / 4; font-size: var(--text-xs); color: var(--ink-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ml-row.unread .from { color: var(--ink); }
+  .ml-row.unread .subj { font-weight: 600; }
+  .ml-row .flag { grid-column: 2 / 4; display: flex; gap: 4px; margin-top: 2px; }
+  .ml-read { padding: 26px 36px 80px; }
+  .ml-read h2 { font-size: 19px; font-weight: 600; line-height: 1.35; text-wrap: balance; }
+  .ml-meta { display: flex; align-items: center; gap: 10px; margin: 14px 0 22px; font-size: var(--text-sm); color: var(--ink-secondary); }
+  .ml-meta .av { width: 30px; height: 30px; font-size: 12px; }
+  .ml-meta .t { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); }
+  .ml-body { max-width: 66ch; font-size: 15px; line-height: 1.7; color: var(--ink); display: flex; flex-direction: column; gap: 14px; }
+  .ml-body.reading { font-family: var(--font-reading); font-size: 17px; line-height: 1.8; }
+  .ml-body .w { border-bottom: 2px dotted var(--mark-vocab); cursor: pointer; }
+  .ml-actions { display: flex; gap: 8px; margin: 22px 0; flex-wrap: wrap; }
+  .ml-draft { max-width: 66ch; margin-top: 8px; }
+  .ml-draft p { font-size: var(--text-sm); line-height: 1.65; color: var(--ink); }
+  .ml-draft .foot { display: flex; gap: 6px; margin-top: 10px; }
+
+  /* ---- 账号与凭据 ---- */
+  .ac-note { display: grid; grid-template-columns: 22px 1fr; gap: 10px; padding: 12px 14px; font-size: var(--text-xs); color: var(--ink-secondary); line-height: 1.6; background: var(--bg-sunken); border-radius: var(--radius-md); --ic: 16px; }
+  .ac-note b { color: var(--ink); font-weight: 500; }
+  .ac-acct { display: flex; align-items: center; gap: 8px; }
+  .ac-acct .av { width: 26px; height: 26px; font-size: 11px; }
+  .ac-acct div { min-width: 0; }
+  .ac-acct b { display: block; font-size: var(--text-sm); font-weight: 500; }
+  .ac-acct small { font-size: 11px; color: var(--ink-muted); }
+
+  /* ---- 助理 ---- */
+  .as-stream { display: flex; flex-direction: column; gap: 22px; max-width: 760px; }
+  .as-day { font-size: 11px; color: var(--ink-faint); font-family: var(--font-mono); }
+  .as-turn { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 12px; }
+  .as-turn .t { font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); padding-top: 4px; }
+  .as-u { font-size: var(--text-md); color: var(--ink); line-height: 1.55; }
+  .as-u::before { content: '“'; color: var(--ink-faint); } .as-u::after { content: '”'; color: var(--ink-faint); }
+  .as-a { font-size: var(--text-base); color: var(--ink-secondary); line-height: 1.6; margin-top: 8px; }
+  .as-acts { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  .act { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-surface); font-size: var(--text-sm); }
+  .act .ic { --ic: 16px; color: var(--ink-muted); }
+  .act .k { color: var(--ink-muted); }
+  .act .k::after { content: ' › '; }
+  .act .s { font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); display: inline-flex; align-items: center; gap: 5px; }
+  .act .s .ic { --ic: 13px; color: var(--ok); }
+  .act.wait { border-color: var(--warn); }
+  .act.wait .s { color: var(--warn); }
+  .approve { border: 1px solid var(--warn); border-radius: var(--radius-md); padding: 12px 14px; background: var(--bg-surface); display: flex; flex-direction: column; gap: 8px; }
+  .approve h4 { margin: 0; font-size: var(--text-sm); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .approve h4 .ic { --ic: 15px; color: var(--warn); }
+  .approve dl { margin: 0; display: grid; grid-template-columns: 56px 1fr; gap: 4px 10px; font-size: var(--text-xs); }
+  .approve dt { color: var(--ink-muted); } .approve dd { margin: 0; color: var(--ink); }
+  .approve .foot { display: flex; gap: 6px; margin-top: 4px; }
+  .as-card { padding: 14px 16px; }
+  .as-card h3 { font-size: var(--text-sm); font-weight: 600; margin-bottom: 10px; }
+  .kv { display: grid; grid-template-columns: 72px 1fr; gap: 8px 10px; font-size: var(--text-sm); }
+  .kv dt { color: var(--ink-muted); } .kv dd { margin: 0; color: var(--ink); }
+  .kv dd small { color: var(--ink-muted); }
+  .tools { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tools .chip { height: 22px; }
+
+  /* ---- 电脑操控 ---- */
+  .cu-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .cu-head h2 { font-size: var(--text-md); font-weight: 600; }
+  .cu-head .right { margin-left: auto; display: flex; gap: 6px; }
+  .cu-screen { border-radius: var(--radius-lg); background: #0F1216; padding: 14px; box-shadow: var(--shadow-md); position: relative; }
+  .cu-screen .label { position: absolute; top: 10px; right: 16px; font-family: var(--font-mono); font-size: 10px; color: #7A828C; }
+  .win { margin: 14px auto 0; width: min(100%, 880px); border-radius: 8px; overflow: hidden; background: #F7F8FA; color: #1B1E23; box-shadow: 0 6px 24px rgba(0,0,0,.45); font-size: 12px; position: relative; }
+  .win-bar { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px; background: #E6E8EC; }
+  .win-bar .dots { display: flex; gap: 6px; }
+  .win-bar .dots i { width: 10px; height: 10px; border-radius: 50%; background: #C9CED6; }
+  .win-tab { padding: 4px 10px; border-radius: 6px 6px 0 0; background: #F7F8FA; font-size: 11px; align-self: flex-end; }
+  .win-url { display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; background: #F7F8FA; border-bottom: 1px solid #E2E5E9; }
+  .win-url span { flex: 1; height: 20px; border-radius: 10px; background: #E9EBED; padding: 0 10px; font-family: var(--font-mono); font-size: 10px; line-height: 20px; color: #4E565F; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .win-page { display: grid; grid-template-columns: 180px 1fr; min-height: 300px; }
+  .win-nav { background: #FFFFFF; border-right: 1px solid #E2E5E9; padding: 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+  .sk { height: 9px; border-radius: 4px; background: #E2E5E9; }
+  .sk.w60 { width: 60%; } .sk.w80 { width: 80%; } .sk.w40 { width: 40%; } .sk.dark { background: #C9CED6; }
+  .win-main { padding: 18px 22px; display: flex; flex-direction: column; gap: 12px; }
+  .win-h { height: 14px; width: 46%; border-radius: 4px; background: #C9CED6; }
+  .win-box { border: 1px dashed #C9CED6; border-radius: 8px; padding: 18px; display: grid; place-items: center; gap: 8px; text-align: center; color: #4E565F; }
+  .win-btn { display: inline-block; padding: 6px 14px; border-radius: 6px; background: #1D4ED8; color: #fff; font-weight: 500; position: relative; }
+  .win-btn.target { outline: 2px solid #1D4ED8; outline-offset: 4px; }
+  .cursor { position: absolute; width: 16px; height: 16px; pointer-events: none; }
+  .cursor svg { width: 100%; height: 100%; filter: drop-shadow(0 1px 1px rgba(0,0,0,.4)); }
+  .win-foot { display: flex; gap: 8px; margin-top: auto; }
+  .win-foot .sk { height: 30px; width: 110px; border-radius: 6px; }
+  .cu-safe { display: flex; gap: 16px; margin-top: 10px; font-size: 11px; color: var(--ink-muted); flex-wrap: wrap; }
+  .cu-safe span { display: inline-flex; align-items: center; gap: 5px; --ic: 13px; }
+  .plan { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .plan li { display: grid; grid-template-columns: 18px 1fr auto; gap: 8px; align-items: center; padding: 7px 0; font-size: var(--text-sm); color: var(--ink-secondary); border-bottom: 1px solid var(--border); }
+  .plan li:last-child { border-bottom: none; }
+  .plan li .n { font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); }
+  .plan li.done { color: var(--ink-muted); } .plan li.done .n { color: var(--ok); }
+  .plan li.now { color: var(--ink); font-weight: 500; } .plan li.now .n { color: var(--accent); }
+  .plan li .chip { height: 18px; font-size: 10px; }
+  .log { font-family: var(--font-mono); font-size: 11px; line-height: 1.7; color: var(--ink-secondary); display: flex; flex-direction: column; gap: 1px; max-height: 190px; overflow-y: auto; }
+  .log b { color: var(--ink-faint); font-weight: 400; margin-right: 8px; }
+  .log .op { color: var(--ink); }
+  .log .cur { color: var(--accent); }
+
+  /* ---- 扩展 ---- */
+  .ex-add { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .ex-add a { padding: 14px; display: flex; flex-direction: column; gap: 4px; border: 1px dashed var(--border-strong); border-radius: var(--radius-md); color: var(--ink-secondary); font-size: var(--text-sm); }
+  .ex-add a b { color: var(--ink); font-weight: 500; }
+  .ex-add a:hover { border-color: var(--accent); }
+  .ex-add a .ic { --ic: 16px; color: var(--ink-muted); }
+  .ex-pts { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: var(--text-xs); color: var(--ink-muted); margin-top: 10px; }
+  .ex-pts b { color: var(--ink-secondary); font-weight: 500; }
+  .kind { font-size: 11px; color: var(--ink-muted); }
+
+  /* ---- 任务 ---- */
+  .tk-tabs { display: flex; gap: 14px; margin-bottom: 20px; font-size: var(--text-sm); }
+  .tk-tabs a { color: var(--ink-muted); padding-bottom: 6px; border-bottom: 2px solid transparent; }
+  .tk-tabs a.on { color: var(--ink); border-color: var(--accent); }
+  .tk-tabs .n { font-family: var(--font-mono); font-size: 11px; margin-left: 4px; }
+
+  /* ---- 设置 ---- */
+  .st { display: grid; grid-template-columns: 200px minmax(0, 640px); gap: 40px; align-items: start; }
+  .st-nav { display: flex; flex-direction: column; gap: 2px; }
+  .st-nav button { text-align: left; padding: 7px 10px; border-radius: var(--radius-sm); font-size: var(--text-sm); color: var(--ink-secondary); }
+  .st-nav button:hover { background: var(--bg-hover); color: var(--ink); }
+  .st-nav button.on { background: var(--bg-active); color: var(--ink); }
+  .st-sec { display: none; flex-direction: column; gap: 4px; }
+  .st-sec.on { display: flex; }
+  .st-sec h2 { font-size: var(--text-lg); font-weight: 600; margin-bottom: 6px; }
+  .st-sec > p { font-size: var(--text-sm); color: var(--ink-muted); margin-bottom: 14px; }
+  .row { display: grid; grid-template-columns: 1fr auto; gap: 4px 20px; padding: 14px 0; border-top: 1px solid var(--border); align-items: center; }
+  .row b { font-size: var(--text-sm); font-weight: 500; }
+  .row small { font-size: var(--text-xs); color: var(--ink-muted); line-height: 1.5; }
+  .row .ctl { grid-row: 1 / 3; display: flex; align-items: center; gap: 8px; }
+  .sw { width: 34px; height: 20px; border-radius: 10px; background: var(--ink-faint); position: relative; flex-shrink: 0; }
+  .sw::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform var(--dur-fast) var(--ease); }
+  .sw.on { background: var(--accent); } .sw.on::after { transform: translateX(14px); }
+  .field { height: 30px; padding: 0 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--bg-surface); font-size: var(--text-sm); display: inline-flex; align-items: center; gap: 6px; min-width: 150px; }
+  .field.mono { font-family: var(--font-mono); font-size: 12px; }
+
+  /* ---- 未重画的页面 ---- */
+  .ph { display: grid; place-items: center; height: 60vh; text-align: center; color: var(--ink-muted); font-size: var(--text-sm); line-height: 1.7; }
+  .ph b { display: block; font-size: var(--text-lg); color: var(--ink); font-weight: 600; margin-bottom: 6px; }
+
+  /* ---- 助理 HUD：所有页面共用，压在内容上，不进浮层栈 ---- */
+  .hud { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 50; width: min(560px, calc(100% - 48px)); display: flex; justify-content: center; }
+  .hud-pill { display: inline-flex; align-items: center; gap: 10px; height: 38px; padding: 0 8px 0 14px; border-radius: var(--radius-full); background: var(--bg-shell); border: 1px solid var(--border-shell); box-shadow: var(--shadow-md); color: var(--ink-shell-muted); font-size: var(--text-sm); }
+  .hud-pill:hover { color: var(--ink-shell); }
+  .hud-pill .ic { --ic: 16px; color: var(--accent); }
+  .hud-pill kbd { background: transparent; border-color: var(--border-shell); color: var(--ink-faint); }
+  .hud-card { width: 100%; border-radius: var(--radius-lg); background: var(--bg-shell); border: 1px solid var(--border-shell); box-shadow: var(--shadow-lg); overflow: hidden; }
+  .hud-top { display: flex; align-items: center; gap: 10px; padding: 12px 14px 8px; font-size: var(--text-sm); color: var(--ink-shell); }
+  .hud-state { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
+  .hud-state .dot { background: var(--accent); }
+  .hud-state.think .dot { background: var(--warn); }
+  .hud-state.done .dot { background: var(--ok); }
+  .wave { display: inline-flex; align-items: center; gap: 3px; height: 18px; margin-left: 4px; }
+  .wave i { width: 3px; height: 6px; border-radius: 2px; background: var(--accent); animation: wv 900ms ease-in-out infinite; }
+  .wave i:nth-child(2) { animation-delay: 120ms; } .wave i:nth-child(3) { animation-delay: 240ms; }
+  .wave i:nth-child(4) { animation-delay: 360ms; } .wave i:nth-child(5) { animation-delay: 480ms; }
+  @keyframes wv { 0%, 100% { height: 5px; } 50% { height: 16px; } }
+  .hud-card.quiet .wave i { animation: none; height: 5px; }
+  .hud-top .x { margin-left: auto; --ic: 14px; color: var(--ink-shell-muted); }
+  .hud-you { padding: 0 14px 6px; font-size: var(--text-md); color: var(--ink-shell); line-height: 1.5; min-height: 22px; }
+  .hud-you::before { content: '你：'; color: var(--ink-shell-muted); font-size: var(--text-xs); margin-right: 4px; }
+  .hud-ai { padding: 0 14px 10px; font-size: var(--text-sm); color: var(--ink-shell-muted); line-height: 1.55; }
+  .hud-acts { display: flex; flex-direction: column; gap: 6px; padding: 0 14px 12px; }
+  .hud-acts .act { padding: 7px 10px; }
+  .hud-foot { display: flex; align-items: center; gap: 12px; padding: 8px 14px; border-top: 1px solid var(--border-shell); font-size: 11px; color: var(--ink-faint); }
+  .hud-foot .type { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; color: var(--ink-shell-muted); --ic: 13px; }
+  @media (prefers-reduced-motion: reduce) { .wave i { animation: none; height: 8px; } }
+
+  /* ---- ⌘K 命令面板 ---- */
+  .wb-cmdk { position: fixed; inset: 0; z-index: 100; background: var(--backdrop); display: flex; justify-content: center; align-items: flex-start; padding-top: 14vh; }
+  .wb-cmdk-card { width: min(640px, 92vw); background: var(--bg-surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg); border: 1px solid var(--border); }
+  .wb-cmdk-input { display: flex; align-items: center; gap: 10px; padding: 0 16px; height: 52px; border-bottom: 1px solid var(--border); color: var(--ink-muted); }
+  .wb-cmdk-input input { flex: 1; border: none; outline: none; background: none; font: inherit; font-size: var(--text-md); color: var(--ink); }
+  .wb-cmdk-list { max-height: 420px; overflow-y: auto; padding: 6px; }
+  .wb-cmdk-group { padding: 10px 10px 4px; font-size: 11px; color: var(--ink-faint); }
+  .wb-cmdk-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); font-size: var(--text-sm); color: var(--ink-secondary); cursor: pointer; --ic: 16px; }
+  .wb-cmdk-item .ic { color: var(--ink-muted); }
+  .wb-cmdk-item:hover, .wb-cmdk-item.sel { background: var(--bg-active); color: var(--ink); }
+  .wb-cmdk-item .right { margin-left: auto; font-size: 11px; color: var(--ink-faint); font-family: var(--font-mono); }
+  .wb-cmdk-item[hidden] { display: none; }
+  .wb-cmdk-foot { display: flex; gap: 16px; padding: 8px 14px; border-top: 1px solid var(--border); font-size: 11px; color: var(--ink-faint); }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="rail" id="rail" aria-label="主导航">
+    <div class="wb-brand">
+      <div class="rail-logo"><img src="../../web/public/brand/logo-64.png" alt="Lingua"></div>
+      <div class="wb-brand-text"><b>Lingua</b><small>本地工作台</small></div>
+    </div>
+
+    <button class="wb-cmd" onclick="openCmdk()" title="搜索与命令（⌘K）">
+      <i class="ic" data-i="search"></i>
+      <span>搜索、跳转、命令</span>
+      <kbd>⌘K</kbd>
+    </button>
+
+    <a class="rail-item" href="#/today" data-nav="today"><i class="ic" data-i="today"></i><span class="rail-label">今天</span></a>
+
+    <div class="rail-group">学习</div>
+    <a class="rail-item" href="#/read" data-nav="read"><i class="ic" data-i="book"></i><span class="rail-label">阅读</span></a>
+    <a class="rail-item" href="#/video" data-nav="video"><i class="ic" data-i="video"></i><span class="rail-label">视频</span></a>
+    <a class="rail-item" href="#/vocab" data-nav="vocab"><i class="ic" data-i="vocab"></i><span class="rail-label">词汇</span><span class="rail-badge" title="37 张到期">37</span></a>
+    <a class="rail-item" href="#/grammar" data-nav="grammar"><i class="ic" data-i="grammar"></i><span class="rail-label">语法</span></a>
+    <a class="rail-item" href="#/talk" data-nav="talk"><i class="ic" data-i="mic"></i><span class="rail-label">对话</span></a>
+
+    <div class="rail-group">创作</div>
+    <a class="rail-item" href="#/studio" data-nav="studio"><i class="ic" data-i="pen"></i><span class="rail-label">工坊</span></a>
+
+    <div class="rail-group">助理</div>
+    <a class="rail-item" href="#/assistant" data-nav="assistant"><i class="ic" data-i="assistant"></i><span class="rail-label">语音助理</span></a>
+    <a class="rail-item" href="#/computer" data-nav="computer"><i class="ic" data-i="pointer"></i><span class="rail-label">电脑操控</span><span class="rail-badge warn" title="1 个在等你确认">1</span></a>
+
+    <div class="rail-group">账号</div>
+    <a class="rail-item" href="#/mail" data-nav="mail"><i class="ic" data-i="mail"></i><span class="rail-label">邮件</span><span class="rail-badge" title="12 封未读">12</span></a>
+    <a class="rail-item" href="#/accounts" data-nav="accounts"><i class="ic" data-i="key"></i><span class="rail-label">账号与凭据</span></a>
+
+    <div class="rail-spacer"></div>
+
+    <a class="rail-item" href="#/tasks" data-nav="tasks"><i class="ic" data-i="activity"></i><span class="rail-label">任务</span><span class="rail-badge" title="3 个在跑">3</span></a>
+    <a class="rail-item" href="#/extensions" data-nav="extensions"><i class="ic" data-i="blocks"></i><span class="rail-label">扩展</span></a>
+    <a class="rail-item" href="#/settings" data-nav="settings"><i class="ic" data-i="sliders"></i><span class="rail-label">设置</span></a>
+    <button class="rail-item" onclick="toggleTheme()" title="切换深浅色"><i class="ic" data-i="sun"></i><span class="rail-label">主题</span></button>
+    <button class="rail-item rail-toggle" onclick="toggleRail()" title="收起导航"><i class="ic" data-i="chevron"></i><span class="rail-label">收起</span></button>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <nav class="tb-where" aria-label="当前位置">
+        <h1 class="tb-title" id="tb-title">今天</h1>
+        <span class="tb-meta" id="tb-meta"></span>
+      </nav>
+      <div class="tb-gap"></div>
+      <div class="tb-actions" id="tb-actions"></div>
+      <div class="tb-actions">
+        <span class="tb-live" title="API · worker · 数据库 · Redis 都在"><i></i>本机服务正常</span>
+        <button class="btn btn-outline tb-mic" onclick="hudDemo()" title="按住 ⌥空格 说话"><i class="ic" data-i="mic" style="--ic:15px"></i>助理<kbd>⌥␣</kbd></button>
+      </div>
+    </header>
+
+    <div class="content" id="content">
+
+      <!-- ============ 今天 ============ -->
+      <section class="panel pad" id="p-today">
+        <div class="two">
+          <div>
+            <div class="sec">
+              <div class="sec-head"><h2>接着来</h2></div>
+              <div class="wb-continue">
+                <a class="card wb-cc" href="#/read">
+                  <div class="wb-thumb book">Pride and Prejudice</div>
+                  <div class="wb-cc-body">
+                    <span class="wb-kind">书 · 第 12 章</span>
+                    <div class="wb-cc-title serif">Pride and Prejudice</div>
+                    <div class="wb-cc-sub">Jane Austen · 昨天读到第 12 章第 3 段</div>
+                    <div class="wb-cc-foot"><div class="bar" style="flex:1"><i style="width:63%"></i></div><span class="mono">63%</span></div>
+                  </div>
+                </a>
+                <a class="card wb-cc" href="#/video">
+                  <div class="wb-thumb video"><i class="ic" data-i="video"></i></div>
+                  <div class="wb-cc-body">
+                    <span class="wb-kind">视频 · <span class="mono">04:12 / 06:10</span></span>
+                    <div class="wb-cc-title serif">Why do we procrastinate?</div>
+                    <div class="wb-cc-sub">BBC Learning English · 6 Minute English</div>
+                    <div class="wb-cc-foot"><div class="bar" style="flex:1"><i style="width:68%"></i></div><span class="mono">68%</span></div>
+                  </div>
+                </a>
+                <a class="card wb-cc" href="#/talk">
+                  <div class="wb-thumb talk"><i class="ic" data-i="mic"></i></div>
+                  <div class="wb-cc-body">
+                    <span class="wb-kind">对话 · 场景</span>
+                    <div class="wb-cc-title">机场值机与托运</div>
+                    <div class="wb-cc-sub">上次 8 分钟 · 3 个任务完成 1 个</div>
+                    <div class="wb-cc-foot"><span>周日</span><button class="btn btn-soft">再练一轮</button></div>
+                  </div>
+                </a>
+              </div>
+            </div>
+
+            <div class="sec">
+              <div class="sec-head"><h2>在跑</h2><span class="count">3</span><a href="#/tasks">全部任务</a></div>
+              <div class="card">
+                <div class="run attn">
+                  <span class="dot"></span>
+                  <div><div class="run-title">电脑操控 · 提交 Coursera 作业</div><div class="run-sub">第 7 步「提交」在等你确认 · Chrome 窗口</div></div>
+                  <div class="bar"><i style="width:86%"></i></div>
+                  <span class="run-pct">6/7</span>
+                  <a href="#/computer">去确认</a>
+                </div>
+                <div class="run">
+                  <span class="dot"></span>
+                  <div><div class="run-title">转写字幕 · Why cities are getting quieter</div><div class="run-sub">视频管线 · 强制对齐中 · 已用 2 分 40 秒</div></div>
+                  <div class="bar"><i style="width:62%"></i></div>
+                  <span class="run-pct">62%</span>
+                  <a href="#/tasks">看节点</a>
+                </div>
+                <div class="run">
+                  <span class="dot"></span>
+                  <div><div class="run-title">场景本生成 · 旅行 · 值机</div><div class="run-sub">词库管线 · 出封面 · 第 3/4 步</div></div>
+                  <div class="bar"><i style="width:75%"></i></div>
+                  <span class="run-pct">75%</span>
+                  <a href="#/tasks">看节点</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="sec">
+              <div class="sec-head"><h2>最近加入</h2><a href="#/read">阅读 · 视频 · 词汇 · 邮件</a></div>
+              <div class="wb-recent">
+                <a class="card wb-rc" href="#/read"><span class="wb-rc-ic"><i class="ic" data-i="book"></i></span><div><b class="serif">The Old Man and the Sea</b><small>书 · 今天导入 · 解析完成</small></div></a>
+                <a class="card wb-rc" href="#/mail"><span class="wb-rc-ic"><i class="ic" data-i="mail"></i></span><div><b class="serif">Re: Interview slot next week</b><small>邮件 · 收入阅读 · 380 词</small></div></a>
+                <a class="card wb-rc" href="#/video"><span class="wb-rc-ic"><i class="ic" data-i="video"></i></span><div><b class="serif">Why cities are getting quieter</b><small>视频 · 转写中</small></div></a>
+                <a class="card wb-rc" href="#/vocab"><span class="wb-rc-ic"><i class="ic" data-i="vocab"></i></span><div><b>旅行 · 值机</b><small>场景本 · 生成中</small></div></a>
+                <a class="card wb-rc import" href="#/read"><i class="ic" data-i="plus" style="--ic:15px"></i><b style="font-weight:500">拖入文件，或粘贴链接</b></a>
+              </div>
+            </div>
+          </div>
+
+          <aside class="aside">
+            <div class="card wb-due"><b>37</b><span>张到期</span><button class="btn btn-primary">复习</button></div>
+            <div class="card brief">
+              <div class="brief-head"><i class="ic" data-i="assistant" style="--ic:15px;color:var(--accent)"></i>早报<span class="sub">07:30 例程 · 已念过</span></div>
+              <ul>
+                <li><b>邮件</b><span><a href="#/mail">2 封等你回</a>（scholar.work），1 封发票（lingua.dev）</span></li>
+                <li><b>日程</b><span>15:00 与 Ken 通话（Google 日历）</span></li>
+                <li><b>任务</b><span><a href="#/tasks">《Why cities…》译文缺 12 句</a>，管线标了 degraded</span></li>
+                <li><b>词汇</b><span>37 张到期，昨天漏了一次复习</span></li>
+              </ul>
+              <div class="brief-foot"><button class="btn btn-ghost-sm"><i class="ic" data-i="play" style="--ic:13px"></i>再念一遍</button><button class="btn btn-ghost-sm">改例程</button></div>
+            </div>
+            <div class="card wb-stat">
+              <div class="wb-stat-head"><span>本周</span><b>3<small>小时</small> 12<small>分</small></b></div>
+              <div class="wb-week"><i style="height:46%"></i><i style="height:70%"></i><i style="height:30%"></i><i style="height:88%"></i><i style="height:52%"></i><i style="height:22%"></i><i class="today" style="height:40%"></i></div>
+              <div class="wb-week-l"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+            </div>
+            <div class="card wb-keys">
+              <kbd>⌘K</kbd><span>搜索、跳转、命令</span>
+              <kbd>⌥␣</kbd><span>按住对助理说话</span>
+              <kbd>⌘I</kbd><span>导入书、文章、视频、词表</span>
+              <kbd>R</kbd><span>开始复习到期词</span>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ============ 阅读（简版） ============ -->
+      <section class="panel pad" id="p-read">
+        <div class="card rd-banner">
+          <div class="wb-thumb book">Pride and Prejudice</div>
+          <div><h2>Pride and Prejudice</h2><p>第 12 章第 3 段 · 63% · 昨天 22:14</p></div>
+          <button class="btn btn-primary">接着读</button>
+        </div>
+        <div class="sec">
+          <div class="sec-head"><h2>在读</h2><span class="count">4</span><span class="more">按状态分段，书与文章同卡</span></div>
+          <div class="rd-grid">
+            <a class="rd-item" href="#"><div class="rd-cover" style="background:#2B3A55">Pride and Prejudice<div class="bar"><i style="width:63%"></i></div></div><b>Pride and Prejudice</b><small>Jane Austen · 第 12 章</small></a>
+            <a class="rd-item" href="#"><div class="rd-cover" style="background:#3F5A4A">The Old Man and the Sea<div class="bar"><i style="width:4%"></i></div></div><b>The Old Man and the Sea</b><small>Hemingway · 今天导入</small></a>
+            <a class="rd-item" href="#"><div class="rd-cover article">How to Do Great Work<div class="bar"><i style="width:40%"></i></div></div><b>How to Do Great Work</b><small>文章 · 4,200 词 · 40%</small></a>
+            <a class="rd-item" href="#"><div class="rd-cover article">Re: Interview slot next week<div class="bar"><i style="width:0%"></i></div></div><b>Re: Interview slot next week</b><small>邮件 · 380 词 · 从收件箱收入</small></a>
+            <a class="rd-item" href="#"><div class="rd-cover" style="background:#6B3E3E">Gulliver's Travels<div class="bar"><i style="width:91%"></i></div></div><b>Gulliver's Travels</b><small>Swift · 第 4 部</small></a>
+            <a class="rd-import" href="#"><i class="ic" data-i="plus"></i>拖入 epub / pdf / txt / md<br>或粘贴链接</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 邮件 ============ -->
+      <section class="panel fill" id="p-mail">
+        <div class="ml">
+          <div class="ml-side">
+            <div class="ml-group">账号</div>
+            <button class="ml-acct on" data-acct="all" onclick="pickAcct(this)"><i class="ic" data-i="inbox" style="--ic:15px"></i><span class="a">全部收件箱</span><span class="n">12</span></button>
+            <button class="ml-acct" data-acct="s" onclick="pickAcct(this)"><span class="av s">S</span><span class="a">scholar@gmail.com</span><span class="n">5</span></button>
+            <button class="ml-acct" data-acct="w" onclick="pickAcct(this)"><span class="av w">W</span><span class="a">scholar.work@gmail.com</span><span class="n">4</span></button>
+            <button class="ml-acct" data-acct="d" onclick="pickAcct(this)"><span class="av d">D</span><span class="a">lingua.dev@gmail.com</span><span class="n">3</span></button>
+            <div class="ml-group">视图</div>
+            <button class="ml-acct"><i class="ic" data-i="reply" style="--ic:15px"></i><span class="a">等我回</span><span class="n">3</span></button>
+            <button class="ml-acct"><i class="ic" data-i="spark" style="--ic:15px"></i><span class="a">助理起草了</span><span class="n">1</span></button>
+            <button class="ml-acct"><i class="ic" data-i="book" style="--ic:15px"></i><span class="a">收入阅读</span><span class="n">2</span></button>
+            <div class="ml-group">同步</div>
+            <div class="sub" style="padding:4px 10px">Gmail API · 3 个账号 · 上次 2 分钟前<br>令牌在<a href="#/accounts" style="color:var(--accent)">账号与凭据</a>里管</div>
+          </div>
+
+          <div class="ml-list" id="ml-list">
+            <div class="ml-tools">
+              <div class="ml-search"><i class="ic" data-i="search"></i>搜三个账号 · 支持 from: has:attachment</div>
+              <button class="icon-btn" title="同步"><i class="ic" data-i="refresh" style="--ic:15px"></i></button>
+            </div>
+            <div class="ml-row on unread" data-acct="w" data-msg="0" onclick="pickMsg(this)"><span class="av w">W</span><span class="from">Ken Harper</span><span class="t">09:41</span><span class="subj">Re: Interview slot next week</span><span class="snip">Thanks for getting back so quickly. Would Thursday 3pm your time still work? I can also…</span><span class="flag"><span class="chip warn">等我回</span><span class="chip">收入阅读</span></span></div>
+            <div class="ml-row unread" data-acct="d" data-msg="1" onclick="pickMsg(this)"><span class="av d">D</span><span class="from">Volcengine Billing</span><span class="t">08:02</span><span class="subj">Invoice for August 2026 is ready</span><span class="snip">Your invoice VE-2026-08-114 for 42.60 USD is available. Services: Doubao Realtime…</span><span class="flag"><span class="chip">发票</span></span></div>
+            <div class="ml-row unread" data-acct="w" data-msg="2" onclick="pickMsg(this)"><span class="av w">W</span><span class="from">Coursera</span><span class="t">07:15</span><span class="subj">Assignment due in 2 days: Week 4 peer review</span><span class="snip">Your peer-graded assignment for “Learning How to Learn” is due Wednesday…</span><span class="flag"><span class="chip accent">助理在处理</span></span></div>
+            <div class="ml-row" data-acct="s" data-msg="3" onclick="pickMsg(this)"><span class="av s">S</span><span class="from">GitHub</span><span class="t">昨天</span><span class="subj">[lingua-next] Dependabot: 3 updates</span><span class="snip">Bumps konva from 9.3.6 to 9.3.18 — pinned by project, will be skipped…</span></div>
+            <div class="ml-row" data-acct="s" data-msg="4" onclick="pickMsg(this)"><span class="av s">S</span><span class="from">Mom</span><span class="t">昨天</span><span class="subj">周末回来吃饭吗</span><span class="snip">你爸说买了螃蟹，周六晚上六点。要是加班就说一声。</span><span class="flag"><span class="chip warn">等我回</span></span></div>
+            <div class="ml-row" data-acct="d" data-msg="5" onclick="pickMsg(this)"><span class="av d">D</span><span class="from">Google Cloud</span><span class="t">周一</span><span class="subj">OAuth client “Lingua Workbench” verification</span><span class="snip">Your OAuth consent screen is in testing mode. Up to 100 test users can authorize…</span></div>
+            <div class="ml-row" data-acct="w" data-msg="6" onclick="pickMsg(this)"><span class="av w">W</span><span class="from">Anna Liu</span><span class="t">周一</span><span class="subj">Slides for Friday</span><span class="snip">Attached the deck. Can you check slide 12, I think the numbers are off…</span><span class="flag"><span class="chip warn">等我回</span></span></div>
+            <div class="ml-row" data-acct="s" data-msg="7" onclick="pickMsg(this)"><span class="av s">S</span><span class="from">BBC Learning English</span><span class="t">周日</span><span class="subj">6 Minute English: Why cities are getting quieter</span><span class="snip">This week we look at how urban noise is changing…</span><span class="flag"><span class="chip">收入阅读</span></span></div>
+          </div>
+
+          <div class="ml-read" id="ml-read">
+            <h2 id="mr-subj">Re: Interview slot next week</h2>
+            <div class="ml-meta"><span class="av w" id="mr-av">W</span><div><b id="mr-from">Ken Harper</b> <span class="muted">&lt;ken.harper@northwind.io&gt;</span><br><small class="sub">收于 scholar.work@gmail.com</small></div><span class="t" id="mr-time">今天 09:41</span></div>
+            <div class="ml-actions">
+              <button class="btn btn-outline"><i class="ic" data-i="reply" style="--ic:14px"></i>回复</button>
+              <button class="btn btn-outline"><i class="ic" data-i="archive" style="--ic:14px"></i>归档</button>
+              <button class="btn btn-soft"><i class="ic" data-i="spark" style="--ic:14px"></i>让助理起草</button>
+              <button class="btn" id="mr-readmode" onclick="toggleReading()"><i class="ic" data-i="book" style="--ic:14px"></i>当阅读材料看（点词可查）</button>
+            </div>
+            <div class="ml-body" id="mr-body">
+              <p>Hi Scholar,</p>
+              <p>Thanks for getting back so quickly. Would Thursday 3pm your time still work? I can also do Friday morning if that is more <span class="w">convenient</span>. The call will be about 45 minutes: a short walkthrough of your recent work, then a few questions about how you'd approach the <span class="w">onboarding</span> problem we discussed.</p>
+              <p>No need to prepare slides. If you have a repo you're <span class="w">particularly</span> proud of, send the link beforehand and we'll look at it together.</p>
+              <p>Best,<br>Ken</p>
+            </div>
+            <div class="ai ml-draft">
+              <div class="ai-head"><i class="ic" data-i="spark"></i>助理起草 · 快速翻译 · deepseek-chat</div>
+              <p>Hi Ken, Thursday 3pm works for me. I'll send the repo link tomorrow. Looking forward to it. — Scholar</p>
+              <div class="foot"><button class="btn btn-primary btn-sm">采用并发送</button><button class="btn btn-outline btn-sm">改一改</button><button class="btn btn-ghost-sm">换个语气</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 账号与凭据 ============ -->
+      <section class="panel pad" id="p-accounts">
+        <div class="two">
+          <div>
+            <div class="sec">
+              <div class="sec-head"><h2>Google 账号</h2><span class="count">3</span><a href="#">添加账号</a></div>
+              <div class="card" style="padding:14px 4px 4px">
+                <table class="tbl">
+                  <thead><tr><th>账号</th><th>已授权</th><th>令牌</th><th>上次同步</th><th></th></tr></thead>
+                  <tbody>
+                    <tr><td><div class="ac-acct"><span class="av s">S</span><div><b>scholar@gmail.com</b><small>个人</small></div></div></td><td><div class="chips"><span class="chip ok">Gmail 读写</span><span class="chip ok">日历 只读</span><span class="chip">Drive 未授权</span></div></td><td><span class="chip ok">有效</span></td><td class="mono sub">2 分钟前</td><td class="actions"><button class="btn-ghost-sm">同步</button><button class="btn-ghost-sm">重新授权</button><button class="btn-ghost-sm">移除</button></td></tr>
+                    <tr><td><div class="ac-acct"><span class="av w">W</span><div><b>scholar.work@gmail.com</b><small>工作</small></div></div></td><td><div class="chips"><span class="chip ok">Gmail 读写</span><span class="chip ok">日历 读写</span><span class="chip ok">Drive 只读</span></div></td><td><span class="chip ok">有效</span></td><td class="mono sub">2 分钟前</td><td class="actions"><button class="btn-ghost-sm">同步</button><button class="btn-ghost-sm">重新授权</button><button class="btn-ghost-sm">移除</button></td></tr>
+                    <tr><td><div class="ac-acct"><span class="av d">D</span><div><b>lingua.dev@gmail.com</b><small>开发者 · OAuth 客户端也挂在这</small></div></div></td><td><div class="chips"><span class="chip ok">Gmail 只读</span><span class="chip">日历 未授权</span></div></td><td><span class="chip warn">刷新令牌过期</span></td><td class="mono sub">3 天前</td><td class="actions"><button class="btn-ghost-sm active">重新授权</button><button class="btn-ghost-sm">移除</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="sec">
+              <div class="sec-head"><h2>凭据保险箱</h2><span class="count">9</span><a href="#">添加凭据</a></div>
+              <div class="card" style="padding:14px 4px 4px">
+                <table class="tbl">
+                  <thead><tr><th>名称</th><th>类型</th><th>谁在用</th><th>上次使用</th><th></th></tr></thead>
+                  <tbody>
+                    <tr><td class="name">Google OAuth × 3</td><td class="kind">OAuth 刷新令牌</td><td><div class="chips"><span class="chip">邮件</span><span class="chip">日历</span><span class="chip">早报</span></div></td><td class="mono sub">2 分钟前</td><td class="actions"><span class="sub">由上表管理</span></td></tr>
+                    <tr><td class="name">OpenAI 兼容中转</td><td class="kind">API key</td><td><div class="chips"><span class="chip">模型服务 · 6 个能力</span></div></td><td class="mono sub">刚刚</td><td class="actions"><button class="btn-ghost-sm">换 key</button><button class="btn-ghost-sm">删除</button></td></tr>
+                    <tr><td class="name">火山引擎 · 语音</td><td class="kind">AppId + AccessKey</td><td><div class="chips"><span class="chip">对话</span><span class="chip">语音助理</span><span class="chip">字幕转写</span></div></td><td class="mono sub">09:40</td><td class="actions"><button class="btn-ghost-sm">换 key</button><button class="btn-ghost-sm">删除</button></td></tr>
+                    <tr><td class="name">YouTube 登录态</td><td class="kind">浏览器 cookies</td><td><div class="chips"><span class="chip">视频下载</span></div></td><td class="mono sub">昨天</td><td class="actions"><button class="btn-ghost-sm">重新登录</button><button class="btn-ghost-sm">删除</button></td></tr>
+                    <tr><td class="name">Coursera</td><td class="kind">账号密码</td><td><div class="chips"><span class="chip accent">电脑操控 · 只填充</span></div></td><td class="mono sub">10:05</td><td class="actions"><button class="btn-ghost-sm">改密码</button><button class="btn-ghost-sm">删除</button></td></tr>
+                    <tr><td class="name">GitHub</td><td class="kind">账号密码 + TOTP</td><td><div class="chips"><span class="chip accent">电脑操控 · 只填充</span></div></td><td class="mono sub">上周</td><td class="actions"><button class="btn-ghost-sm">改密码</button><button class="btn-ghost-sm">删除</button></td></tr>
+                    <tr><td class="name">Claude Code · MCP</td><td class="kind">Bearer</td><td><div class="chips"><span class="chip">扩展 · 12 个工具</span></div></td><td class="mono sub">今天</td><td class="actions"><button class="btn-ghost-sm">换 token</button><button class="btn-ghost-sm">删除</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <aside class="aside">
+            <div class="ac-note"><i class="ic" data-i="shield"></i><div><b>主密钥在 macOS 钥匙串里</b>，库里只有密文。换机器要先导出保险箱，导出文件本身再加一道口令。</div></div>
+            <div class="ac-note"><i class="ic" data-i="pointer"></i><div><b>助理和电脑操控只能「填充」，不能「读出」。</b>它们拿到的是「把 Coursera 密码填进这个输入框」这个动作，值不经过模型。任何读出都记进台账。</div></div>
+            <div class="ac-note"><i class="ic" data-i="key"></i><div><b>模型服务的 key 也在这里。</b>设置 · 模型服务只是从保险箱里挑一把，不再单独存一份。</div></div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ============ 语音助理 ============ -->
+      <section class="panel pad" id="p-assistant">
+        <div class="two">
+          <div class="as-stream">
+            <span class="as-day">9 月 1 日 · 周二</span>
+            <div class="as-turn"><span class="t">07:30</span><div>
+              <div class="as-a" style="margin-top:0"><span class="chip accent" style="margin-right:6px">例程 · 早报</span>早上好。邮件有 2 封等你回，都在工作邮箱。15 点和 Ken 有个通话。昨晚那条视频转写完了，译文缺 12 句，我标了 degraded。词汇 37 张到期。</div>
+            </div></div>
+            <div class="as-turn"><span class="t">09:12</span><div>
+              <div class="as-u">把昨天那本书打开到我读到的地方</div>
+              <div class="as-a">打开了《Pride and Prejudice》第 12 章第 3 段。</div>
+              <div class="as-acts"><div class="act"><i class="ic" data-i="book"></i><span><span class="k">阅读</span>打开 Pride and Prejudice · 第 12 章 § 3</span><span class="s"><i class="ic" data-i="check"></i>done</span></div></div>
+            </div></div>
+            <div class="as-turn"><span class="t">09:40</span><div>
+              <div class="as-u">在我三个邮箱里找一下八月的发票，整理成一封发到工作邮箱</div>
+              <div class="as-a">在 lingua.dev 找到 3 封，scholar 找到 1 封，共 4 个附件。要我直接用 Gmail 接口发，还是打开浏览器操作给你看？</div>
+              <div class="as-u" style="margin-top:10px">直接发</div>
+              <div class="as-acts">
+                <div class="act"><i class="ic" data-i="mail"></i><span><span class="k">邮件</span>搜索 3 个账号 · after:2026/08/01 invoice has:attachment</span><span class="s"><i class="ic" data-i="check"></i>4 封</span></div>
+                <div class="act wait"><i class="ic" data-i="send"></i><span><span class="k">邮件</span>发送到 scholar.work@gmail.com · 4 个附件</span><span class="s">等你确认</span></div>
+                <div class="approve">
+                  <h4><i class="ic" data-i="shield"></i>发送邮件前要你点头</h4>
+                  <dl><dt>收件人</dt><dd>scholar.work@gmail.com</dd><dt>主题</dt><dd>八月发票 4 张</dd><dt>附件</dt><dd class="mono">VE-2026-08-114.pdf · OAI-0831.pdf · +2</dd></dl>
+                  <div class="foot"><button class="btn btn-primary btn-sm">发送</button><button class="btn btn-outline btn-sm">先看内容</button><button class="btn btn-ghost-sm">算了</button></div>
+                </div>
+              </div>
+            </div></div>
+            <div class="as-turn"><span class="t">10:05</span><div>
+              <div class="as-u">帮我在 Chrome 里把 Coursera 那门课的作业交了</div>
+              <div class="as-a">这个得操作屏幕。我把范围限定在 Chrome 窗口，用保险箱里的 Coursera 账号登录，点「提交」之前会停下来问你。</div>
+              <div class="as-acts"><div class="act"><i class="ic" data-i="pointer"></i><span><span class="k">电脑操控</span>提交 Coursera 作业 · 第 7/7 步在等确认</span><a class="s" href="#/computer" style="color:var(--accent)">看屏幕<i class="ic" data-i="arrow" style="color:var(--accent)"></i></a></div></div>
+            </div></div>
+          </div>
+
+          <aside class="aside">
+            <div class="card as-card">
+              <h3>怎么叫它</h3>
+              <dl class="kv">
+                <dt>唤醒词</dt><dd>“Lingua” <small>· 本机识别，不上传</small></dd>
+                <dt>快捷键</dt><dd><kbd>⌥␣</kbd> 按住说话 <small>· 全局，任何应用里都行</small></dd>
+                <dt>打断</dt><dd>它说话时你开口即停</dd>
+                <dt>声音</dt><dd>Saturn · seed-tts-2.0 <small>· 火山</small></dd>
+                <dt>语言</dt><dd>中英混说 <small>· 学习模式里只说英文</small></dd>
+              </dl>
+            </div>
+            <div class="card as-card">
+              <h3>它能动的东西 <span class="sub" style="font-weight:400">· 来自扩展</span></h3>
+              <div class="tools">
+                <span class="chip">阅读 3</span><span class="chip">视频 2</span><span class="chip">词汇 2</span><span class="chip">邮件 4</span><span class="chip">日历 2</span><span class="chip">画布 2</span><span class="chip">任务 2</span><span class="chip accent">电脑操控 1</span><span class="chip">Claude Code 12</span>
+              </div>
+              <p class="sub" style="margin-top:10px">发送、付款、删除、安装、提交表单前必问；范围与例外在 <a href="#/settings" style="color:var(--accent)">设置 · 语音助理</a>。</p>
+            </div>
+            <div class="card as-card">
+              <h3>例程</h3>
+              <dl class="kv">
+                <dt>早报</dt><dd>每天 07:30 · 邮件 + 日程 + 任务 + 词汇 · 念出来</dd>
+                <dt>睡前</dt><dd>22:30 · 今天学了什么，明天到期多少</dd>
+              </dl>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ============ 电脑操控 ============ -->
+      <section class="panel pad" id="p-computer">
+        <div class="two" style="grid-template-columns: minmax(0,1fr) 340px">
+          <div>
+            <div class="cu-head">
+              <h2>提交 Coursera 作业</h2>
+              <span class="chip accent">仅 Chrome 窗口</span>
+              <span class="chip" id="cu-state">第 7/7 步 · 等你确认</span>
+              <div class="right"><button class="btn btn-outline"><i class="ic" data-i="pause" style="--ic:14px"></i>暂停</button><button class="btn btn-outline" onclick="takeover()"><i class="ic" data-i="hand" style="--ic:14px"></i>我来</button><button class="btn btn-danger">停止</button></div>
+            </div>
+            <div class="cu-screen">
+              <span class="label">屏幕 1 · 2560×1440 · 预览 2 fps · 延迟 240 ms</span>
+              <div class="win">
+                <div class="win-bar"><span class="dots"><i></i><i></i><i></i></span><span class="win-tab">Week 4 Peer Review — Coursera</span></div>
+                <div class="win-url"><span>coursera.org/learn/learning-how-to-learn/peer/…/week-4-peer-review/submit</span></div>
+                <div class="win-page">
+                  <div class="win-nav"><span class="sk w60 dark"></span><span class="sk w80"></span><span class="sk w40"></span><span class="sk w80"></span><span class="sk w60"></span><span class="sk w40"></span></div>
+                  <div class="win-main">
+                    <span class="win-h"></span>
+                    <span class="sk w80"></span><span class="sk w60"></span>
+                    <div class="win-box"><span class="sk w40" style="height:12px;background:#C9CED6"></span><span class="sk w60"></span><span class="mono" style="font-size:11px;color:#15803D">assignment-week4.pdf · 1.2 MB · 已上传</span></div>
+                    <label style="display:flex;gap:8px;align-items:center;color:#4E565F"><span style="width:14px;height:14px;border:1px solid #1D4ED8;border-radius:3px;background:#1D4ED8;display:inline-grid;place-items:center;color:#fff;font-size:10px">✓</span>I confirm this is my own work</label>
+                    <div class="win-foot"><span class="win-btn target" id="cu-target">Submit assignment</span><span class="sk"></span></div>
+                  </div>
+                </div>
+                <span class="cursor" style="left:288px;top:322px"><svg viewBox="0 0 24 24" fill="#1B1E23" stroke="#fff" stroke-width="1.5"><path d="M4 3l7.5 17 2.6-7.1L21 10.3z"/></svg></span>
+              </div>
+            </div>
+            <div class="cu-safe">
+              <span><i class="ic" data-i="shield"></i>每步截图与动作留 7 天，可回放</span>
+              <span><i class="ic" data-i="key"></i>Coursera 密码只填充，模型没看到</span>
+              <span><i class="ic" data-i="eye"></i>它只看得到这个窗口，其它屏幕内容不送模型</span>
+            </div>
+          </div>
+
+          <aside class="aside">
+            <div class="approve" id="cu-approve">
+              <h4><i class="ic" data-i="shield"></i>第 7 步「提交」要你点头</h4>
+              <dl><dt>动作</dt><dd>点击「Submit assignment」</dd><dt>后果</dt><dd>提交后 Coursera 不允许撤回</dd><dt>已核对</dt><dd>文件名、诚信声明已勾</dd></dl>
+              <div class="foot"><button class="btn btn-primary btn-sm" onclick="approve()">提交</button><button class="btn btn-outline btn-sm" onclick="takeover()">我来点</button><button class="btn btn-ghost-sm">停在这</button></div>
+            </div>
+            <div class="card as-card">
+              <h3>计划</h3>
+              <ol class="plan">
+                <li class="done"><span class="n">1</span><span>打开 Chrome，定位 Coursera 标签</span></li>
+                <li class="done"><span class="n">2</span><span>用保险箱登录（如已登录跳过）</span><span class="chip">跳过</span></li>
+                <li class="done"><span class="n">3</span><span>进入 Week 4 peer review</span></li>
+                <li class="done"><span class="n">4</span><span>上传 assignment-week4.pdf</span></li>
+                <li class="done"><span class="n">5</span><span>填写说明（来自你 8/29 的笔记）</span></li>
+                <li class="done"><span class="n">6</span><span>勾选诚信声明</span></li>
+                <li class="now" id="cu-step7"><span class="n">7</span><span>提交</span><span class="chip warn">需确认</span></li>
+              </ol>
+            </div>
+            <div class="card as-card">
+              <h3>动作</h3>
+              <div class="log" id="cu-log">
+                <div><b>10:05:12</b><span class="op">focus</span> window “Coursera”</div>
+                <div><b>10:05:15</b><span class="op">click</span> (1180, 412) “Assignments”</div>
+                <div><b>10:05:19</b><span class="op">scroll</span> −600</div>
+                <div><b>10:05:22</b><span class="op">click</span> (1402, 690) “Upload file”</div>
+                <div><b>10:05:23</b><span class="op">wait</span> file dialog</div>
+                <div><b>10:05:24</b><span class="op">type</span> ~/Documents/assignment-week4.pdf ⏎</div>
+                <div><b>10:05:31</b><span class="op">wait</span> “已上传” 出现</div>
+                <div><b>10:05:33</b><span class="op">type</span> 说明 · 212 字</div>
+                <div><b>10:05:36</b><span class="op">click</span> (1216, 838) checkbox</div>
+                <div><b>10:05:37</b><span class="cur">ask</span> 提交前确认</div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ============ 扩展 ============ -->
+      <section class="panel pad" id="p-extensions">
+        <div class="sec">
+          <div class="sec-head">
+            <div class="seg" id="ex-seg">
+              <button class="active" data-f="all" onclick="exFilter(this)">全部 13</button>
+              <button data-f="module" onclick="exFilter(this)">内置模块</button>
+              <button data-f="connector" onclick="exFilter(this)">连接器</button>
+              <button data-f="mcp" onclick="exFilter(this)">MCP</button>
+              <button data-f="routine" onclick="exFilter(this)">例程</button>
+              <button data-f="attn" onclick="exFilter(this)">需要处理 2</button>
+            </div>
+          </div>
+          <div class="card" style="padding:14px 4px 4px">
+            <table class="tbl" id="ex-tbl">
+              <thead><tr><th>扩展</th><th>类型</th><th>贡献了什么</th><th>状态</th><th></th></tr></thead>
+              <tbody>
+                <tr data-k="module"><td class="name">阅读</td><td class="kind">内置模块</td><td><div class="chips"><span class="chip">导航</span><span class="chip">命令 3</span><span class="chip">工具 3</span><span class="chip">设置</span></div></td><td><span class="chip ok">就绪</span></td><td class="actions"><button class="btn-ghost-sm">设置</button></td></tr>
+                <tr data-k="module"><td class="name">视频</td><td class="kind">内置模块</td><td><div class="chips"><span class="chip">导航</span><span class="chip">工具 2</span><span class="chip">节点 1</span><span class="chip">后台任务 13</span></div></td><td><span class="chip ok">就绪</span></td><td class="actions"><button class="btn-ghost-sm">设置</button></td></tr>
+                <tr data-k="module"><td class="name">词汇 · 语法 · 对话</td><td class="kind">内置模块</td><td><div class="chips"><span class="chip">导航 3</span><span class="chip">命令 2</span><span class="chip">工具 5</span></div></td><td><span class="chip ok">就绪</span></td><td class="actions"><button class="btn-ghost-sm">设置</button></td></tr>
+                <tr data-k="module"><td class="name">工坊</td><td class="kind">内置模块</td><td><div class="chips"><span class="chip">导航</span><span class="chip">节点 14</span><span class="chip">工具 5</span><span class="chip">工作流</span></div></td><td><span class="chip ok">就绪</span></td><td class="actions"><button class="btn-ghost-sm">设置</button></td></tr>
+                <tr data-k="module"><td class="name">邮件</td><td class="kind">内置模块</td><td><div class="chips"><span class="chip">导航</span><span class="chip">命令 2</span><span class="chip">工具 4</span><span class="chip">数据表 2</span></div></td><td><span class="chip ok">就绪</span></td><td class="actions"><button class="btn-ghost-sm">设置</button></td></tr>
+                <tr data-k="connector attn"><td class="name">Google 账号</td><td class="kind">连接器 · OAuth</td><td><div class="chips"><span class="chip">凭据 3</span><span class="chip">工具 6</span><span class="chip">页面 2</span><span class="chip">设置</span></div></td><td><span class="chip warn">1 个账号要重新授权</span></td><td class="actions"><button class="btn-ghost-sm active">去处理</button></td></tr>
+                <tr data-k="connector"><td class="name">火山引擎 · 语音</td><td class="kind">连接器</td><td><div class="chips"><span class="chip">实时对话</span><span class="chip">TTS</span><span class="chip">ASR</span></div></td><td><span class="chip ok">就绪</span></td><td class="actions"><button class="btn-ghost-sm">设置</button></td></tr>
+                <tr data-k="connector"><td class="name">OpenAI 兼容端点</td><td class="kind">连接器</td><td><div class="chips"><span class="chip">chat</span><span class="chip">image</span><span class="chip">模型 13</span></div></td><td><span class="chip ok">就绪</span></td><td class="actions"><button class="btn-ghost-sm">设置</button></td></tr>
+                <tr data-k="connector"><td class="name">浏览器操控 · Playwright</td><td class="kind">连接器 · 电脑操控</td><td><div class="chips"><span class="chip">工具 8</span><span class="chip">范围 浏览器</span></div></td><td><span class="chip ok">就绪</span></td><td class="actions"><button class="btn-ghost-sm">设置</button></td></tr>
+                <tr data-k="connector attn"><td class="name">桌面操控 · macOS</td><td class="kind">连接器 · 电脑操控</td><td><div class="chips"><span class="chip">工具 4</span><span class="chip">范围 整个桌面</span></div></td><td><span class="chip warn">缺 辅助功能 · 屏幕录制 权限</span></td><td class="actions"><button class="btn-ghost-sm active">去授权</button></td></tr>
+                <tr data-k="mcp"><td class="name">Claude Code</td><td class="kind">MCP 服务器</td><td><div class="chips"><span class="chip">工具 12</span></div></td><td><span class="chip ok">已连接</span></td><td class="actions"><button class="btn-ghost-sm">设置</button></td></tr>
+                <tr data-k="connector"><td class="name">剪藏</td><td class="kind">浏览器扩展</td><td><div class="chips"><span class="chip">命令 1 · 收入阅读</span></div></td><td><span class="chip ok">就绪</span></td><td class="actions"><button class="btn-ghost-sm">设置</button></td></tr>
+                <tr data-k="routine"><td class="name">早报</td><td class="kind">例程 · 声明式 YAML</td><td><div class="chips"><span class="chip mono">07:30</span><span class="chip">用 邮件 · 日历 · 任务 · TTS</span></div></td><td><span class="chip ok">今天 07:30 跑过</span></td><td class="actions"><button class="btn-ghost-sm">编辑</button><button class="btn-ghost-sm">现在跑</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="sec">
+          <div class="sec-head"><h2>添加扩展</h2></div>
+          <div class="ex-add">
+            <a href="#"><i class="ic" data-i="plug"></i><b>接入 MCP 服务器</b><span>填一个 URL 或本地命令，它的工具立刻能被助理、画布、⌘K 用</span></a>
+            <a href="#"><i class="ic" data-i="file"></i><b>本地目录</b><span>一个带 manifest.yaml 的文件夹；声明式的热装，带 worker 代码的重启生效</span></a>
+            <a href="#"><i class="ic" data-i="clock"></i><b>新建例程</b><span>定时或事件触发，串几个工具，结果念出来或塞进「今天」</span></a>
+          </div>
+          <div class="ex-pts"><b>扩展能贡献的位置</b><span>导航页</span><span>⌘K 命令</span><span>助理工具</span><span>画布节点</span><span>设置项</span><span>后台任务</span><span>例程触发器</span><span>数据表</span><span>凭据类型</span></div>
+        </div>
+      </section>
+
+      <!-- ============ 任务 ============ -->
+      <section class="panel pad" id="p-tasks">
+        <div class="tk-tabs"><a class="on" href="#">全部<span class="n">7</span></a><a href="#">视频<span class="n">2</span></a><a href="#">词库<span class="n">1</span></a><a href="#">工坊<span class="n">1</span></a><a href="#">电脑操控<span class="n">1</span></a><a href="#">例程<span class="n">2</span></a></div>
+        <div class="sec">
+          <div class="sec-head"><h2>需要关注</h2><span class="count">2</span></div>
+          <div class="card">
+            <div class="run attn"><span class="dot"></span><div><div class="run-title">电脑操控 · 提交 Coursera 作业</div><div class="run-sub">第 7 步「提交」在等你确认</div></div><div class="bar"><i style="width:86%"></i></div><span class="run-pct">6/7</span><a href="#/computer">去确认</a></div>
+            <div class="run attn"><span class="dot"></span><div><div class="run-title">视频 · Why cities are getting quieter</div><div class="run-sub">degraded · 译文缺 12 句 · 可只重跑 translate</div></div><div class="bar"><i style="width:100%;background:var(--warn)"></i></div><span class="run-pct">12 缺</span><a href="#">重跑</a></div>
+          </div>
+        </div>
+        <div class="sec">
+          <div class="sec-head"><h2>在跑</h2><span class="count">2</span></div>
+          <div class="card">
+            <div class="run"><span class="dot"></span><div><div class="run-title">转写字幕 · Why cities are getting quieter</div><div class="run-sub">视频管线 · 强制对齐 · 已用 2 分 40 秒</div></div><div class="bar"><i style="width:62%"></i></div><span class="run-pct">62%</span><a href="#">看节点</a></div>
+            <div class="run"><span class="dot"></span><div><div class="run-title">场景本生成 · 旅行 · 值机</div><div class="run-sub">词库管线 · 出封面 · 第 3/4 步</div></div><div class="bar"><i style="width:75%"></i></div><span class="run-pct">75%</span><a href="#">看节点</a></div>
+          </div>
+        </div>
+        <div class="sec">
+          <div class="sec-head"><h2>最近完成</h2><span class="count">3</span></div>
+          <div class="card">
+            <div class="run"><span class="dot ok"></span><div><div class="run-title">邮件 · 搜索八月发票</div><div class="run-sub">助理 · 3 个账号 · 4 封 · 09:40</div></div><span></span><span class="run-pct">1.2 s</span><a href="#/assistant">看对话</a></div>
+            <div class="run"><span class="dot ok"></span><div><div class="run-title">早报</div><div class="run-sub">例程 · 07:30 · 念了 48 秒</div></div><span></span><span class="run-pct">6.4 s</span><a href="#/assistant">看内容</a></div>
+            <div class="run"><span class="dot ok"></span><div><div class="run-title">导入 · The Old Man and the Sea</div><div class="run-sub">阅读 · 解析 26 章 · 分句 1,812</div></div><span></span><span class="run-pct">4.1 s</span><a href="#/read">打开</a></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 设置 ============ -->
+      <section class="panel pad" id="p-settings">
+        <div class="st">
+          <nav class="st-nav">
+            <button data-s="models" onclick="stPick(this)">模型服务</button>
+            <button class="on" data-s="voice" onclick="stPick(this)">语音助理</button>
+            <button data-s="computer" onclick="stPick(this)">电脑操控</button>
+            <button data-s="lan" onclick="stPick(this)">局域网访问</button>
+            <button data-s="look" onclick="stPick(this)">阅读与外观</button>
+            <button data-s="data" onclick="stPick(this)">数据与备份</button>
+          </nav>
+          <div>
+            <div class="st-sec" data-s="models"><h2>模型服务</h2><p>供应商凭据 → 模型部署 → 能力绑定，三层。全产品只有这一处配置模型与 API。</p><div class="ph" style="height:200px">沿用现有设置页 · 凭据一栏改从保险箱里挑</div></div>
+            <div class="st-sec on" data-s="voice">
+              <h2>语音助理</h2><p>怎么叫它、它用什么声音、哪些事要先问你。</p>
+              <div class="row"><b>唤醒词</b><small>本机识别（openWakeWord），音频不出这台电脑。误唤醒多就换个长一点的词。</small><div class="ctl"><span class="field">Lingua</span><span class="sw on"></span></div></div>
+              <div class="row"><b>按住说话</b><small>全局快捷键，在别的应用里也能按。松开即发送。</small><div class="ctl"><span class="field mono">⌥ Space</span></div></div>
+              <div class="row"><b>声音</b><small>助理的音色。学习模式里的场景对话另有一套音色，在「对话」里配。</small><div class="ctl"><span class="field">Saturn · seed-tts-2.0</span></div></div>
+              <div class="row"><b>它说话时你开口即打断</b><small>关掉的话要等它说完。</small><div class="ctl"><span class="sw on"></span></div></div>
+              <div class="row"><b>做这些事之前必须问我</b><small>发送、付款、删除、安装、提交表单。清单可加不可减。</small><div class="ctl"><span class="field">5 项</span></div></div>
+              <div class="row"><b>早报</b><small>每天定时念一遍邮件、日程、任务、词汇。</small><div class="ctl"><span class="field mono">07:30</span><span class="sw on"></span></div></div>
+            </div>
+            <div class="st-sec" data-s="computer">
+              <h2>电脑操控</h2><p>它能碰哪块屏幕，碰之前要不要问，碰过的留多久。</p>
+              <div class="row"><b>默认范围</b><small>「浏览器」走 Playwright，稳定、可回放；「整个桌面」要 macOS 辅助功能与屏幕录制权限。</small><div class="ctl"><span class="field">仅浏览器窗口</span></div></div>
+              <div class="row"><b>桌面权限</b><small>系统设置 › 隐私与安全性 › 辅助功能 / 屏幕录制。</small><div class="ctl"><span class="chip warn">未授权</span><button class="btn btn-outline btn-sm">去授权</button></div></div>
+              <div class="row"><b>每步截图保留</b><small>用来回放和追责。到期自动删。</small><div class="ctl"><span class="field mono">7 天</span></div></div>
+              <div class="row"><b>凭据只填充不读出</b><small>保险箱的值不进模型上下文。关掉等于把密码明文给模型，不建议。</small><div class="ctl"><span class="sw on"></span></div></div>
+              <div class="row"><b>单次会话上限</b><small>超过就停下来问你要不要继续。</small><div class="ctl"><span class="field mono">40 步 · 10 分钟</span></div></div>
+            </div>
+            <div class="st-sec" data-s="lan">
+              <h2>局域网访问</h2><p>默认只有这台电脑能打开。开了之后同一 Wi-Fi 下的手机、平板也能用，不建账号。</p>
+              <div class="row"><b>允许局域网访问</b><small>API 仍只绑本机，前端经 nginx 对局域网可达；麦克风要走 HTTPS。</small><div class="ctl"><span class="sw"></span></div></div>
+              <div class="row"><b>共享口令</b><small>可选。浏览器第一次打开输一次，之后存 cookie。</small><div class="ctl"><span class="field mono">未设置</span></div></div>
+              <div class="row"><b>本机地址</b><small>局域网设备打开这个。</small><div class="ctl"><span class="field mono">https://192.168.1.24:8443</span></div></div>
+            </div>
+            <div class="st-sec" data-s="look"><h2>阅读与外观</h2><p>字号、行距、行宽、深浅色。</p><div class="ph" style="height:200px">沿用现有设置页</div></div>
+            <div class="st-sec" data-s="data"><h2>数据与备份</h2><p>数据库、媒体、保险箱各一份。</p><div class="ph" style="height:200px">沿用现有设置页 · 加保险箱导出</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 未重画的页面 ============ -->
+      <section class="panel pad" id="p-other"><div class="ph"><div><b id="ph-title">视频</b>这一页沿用现在的实现，只换外壳。<br>CR-006 的 P3 会逐页按新壳重看。</div></div></section>
+    </div>
+
+    <!-- 助理 HUD -->
+    <div class="hud" id="hud">
+      <button class="hud-pill" id="hud-pill" onclick="hudDemo()"><i class="ic" data-i="assistant"></i><span>按住 <kbd>⌥␣</kbd> 说话，或说“Lingua”</span></button>
+      <div class="hud-card" id="hud-card" hidden>
+        <div class="hud-top">
+          <span class="hud-state" id="hud-state"><span class="dot"></span><span id="hud-word">在听</span></span>
+          <span class="wave" id="hud-wave"><i></i><i></i><i></i><i></i><i></i></span>
+          <button class="x icon-btn" onclick="hudClose()" title="收起"><i class="ic" data-i="x"></i></button>
+        </div>
+        <div class="hud-you" id="hud-you"></div>
+        <div class="hud-ai" id="hud-ai"></div>
+        <div class="hud-acts" id="hud-acts"></div>
+        <div class="hud-foot"><span>松开 ⌥␣ 发送</span><span>Esc 收起</span><span class="type"><i class="ic" data-i="type"></i>改用打字</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⌘K -->
+<div class="wb-cmdk" id="cmdk" hidden onclick="if (event.target === this) closeCmdk()">
+  <div class="wb-cmdk-card" role="dialog" aria-label="搜索与命令">
+    <div class="wb-cmdk-input"><i class="ic" data-i="search"></i><input id="cmdk-input" placeholder="搜书、视频、单词、邮件，或输入命令" autocomplete="off" oninput="cmdkFilter(this.value)"><kbd>Esc</kbd></div>
+    <div class="wb-cmdk-list" id="cmdk-list">
+      <div class="wb-cmdk-group">最近</div>
+      <a class="wb-cmdk-item sel" href="#/read"><i class="ic" data-i="book"></i>Pride and Prejudice · 第 12 章<span class="right">书</span></a>
+      <a class="wb-cmdk-item" href="#/mail"><i class="ic" data-i="mail"></i>Re: Interview slot next week<span class="right">邮件 · work</span></a>
+      <a class="wb-cmdk-item" href="#/video"><i class="ic" data-i="video"></i>Why do we procrastinate?<span class="right">视频</span></a>
+      <div class="wb-cmdk-group">让助理</div>
+      <a class="wb-cmdk-item" href="#/assistant"><i class="ic" data-i="spark"></i>起草回复这封邮件…</a>
+      <a class="wb-cmdk-item" href="#/mail"><i class="ic" data-i="mail"></i>在所有邮箱里搜…<span class="right">from: has:</span></a>
+      <a class="wb-cmdk-item" href="#/computer"><i class="ic" data-i="pointer"></i>在浏览器里帮我…<span class="right">电脑操控</span></a>
+      <a class="wb-cmdk-item" href="#/assistant"><i class="ic" data-i="play"></i>把早报再念一遍</a>
+      <div class="wb-cmdk-group">命令</div>
+      <a class="wb-cmdk-item" href="#/read"><i class="ic" data-i="plus"></i>导入书或文章…<span class="right">⌘I</span></a>
+      <a class="wb-cmdk-item" href="#/video"><i class="ic" data-i="video"></i>导入视频链接…</a>
+      <a class="wb-cmdk-item" href="#/vocab"><i class="ic" data-i="vocab"></i>开始复习到期词<span class="right">R</span></a>
+      <a class="wb-cmdk-item" href="#/studio"><i class="ic" data-i="pen"></i>新建画布</a>
+      <a class="wb-cmdk-item" href="#/extensions"><i class="ic" data-i="plug"></i>接入 MCP 服务器…</a>
+      <a class="wb-cmdk-item" href="#" onclick="toggleTheme()"><i class="ic" data-i="sun"></i>切换深浅色</a>
+      <div class="wb-cmdk-group">页面</div>
+      <a class="wb-cmdk-item" href="#/today"><i class="ic" data-i="today"></i>今天<span class="right">G H</span></a>
+      <a class="wb-cmdk-item" href="#/read"><i class="ic" data-i="book"></i>阅读<span class="right">G R</span></a>
+      <a class="wb-cmdk-item" href="#/mail"><i class="ic" data-i="mail"></i>邮件<span class="right">G M</span></a>
+      <a class="wb-cmdk-item" href="#/accounts"><i class="ic" data-i="key"></i>账号与凭据<span class="right">G A</span></a>
+      <a class="wb-cmdk-item" href="#/tasks"><i class="ic" data-i="activity"></i>任务<span class="right">G T</span></a>
+      <a class="wb-cmdk-item" href="#/extensions"><i class="ic" data-i="blocks"></i>扩展<span class="right">G X</span></a>
+      <a class="wb-cmdk-item" href="#/settings"><i class="ic" data-i="sliders"></i>设置 · 模型服务<span class="right">G ,</span></a>
+    </div>
+    <div class="wb-cmdk-foot"><span>↑↓ 选择</span><span>↵ 打开</span><span>Esc 关闭</span></div>
+  </div>
+</div>
+
+<script>
+/* ---- 图标：lucide 同款线性图标，集中在一处，页面里只写 data-i ---- */
+const I = {
+  search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+  today: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M9 16l2 2 4-4"/>',
+  book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+  video: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/>',
+  vocab: '<rect x="3" y="5" width="14" height="12" rx="2"/><path d="M7 21h12a2 2 0 0 0 2-2V9"/>',
+  grammar: '<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>',
+  mic: '<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M8 21h8"/>',
+  pen: '<path d="M15 4l5 5L9 20H4v-5L15 4z"/><path d="M13 6l5 5"/>',
+  assistant: '<path d="M2 10v4M6 6v12M10 3v18M14 8v8M18 5v14M22 10v4"/>',
+  pointer: '<path d="M9 9l5 12 1.8-5.2L21 14 9 9z"/><path d="M7.2 2.2L8 5.1M5.1 8l-2.9-.8M14 4.1L12 6M6 12l-1.9 2"/>',
+  mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/>',
+  inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  key: '<circle cx="15.5" cy="8.5" r="4.5"/><path d="M12.3 11.7L3 21M6 21v-3h3v-3"/>',
+  activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  blocks: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M17.5 14v7M14 17.5h7"/>',
+  sliders: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3"/><path d="M1 14h6M9 8h6M17 16h6"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>',
+  moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>',
+  chevron: '<path d="M6 9l6 6 6-6"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  check: '<path d="M20 6L9 17l-5-5"/>',
+  x: '<path d="M18 6L6 18M6 6l12 12"/>',
+  arrow: '<path d="M5 12h14M12 5l7 7-7 7"/>',
+  reply: '<path d="M9 17L4 12l5-5"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>',
+  archive: '<rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+  send: '<path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4z"/>',
+  hand: '<path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 0 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>',
+  pause: '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>',
+  play: '<path d="M6 4l14 8-14 8z"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+  file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+  refresh: '<path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/>',
+  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  plug: '<path d="M12 22v-5M9 8V2M15 8V2"/><path d="M18 8v5a6 6 0 0 1-12 0V8z"/>',
+  type: '<path d="M4 7V4h16v3M9 20h6M12 4v16"/>',
+  spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
+};
+const ic = (n) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + I[n] + '</svg>';
+document.querySelectorAll('[data-i]').forEach((el) => { el.innerHTML = ic(el.dataset.i); });
+
+/* ---- 路由：hash 切面板，顶栏跟着换 ---- */
+const ROUTES = {
+  today:      { title: '今天', meta: ['9 月 1 日 · 周二', '示意数据'], actions: '<button class="btn btn-outline">' + ic('plus') + '导入</button><button class="btn btn-primary">开始复习 · 37</button>' },
+  read:       { title: '阅读', meta: ['5 在读 · 41 本'], actions: '<div class="seg"><button class="active">在读</button><button>未开始</button><button>读完</button></div><button class="btn btn-outline">' + ic('plus') + '导入</button>' },
+  mail:       { title: '邮件', meta: ['3 个账号', '12 未读'], actions: '<button class="btn btn-primary">写邮件</button>' },
+  accounts:   { title: '账号与凭据', meta: ['3 个 Google 账号', '9 条凭据'], actions: '<button class="btn btn-outline">导出保险箱</button><button class="btn btn-primary">添加</button>' },
+  assistant:  { title: '语音助理', meta: ['今天 4 次', '示意数据'], actions: '<button class="btn btn-outline">历史</button>' },
+  computer:   { title: '电脑操控', meta: ['1 个会话', '等你确认'], actions: '<button class="btn btn-outline">历史与回放</button>' },
+  extensions: { title: '扩展', meta: ['13 个', '2 个要处理'], actions: '<button class="btn btn-primary">' + ic('plus') + '添加</button>' },
+  tasks:      { title: '任务', meta: ['2 在跑', '2 要关注'], actions: '<button class="btn btn-outline">清理已完成</button>' },
+  settings:   { title: '设置', meta: [], actions: '' },
+  video:      { title: '视频', other: true }, vocab: { title: '词汇', other: true }, grammar: { title: '语法', other: true }, talk: { title: '对话', other: true }, studio: { title: '工坊', other: true },
+};
+function route() {
+  const key = (location.hash.replace('#/', '') || 'today').split('/')[0];
+  const r = ROUTES[key] || ROUTES.today;
+  document.querySelectorAll('.panel').forEach((p) => p.classList.remove('on'));
+  const panel = document.getElementById(r.other ? 'p-other' : 'p-' + key) || document.getElementById('p-today');
+  panel.classList.add('on');
+  if (r.other) document.getElementById('ph-title').textContent = r.title;
+  document.querySelectorAll('.rail-item[data-nav]').forEach((a) => {
+    const on = a.dataset.nav === key;
+    a.classList.toggle('active', on);
+    if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  });
+  document.getElementById('tb-title').textContent = r.title;
+  document.getElementById('tb-meta').innerHTML = (r.meta || []).map((m) => '<span class="chip">' + m + '</span>').join('');
+  document.getElementById('tb-actions').innerHTML = r.actions || '';
+  document.getElementById('content').scrollTop = 0;
+}
+window.addEventListener('hashchange', route);
+route();
+
+/* ---- 外壳 ---- */
+function toggleRail() { document.getElementById('rail').classList.toggle('collapsed'); }
+function toggleTheme() {
+  const root = document.documentElement;
+  const dark = root.getAttribute('data-theme') === 'dark';
+  root.setAttribute('data-theme', dark ? 'light' : 'dark');
+}
+/* 宿主没盖章时按系统偏好定初值：令牌只认 data-theme，不认 prefers-color-scheme */
+if (!document.documentElement.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  document.documentElement.setAttribute('data-theme', 'dark');
+}
+
+/* ---- ⌘K ---- */
+function openCmdk() { document.getElementById('cmdk').hidden = false; const i = document.getElementById('cmdk-input'); i.value = ''; cmdkFilter(''); i.focus(); }
+function closeCmdk() { document.getElementById('cmdk').hidden = true; }
+function cmdkFilter(q) {
+  q = q.trim().toLowerCase();
+  document.querySelectorAll('#cmdk-list .wb-cmdk-item').forEach((it) => { it.hidden = q !== '' && !it.textContent.toLowerCase().includes(q); });
+}
+document.getElementById('cmdk-list').addEventListener('click', (e) => { if (e.target.closest('.wb-cmdk-item')) closeCmdk(); });
+window.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); document.getElementById('cmdk').hidden ? openCmdk() : closeCmdk(); }
+  else if (e.key === 'Escape') { if (!document.getElementById('cmdk').hidden) closeCmdk(); else hudClose(); }
+  else if (e.altKey && e.code === 'Space') { e.preventDefault(); hudDemo(); }
+});
+
+/* ---- 助理 HUD：演示一轮「听 → 想 → 做 → 完」 ---- */
+let hudTimers = [];
+function hudSet(word, cls) { const s = document.getElementById('hud-state'); s.className = 'hud-state ' + (cls || ''); document.getElementById('hud-word').textContent = word; }
+function hudClose() {
+  hudTimers.forEach(clearTimeout); hudTimers = [];
+  document.getElementById('hud-card').hidden = true; document.getElementById('hud-pill').hidden = false;
+}
+function hudDemo() {
+  hudTimers.forEach(clearTimeout); hudTimers = [];
+  const card = document.getElementById('hud-card'), you = document.getElementById('hud-you'), ai = document.getElementById('hud-ai'), acts = document.getElementById('hud-acts');
+  document.getElementById('hud-pill').hidden = true; card.hidden = false; card.classList.remove('quiet');
+  you.textContent = ''; ai.textContent = ''; acts.innerHTML = '';
+  hudSet('在听');
+  const say = '把 Ken 那封邮件念给我，然后回他周四三点可以';
+  let i = 0;
+  const tick = () => { if (i < say.length) { you.textContent = say.slice(0, ++i); hudTimers.push(setTimeout(tick, 55)); } };
+  tick();
+  hudTimers.push(setTimeout(() => { hudSet('在想', 'think'); card.classList.add('quiet'); }, 55 * say.length + 500));
+  hudTimers.push(setTimeout(() => {
+    hudSet('在做'); card.classList.remove('quiet');
+    ai.textContent = '好，先念。Ken 说周四三点你这边方便的话就定，也可以周五上午；大概 45 分钟，不用准备幻灯片。';
+    acts.innerHTML = '<div class="act">' + '<i class="ic">' + ic('mail') + '</i><span><span class="k">邮件</span>朗读 Re: Interview slot next week · 380 词</span><span class="s"><i class="ic">' + ic('check') + '</i>48 s</span></div>';
+  }, 55 * say.length + 1700));
+  hudTimers.push(setTimeout(() => {
+    acts.innerHTML += '<div class="act wait">' + '<i class="ic">' + ic('send') + '</i><span><span class="k">邮件</span>回复 Ken · “Thursday 3pm works for me…”</span><span class="s">等你确认</span></div>'
+      + '<div class="approve" style="padding:10px 12px"><div class="foot" style="margin:0"><button class="btn btn-primary btn-sm" onclick="hudApprove(this)">发</button><button class="btn btn-outline btn-sm" onclick="location.hash=\'#/mail\'">先看看</button><button class="btn btn-ghost-sm" onclick="hudClose()">算了</button></div></div>';
+    hudSet('等你', 'think'); card.classList.add('quiet');
+  }, 55 * say.length + 3400));
+}
+function hudApprove(btn) {
+  btn.closest('.approve').remove();
+  const w = document.querySelector('#hud-acts .act.wait'); if (w) { w.classList.remove('wait'); w.querySelector('.s').innerHTML = '<i class="ic">' + ic('check') + '</i>已发'; }
+  hudSet('说完了', 'done'); document.getElementById('hud-ai').textContent = '发了。周四三点，我顺手在工作日历上占了 45 分钟。';
+  hudTimers.push(setTimeout(hudClose, 4000));
+}
+
+/* ---- 邮件 ---- */
+const MSGS = [
+  { subj: 'Re: Interview slot next week', from: 'Ken Harper', addr: 'ken.harper@northwind.io', acct: 'w', av: 'W', time: '今天 09:41' },
+  { subj: 'Invoice for August 2026 is ready', from: 'Volcengine Billing', addr: 'billing@volcengine.com', acct: 'd', av: 'D', time: '今天 08:02' },
+  { subj: 'Assignment due in 2 days: Week 4 peer review', from: 'Coursera', addr: 'no-reply@coursera.org', acct: 'w', av: 'W', time: '今天 07:15' },
+  { subj: '[lingua-next] Dependabot: 3 updates', from: 'GitHub', addr: 'noreply@github.com', acct: 's', av: 'S', time: '昨天 18:20' },
+  { subj: '周末回来吃饭吗', from: 'Mom', addr: '—', acct: 's', av: 'S', time: '昨天 12:03' },
+  { subj: 'OAuth client “Lingua Workbench” verification', from: 'Google Cloud', addr: 'noreply-cloud@google.com', acct: 'd', av: 'D', time: '周一' },
+  { subj: 'Slides for Friday', from: 'Anna Liu', addr: 'anna@northwind.io', acct: 'w', av: 'W', time: '周一' },
+  { subj: '6 Minute English: Why cities are getting quieter', from: 'BBC Learning English', addr: 'news@bbc.co.uk', acct: 's', av: 'S', time: '周日' },
+];
+const ACCT_NAME = { s: 'scholar@gmail.com', w: 'scholar.work@gmail.com', d: 'lingua.dev@gmail.com' };
+function pickAcct(btn) {
+  document.querySelectorAll('.ml-acct[data-acct]').forEach((b) => b.classList.toggle('on', b === btn));
+  const f = btn.dataset.acct;
+  document.querySelectorAll('.ml-row').forEach((r) => { r.hidden = f !== 'all' && r.dataset.acct !== f; });
+}
+function pickMsg(row) {
+  document.querySelectorAll('.ml-row').forEach((r) => r.classList.toggle('on', r === row));
+  row.classList.remove('unread');
+  const m = MSGS[+row.dataset.msg];
+  document.getElementById('mr-subj').textContent = m.subj;
+  document.getElementById('mr-from').textContent = m.from;
+  document.getElementById('mr-time').textContent = m.time;
+  const av = document.getElementById('mr-av'); av.className = 'av ' + m.acct; av.textContent = m.av;
+  document.querySelector('#ml-read .ml-meta .muted').textContent = '<' + m.addr + '>';
+  document.querySelector('#ml-read .ml-meta small').textContent = '收于 ' + ACCT_NAME[m.acct];
+}
+function toggleReading() {
+  const b = document.getElementById('mr-body'); b.classList.toggle('reading');
+  document.getElementById('mr-readmode').classList.toggle('active', b.classList.contains('reading'));
+}
+
+/* ---- 电脑操控 ---- */
+function approve() {
+  document.getElementById('cu-approve').hidden = true;
+  const s = document.getElementById('cu-step7'); s.className = 'done'; s.querySelector('.chip').remove();
+  document.getElementById('cu-state').textContent = '7/7 · 已完成';
+  document.getElementById('cu-target').classList.remove('target');
+  document.getElementById('cu-log').insertAdjacentHTML('beforeend', '<div><b>10:06:02</b><span class="op">click</span> (1096, 902) “Submit assignment”</div><div><b>10:06:05</b><span class="op">wait</span> “Submitted” 出现</div><div><b>10:06:05</b><span class="op">done</span> 截图已存</div>');
+}
+function takeover() {
+  document.getElementById('cu-state').textContent = '你在操作 · 它在看';
+  document.getElementById('cu-log').insertAdjacentHTML('beforeend', '<div><b>10:06:02</b><span class="cur">handoff</span> 交给你，按 ⌥⎋ 交回</div>');
+}
+
+/* ---- 扩展 / 设置 ---- */
+function exFilter(btn) {
+  document.querySelectorAll('#ex-seg button').forEach((b) => b.classList.toggle('active', b === btn));
+  const f = btn.dataset.f;
+  document.querySelectorAll('#ex-tbl tbody tr').forEach((tr) => { tr.hidden = f !== 'all' && !tr.dataset.k.split(' ').includes(f); });
+}
+function stPick(btn) {
+  document.querySelectorAll('.st-nav button').forEach((b) => b.classList.toggle('on', b === btn));
+  document.querySelectorAll('.st-sec').forEach((s) => s.classList.toggle('on', s.dataset.s === btn.dataset.s));
+}
+</script>
+</body>
+</html>

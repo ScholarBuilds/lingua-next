@@ -1,0 +1,218 @@
+[
+  {
+    "id": 620,
+    "sentence": "He rode a black horse.",
+    "components": [
+      {
+        "text": "He",
+        "role": "主语"
+      },
+      {
+        "text": "rode",
+        "role": "谓语"
+      },
+      {
+        "text": "a black horse",
+        "role": "宾语"
+      },
+      {
+        "text": "black",
+        "role": "定语"
+      }
+    ]
+  },
+  {
+    "id": 1096,
+    "sentence": "They attacked him in various ways, with barefaced questions, ingenious suppositions, and distant surmises; but he eluded the skill of them all; and they were at last obliged to accept the second-hand intelligence of their neighbour, Lady Lucas.",
+    "components": [
+      {
+        "text": "They",
+        "role": "主语"
+      },
+      {
+        "text": "attacked",
+        "role": "谓语"
+      },
+      {
+        "text": "him",
+        "role": "宾语"
+      },
+      {
+        "text": "in various ways",
+        "role": "方式状语"
+      },
+      {
+        "text": "with barefaced questions, ingenious suppositions, and distant surmises",
+        "role": "介词短语，补充说明各种方式的具体内容"
+      },
+      {
+        "text": "but",
+        "role": "并列连词，表示转折"
+      },
+      {
+        "text": "he",
+        "role": "主语"
+      },
+      {
+        "text": "eluded",
+        "role": "谓语"
+      },
+      {
+        "text": "the skill of them all",
+        "role": "宾语"
+      },
+      {
+        "text": "and",
+        "role": "并列连词"
+      },
+      {
+        "text": "they",
+        "role": "主语"
+      },
+      {
+        "text": "were at last obliged",
+        "role": "系表结构/被动表达"
+      },
+      {
+        "text": "to accept",
+        "role": "不定式，作补足语"
+      },
+      {
+        "text": "the second-hand intelligence of their neighbour, Lady Lucas",
+        "role": "宾语"
+      },
+      {
+        "text": "at last",
+        "role": "时间状语"
+      },
+      {
+        "text": "Lady Lucas",
+        "role": "their neighbour 的同位语"
+      }
+    ]
+  },
+  {
+    "id": 1159,
+    "sentence": "Mr. Bennet made no answer.",
+    "components": [
+      {
+        "text": "Mr. Bennet",
+        "role": "主语"
+      },
+      {
+        "text": "made",
+        "role": "谓语"
+      },
+      {
+        "text": "no answer",
+        "role": "宾语"
+      }
+    ]
+  },
+  {
+    "id": 1252,
+    "sentence": "THE ladies of Longbourn soon waited on those of Netherfield.",
+    "components": [
+      {
+        "text": "THE ladies of Longbourn",
+        "role": "主语"
+      },
+      {
+        "text": "of Longbourn",
+        "role": "后置定语，修饰 ladies"
+      },
+      {
+        "text": "soon",
+        "role": "状语（时间/程度）"
+      },
+      {
+        "text": "waited on",
+        "role": "谓语"
+      },
+      {
+        "text": "those of Netherfield",
+        "role": "宾语"
+      },
+      {
+        "text": "of Netherfield",
+        "role": "后置定语，修饰 those"
+      }
+    ]
+  },
+  {
+    "id": 11456,
+    "sentence": "In another moment down went Alice after it, never once considering how in the world she was to get out again.",
+    "components": [
+      {
+        "text": "In another moment",
+        "role": "时间状语"
+      },
+      {
+        "text": "down went Alice",
+        "role": "倒装句，主句"
+      },
+      {
+        "text": "after it",
+        "role": "方向/对象状语"
+      },
+      {
+        "text": "never once considering how in the world she was to get out again",
+        "role": "现在分词短语作伴随状语"
+      },
+      {
+        "text": "how in the world she was to get out again",
+        "role": "considering 的宾语从句"
+      },
+      {
+        "text": "in the world",
+        "role": "插入强调成分"
+      },
+      {
+        "text": "she was to get out again",
+        "role": "宾语从句核心结构"
+      }
+    ]
+  },
+  {
+    "id": 12675,
+    "sentence": "I’m from Hangzhou, and I live in Shanghai now.",
+    "components": [
+      {
+        "text": "I’m from Hangzhou",
+        "role": "并列分句1"
+      },
+      {
+        "text": "I’m",
+        "role": "主语 + 系动词"
+      },
+      {
+        "text": "from Hangzhou",
+        "role": "表语"
+      },
+      {
+        "text": "and",
+        "role": "并列连词"
+      },
+      {
+        "text": "I live in Shanghai now",
+        "role": "并列分句2"
+      },
+      {
+        "text": "I",
+        "role": "主语"
+      },
+      {
+        "text": "live",
+        "role": "谓语"
+      },
+      {
+        "text": "in Shanghai",
+        "role": "地点状语"
+      },
+      {
+        "text": "now",
+        "role": "时间状语"
+      }
+    ]
+  }
+]

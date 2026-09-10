@@ -1,0 +1,187 @@
+/* 发音评测面板的样式。原本长在 features/phonetics/phonetics.css 里，
+   2026-08-23 音标页面整个删掉时搬过来——这块面板服务的是跟读打分
+   （ShadowStudio），跟音标页面只是历史上同住一个目录。
+
+   BR-90（该规则已随音素层于 2026-08-30 失效，见 AssessmentPanel.tsx 文件头）
+   视觉权重严格排序为 句子级 > 词级 > 音素级。 */
+
+.pa-panel {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-paper);
+}
+
+.pa-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.pa-title {
+  font-size: var(--text-sm);
+  font-weight: 620;
+}
+
+.pa-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.pa-metric {
+  text-align: center;
+}
+
+.pa-metric-val {
+  font-size: 22px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.pa-metric-bar {
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--bg-sunken);
+  overflow: hidden;
+  margin: 5px 0 4px;
+}
+
+.pa-metric-bar > div {
+  height: 100%;
+  background: var(--accent);
+}
+
+.pa-metric-label {
+  font-size: 10px;
+  color: var(--ink-muted);
+}
+
+/* 词级：中等视觉权重。低置信度只是底色变浅，不打红叉（BR-90） */
+.pa-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-family: var(--font-reading);
+  font-size: var(--text-sm);
+  margin-bottom: 10px;
+}
+
+.pa-w {
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  border-bottom: 2px solid transparent;
+}
+
+.pa-w.weak {
+  border-bottom-color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.pa-w.off {
+  text-decoration: underline dotted var(--ink-faint);
+}
+
+.pa-breaks {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: var(--text-xs);
+}
+
+.pa-breaks li {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  color: var(--ink-secondary);
+}
+
+.pa-break-kind {
+  color: var(--warn);
+}
+
+.pa-break-kind.MissingBreak {
+  color: var(--ink-muted);
+}
+
+.pa-breaks code {
+  font-family: var(--font-reading);
+}
+
+.pa-breaks i {
+  font-style: normal;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.pa-notes {
+  margin: 8px 0 0;
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+.pa-narrate {
+  margin-top: 10px;
+}
+
+.pa-narration {
+  margin-top: 8px;
+  font-size: var(--text-sm);
+  line-height: 1.8;
+  color: var(--ink-secondary);
+}
+
+.pstrip-cell.on {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+
+.pstrip-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 7px;
+}
+
+.pstrip-karaoke {
+  border: 1px solid var(--border-strong);
+  background: var(--bg-surface);
+  color: var(--ink-secondary);
+  border-radius: var(--radius-full);
+  padding: 2px 10px;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.pstrip-karaoke:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pstrip-karaoke-hint {
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+/* 真人录音的小标记：与合成语音区分，来源三分在这里也成立（BR-04） */
+.wa-real {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--ok);
+  display: inline-block;
+  margin-left: 2px;
+}
+
+/* 跟读打分入口。原先住在音标模块的样式表里，那个目录整个删掉时
+   这一条漏了迁移，按钮贴着上面的控件没有间距 */
+.ss-assess-btn { margin-top: 10px; }

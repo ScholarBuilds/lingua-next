@@ -1,0 +1,414 @@
+/* 创作台样式（模块 16）。
+
+   类名前缀 pstu- 独占，加类前 grep 过全仓（STD-UI-003a）：浮层类名同时决定定位
+   方式，撞名不报错，只是"样式莫名其妙"。颜色一律走 tokens.css 的令牌，不新造色值。 */
+
+/* ---- 外壳：覆盖 DialogContent 的 grid/p-6/sm:max-w-lg ---- */
+
+.pstu-shell {
+  display: flex; flex-direction: column; gap: 0; padding: 0;
+  width: min(1440px, 97vw); max-width: min(1440px, 97vw);
+  height: min(840px, 92vh);
+  overflow: hidden;
+  color: var(--ink);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ---- 头 ---- */
+
+.pstu-head {
+  flex: 0 0 auto;
+  display: flex; flex-direction: row; align-items: center; gap: 11px;
+  padding: 12px 12px 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.pstu-mark {
+  flex: 0 0 auto; width: 32px; height: 32px;
+  display: grid; place-items: center;
+  border-radius: var(--radius-md);
+  background: var(--accent-soft); color: var(--accent);
+}
+.pstu-mark svg { width: 17px; height: 17px; }
+.pstu-head-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pstu-title { font-size: var(--text-md); font-weight: 600; letter-spacing: 0.01em; }
+.pstu-sub { font-size: var(--text-xs); color: var(--ink-muted); }
+.pstu-x {
+  flex: 0 0 auto; width: 30px; height: 30px;
+  display: grid; place-items: center;
+  border-radius: var(--radius-sm); color: var(--ink-muted);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.pstu-x:hover { background: var(--bg-hover); color: var(--ink); }
+.pstu-x svg { width: 16px; height: 16px; }
+
+/* ---- 因果条：意图 + 画风 → 英文提示词 → 出图。
+       挂在头部而不是自成一行：三栏布局本身已经把因果摆出来了，
+       这条只是给个名字，占一行太浪费高度 ---- */
+
+.pstu-flow {
+  flex: 0 0 auto; list-style: none; margin: 0 auto 0 0;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+}
+.pstu-step {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 12px 4px 5px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+}
+.pstu-step > b {
+  width: 19px; height: 19px; flex: 0 0 auto;
+  display: grid; place-items: center;
+  border-radius: var(--radius-full);
+  background: var(--bg-sunken); color: var(--ink-secondary);
+  font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.pstu-step > span {
+  display: flex; flex-direction: column; line-height: 1.3;
+  font-size: var(--text-xs); font-weight: 600; white-space: nowrap;
+}
+.pstu-step-final { background: var(--accent-soft); border-color: var(--accent); }
+.pstu-step-final > b { background: var(--accent); color: var(--on-accent); }
+.pstu-arrow { display: grid; place-items: center; color: var(--ink-faint); }
+.pstu-arrow svg { width: 13px; height: 13px; }
+
+/* ---- 三栏主体：你给的输入 | 推出来的产物 | 跟 AI 改 ---- */
+
+.pstu-body {
+  flex: 1 1 auto; min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(272px, 0.78fr) minmax(0, 1.42fr) minmax(268px, 0.8fr);
+}
+.pstu-col { display: flex; flex-direction: column; min-height: 0; min-width: 0; padding: 12px 14px 14px; }
+.pstu-col-in { gap: 10px; background: var(--bg-app); border-right: 1px solid var(--border); }
+.pstu-col-out { gap: 9px; }
+.pstu-col-chat { gap: 9px; background: var(--bg-app); border-left: 1px solid var(--border); }
+
+.pstu-col-head { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; min-height: 34px; }
+.pstu-col-title { display: flex; align-items: center; gap: 6px; font-size: var(--text-sm); font-weight: 600; }
+.pstu-col-title svg { width: 15px; height: 15px; color: var(--ink-muted); }
+.pstu-count {
+  margin-left: auto;
+  font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+/* 两个输入框：关掉 field-sizing 与自动撑高，高度交给 flex 决定 */
+.pstu-idea, .pstu-prompt {
+  field-sizing: fixed;
+  width: 100%; min-height: 0; resize: none;
+  padding: 10px 12px;
+  color: var(--ink);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+.pstu-idea::placeholder, .pstu-prompt::placeholder { color: var(--ink-faint); }
+.pstu-idea { flex: 1 1 auto; min-height: 150px; font-size: var(--text-base); line-height: 1.75; }
+
+/* ---- 画风：和意图并列的第二个输入 ---- */
+
+.pstu-style { flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; }
+.pstu-style-lab {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: var(--text-xs); font-weight: 600; color: var(--ink-secondary);
+}
+.pstu-style-lab svg { width: 14px; height: 14px; color: var(--ink-muted); }
+.pstu-style-card {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
+  gap: 2px 10px; width: 100%; padding: 9px 11px; text-align: left;
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.pstu-style-card:hover { border-color: var(--accent); background: var(--bg-hover); }
+.pstu-style-card > b { min-width: 0; font-size: var(--text-sm); font-weight: 600; }
+.pstu-style-card > em {
+  grid-column: 1 / -1; font-style: normal;
+  font-size: 11px; line-height: 1.55; color: var(--ink-muted);
+}
+.pstu-style-go { font-size: var(--text-xs); color: var(--accent); white-space: nowrap; }
+/* 应用锁死画幅时，卡片仍在但不是按钮：说清为什么不给改，而不是禁用了事 */
+.pstu-style-locked { cursor: default; background: var(--bg-sunken); }
+.pstu-style-locked:hover { border-color: var(--border); background: var(--bg-sunken); }
+
+.pstu-style-none {
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--ink-muted);
+}
+.pstu-style-none:hover { color: var(--ink); }
+.pstu-style-none svg { width: 12px; height: 12px; }
+
+.pstu-tip {
+  flex: 0 0 auto; display: flex; gap: 6px;
+  font-size: var(--text-xs); line-height: 1.6; color: var(--ink-muted);
+}
+.pstu-tip svg { flex: 0 0 auto; width: 14px; height: 14px; margin-top: 2px; color: var(--warn); }
+
+.pstu-act {
+  flex: 0 0 auto; margin-top: auto;
+  display: flex; flex-direction: column; gap: 7px;
+  padding-top: 12px; border-top: 1px solid var(--border);
+}
+.pstu-btn-main { align-self: stretch; }
+.pstu-warn { font-size: 11px; color: var(--warn); }
+
+/* ---- 中栏：提示词 / 结构 ---- */
+
+.pstu-tablist {
+  flex: 0 0 auto; display: inline-flex; gap: 2px; padding: 2px;
+  background: var(--bg-sunken); border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.pstu-tab {
+  padding: 4px 11px; border-radius: var(--radius-sm);
+  font-size: var(--text-xs); font-weight: 600; color: var(--ink-muted);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.pstu-tab:hover:not(:disabled) { color: var(--ink); }
+.pstu-tab.on { background: var(--bg-surface); color: var(--ink); box-shadow: var(--shadow-sm); }
+.pstu-tab:disabled { color: var(--ink-faint); cursor: not-allowed; }
+
+/* 提示词与画风的关系。四种状态四种说法，配色跟着语义走 */
+.pstu-bond {
+  flex: 0 0 auto; display: flex; align-items: flex-start; gap: 6px;
+  padding: 7px 10px; border-radius: var(--radius-md);
+  font-size: var(--text-xs); line-height: 1.6;
+}
+.pstu-bond svg { flex: 0 0 auto; width: 14px; height: 14px; margin-top: 2px; }
+.pstu-bond-ok { background: var(--ok-soft); color: var(--ok); }
+.pstu-bond-warn { background: var(--warn-soft); color: var(--warn); }
+.pstu-bond-wait { background: var(--bg-sunken); color: var(--ink-muted); }
+
+.pstu-pane { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; gap: 9px; }
+
+.pstu-prompt {
+  flex: 1 1 auto; min-height: 180px;
+  font-family: var(--font-mono); font-size: var(--text-sm); line-height: 1.75;
+  background: var(--bg-sunken);
+}
+
+.pstu-under {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 10px;
+}
+.pstu-under-note { flex: 1 1 auto; min-width: 0; font-size: 11px; line-height: 1.55; color: var(--ink-muted); }
+
+/* ---- 中文解读：出图之前先看懂这段英文要画什么 ---- */
+
+.pstu-explain {
+  flex: 0 1 auto; min-height: 0; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 7px;
+  padding: 10px 12px;
+  background: var(--bg-sunken); border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.pstu-explain-head { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; min-height: 26px; }
+.pstu-explain-head svg { width: 14px; height: 14px; color: var(--ink-muted); }
+.pstu-explain-head > b { font-size: var(--text-xs); font-weight: 600; }
+.pstu-explain-head > button { margin-left: auto; }
+.pstu-explain-busy {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--ink-muted);
+}
+.pstu-explain-busy svg { width: 12px; height: 12px; }
+.pstu-explain-idle { font-size: var(--text-xs); line-height: 1.65; color: var(--ink-faint); }
+.pstu-explain-sum { font-size: var(--text-sm); line-height: 1.75; color: var(--ink); }
+.pstu-explain-pts { display: flex; flex-direction: column; gap: 4px; }
+.pstu-explain-pts > div {
+  display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 9px; align-items: baseline;
+}
+.pstu-explain-pts dt { font-size: 11px; font-weight: 600; color: var(--ink-muted); }
+.pstu-explain-pts dd { font-size: var(--text-xs); line-height: 1.7; color: var(--ink-secondary); }
+
+/* 「你说了但提示词里没有」——这一段是解读里最有价值的部分，配色要压得住 */
+.pstu-miss {
+  display: flex; flex-direction: column; gap: 5px;
+  padding: 8px 10px; border-radius: var(--radius-md);
+  background: var(--warn-soft);
+}
+.pstu-miss > b {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: var(--text-xs); font-weight: 600; color: var(--warn);
+}
+.pstu-miss > b svg { width: 13px; height: 13px; }
+.pstu-miss ul { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.pstu-miss li { position: relative; padding-left: 12px; font-size: var(--text-xs); line-height: 1.65; color: var(--ink); }
+.pstu-miss li::before {
+  content: ''; position: absolute; left: 3px; top: 9px;
+  width: 4px; height: 4px; border-radius: var(--radius-full); background: var(--warn);
+}
+.pstu-miss > span { font-size: 11px; line-height: 1.6; color: var(--ink-muted); }
+
+/* ---- 右栏：对话改词 ---- */
+
+.pstu-chat {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 8px; padding-right: 2px;
+}
+.pstu-chat-idle { display: flex; flex-direction: column; gap: 7px; }
+.pstu-chat-idle p { font-size: var(--text-xs); line-height: 1.7; color: var(--ink-secondary); }
+.pstu-chat-idle ul { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.pstu-chat-idle li {
+  padding: 6px 10px; border-radius: var(--radius-md);
+  background: var(--bg-surface); border: 1px dashed var(--border);
+  font-size: var(--text-xs); color: var(--ink-muted);
+}
+.pstu-chat-idle > span { font-size: 11px; line-height: 1.6; color: var(--ink-faint); }
+
+.pstu-turn {
+  max-width: 94%; padding: 8px 11px; border-radius: var(--radius-md);
+  font-size: var(--text-xs); line-height: 1.7;
+}
+.pstu-turn p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.pstu-turn.mine { align-self: flex-end; background: var(--accent-soft); color: var(--ink); }
+.pstu-turn.ai { align-self: flex-start; background: var(--bg-surface); border: 1px solid var(--border); }
+.pstu-turn-tag {
+  display: inline-flex; align-items: center; gap: 4px; margin-top: 5px;
+  font-size: 10px; font-weight: 600; color: var(--ok);
+}
+.pstu-turn-tag svg { width: 11px; height: 11px; }
+.pstu-turn-busy { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-muted); }
+.pstu-turn-busy svg { width: 13px; height: 13px; }
+
+.pstu-say { flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; }
+.pstu-say-box {
+  field-sizing: fixed;
+  width: 100%; height: 62px; min-height: 62px; resize: none;
+  padding: 8px 10px;
+  font-size: var(--text-xs); line-height: 1.65;
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-md); box-shadow: none;
+}
+.pstu-say-box::placeholder { color: var(--ink-faint); }
+.pstu-say > button { align-self: flex-end; }
+
+/* ---- 七段式结构 ---- */
+
+.pstu-struct-bar { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pstu-struct-hint {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: var(--text-xs); color: var(--ink-muted);
+}
+.pstu-struct-hint svg { width: 14px; height: 14px; }
+.pstu-struct-tools { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.pstu-raw {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 9px; cursor: pointer;
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs); color: var(--ink-secondary); white-space: nowrap;
+}
+.pstu-raw svg { width: 13px; height: 13px; color: var(--ink-muted); }
+
+.pstu-segs, .pstu-json { flex: 1 1 auto; min-height: 0; overflow: auto; }
+.pstu-segs { display: flex; flex-direction: column; gap: 8px; padding-right: 2px; }
+.pstu-json {
+  margin: 0; padding: 12px 14px;
+  background: var(--bg-sunken); border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono); font-size: var(--text-xs); line-height: 1.7;
+  color: var(--ink-secondary); white-space: pre; tab-size: 2;
+}
+
+.pstu-seg {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-md); overflow: hidden;
+}
+.pstu-seg-head {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 8px 11px; text-align: left; color: var(--ink);
+  transition: background var(--dur-fast) var(--ease);
+}
+.pstu-seg-head:hover { background: var(--bg-hover); }
+.pstu-seg-static { cursor: default; }
+.pstu-seg-static:hover { background: transparent; }
+.pstu-seg-arrow {
+  flex: 0 0 auto; width: 14px; height: 14px; color: var(--ink-muted);
+  transition: transform var(--dur-fast) var(--ease);
+}
+.pstu-seg-arrow.pstu-open { transform: rotate(90deg); }
+.pstu-seg-label { font-size: var(--text-sm); font-weight: 600; }
+.pstu-seg-key {
+  padding: 1px 6px; border-radius: var(--radius-sm);
+  background: var(--bg-sunken); color: var(--ink-faint);
+  font-family: var(--font-mono); font-size: 11px;
+}
+.pstu-seg-hint { margin-left: auto; text-align: right; font-size: 11px; color: var(--ink-faint); }
+.pstu-seg-body {
+  padding: 0 12px 11px 33px;
+  font-size: var(--text-sm); line-height: 1.7; color: var(--ink-secondary);
+}
+.pstu-seg-miss .pstu-seg-label { color: var(--ink-muted); }
+.pstu-seg-extra { border-style: dashed; }
+
+/* ---- 结构里的值 ---- */
+
+.pstu-val { white-space: pre-wrap; overflow-wrap: anywhere; }
+.pstu-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.pstu-empty { font-size: var(--text-xs); color: var(--ink-faint); }
+.pstu-arr { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.pstu-arr > li { position: relative; padding-left: 13px; }
+.pstu-arr > li::before {
+  content: ''; position: absolute; left: 3px; top: 10px;
+  width: 4px; height: 4px; border-radius: var(--radius-full); background: var(--ink-faint);
+}
+.pstu-kv { display: flex; flex-direction: column; gap: 5px; }
+.pstu-kv-row { display: grid; grid-template-columns: minmax(72px, 132px) minmax(0, 1fr); gap: 10px; align-items: start; }
+.pstu-kv-row > dt {
+  padding-top: 2px; overflow-wrap: anywhere;
+  font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted);
+}
+.pstu-kv-row > dd { min-width: 0; }
+
+/* ---- 底栏 ---- */
+
+.pstu-foot {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 14px;
+  padding: 10px 16px; border-top: 1px solid var(--border); background: var(--bg-sunken);
+}
+.pstu-foot-note { flex: 1 1 auto; min-width: 0; font-size: var(--text-xs); line-height: 1.6; color: var(--ink-muted); }
+
+/* ---- 键盘可达 ---- */
+
+.pstu-x:focus-visible, .pstu-seg-head:focus-visible,
+.pstu-tab:focus-visible, .pstu-style-card:focus-visible, .pstu-style-none:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: -2px; border-radius: var(--radius-sm);
+}
+.pstu-raw:focus-within { border-color: var(--accent); }
+
+/* ---- 忙碌指示 ---- */
+
+.pstu-spin { animation: pstu-spin 0.8s linear infinite; }
+@keyframes pstu-spin { to { transform: rotate(360deg); } }
+
+/* ---- 窄屏：三栏先并成两栏，再并成上下，整体交给外层滚动 ---- */
+
+@media (max-width: 1240px) {
+  .pstu-body { grid-template-columns: minmax(264px, 0.82fr) minmax(0, 1.18fr); }
+  .pstu-col-chat {
+    grid-column: 1 / -1;
+    border-left: none; border-top: 1px solid var(--border);
+    max-height: 300px;
+  }
+  .pstu-flow { display: none; }
+}
+
+@media (max-width: 900px) {
+  .pstu-shell { width: 96vw; max-width: 96vw; height: 94vh; }
+  .pstu-body { grid-template-columns: minmax(0, 1fr); grid-auto-rows: min-content; overflow-y: auto; }
+  .pstu-col { min-height: 280px; }
+  .pstu-col-in { border-right: none; border-bottom: 1px solid var(--border); }
+  .pstu-idea { min-height: 110px; }
+  .pstu-seg-hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pstu-spin { animation: none; }
+  .pstu-x, .pstu-seg-head, .pstu-seg-arrow, .pstu-tab, .pstu-style-card { transition: none; }
+}

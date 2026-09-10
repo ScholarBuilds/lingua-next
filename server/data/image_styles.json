@@ -1,0 +1,2000 @@
+{
+  "note": "由 scripts/import_image_styles.py 生成，勿手改。来源与清洗规则见该脚本。",
+  "categories": {
+    "general": "通用",
+    "photo": "摄影",
+    "art": "绘画",
+    "concept": "概念与科幻",
+    "game": "游戏",
+    "craft": "手作质感",
+    "commerce": "广告电商",
+    "misc": "其它"
+  },
+  "styles": [
+    {
+      "key": "artstyle-abstract",
+      "origin_name": "artstyle-abstract",
+      "category": "art",
+      "render": "abstract style, non-representational, colors and shapes, expression of feelings, imaginative",
+      "extra_avoid": [
+        "realistic",
+        "photographic",
+        "figurative",
+        "concrete"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "抽象色块风格",
+      "hint": "适合情绪表达和概念插画，用形状与色彩营造自由联想感。"
+    },
+    {
+      "key": "artstyle-abstract-expressionism",
+      "origin_name": "artstyle-abstract expressionism",
+      "category": "art",
+      "render": "abstract expressionist painting, energetic brushwork, bold colors, abstract forms, expressive, emotional",
+      "extra_avoid": [
+        "realistic",
+        "photorealistic",
+        "low contrast",
+        "plain",
+        "simple",
+        "monochrome"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "抽象表现主义",
+      "hint": "适合情绪强烈的画面，笔触奔放，色彩激烈，重在宣泄感受。"
+    },
+    {
+      "key": "artstyle-art-deco",
+      "origin_name": "artstyle-art deco",
+      "category": "art",
+      "render": "art deco style, geometric shapes, bold colors, luxurious, elegant, decorative, symmetrical, ornate",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "realism",
+        "photorealistic",
+        "modernist",
+        "minimalist"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "装饰艺术风格",
+      "hint": "适合海报、建筑和时装题材，几何对称，带有华丽复古气息。"
+    },
+    {
+      "key": "artstyle-art-nouveau",
+      "origin_name": "artstyle-art nouveau",
+      "category": "art",
+      "render": "art nouveau style, elegant, decorative, curvilinear forms, nature-inspired, ornate",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "realism",
+        "photorealistic",
+        "modernist",
+        "minimalist"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "新艺术装饰风",
+      "hint": "适合花草人物与饰纹设计，线条柔美卷曲，充满自然装饰感。"
+    },
+    {
+      "key": "artstyle-constructivist",
+      "origin_name": "artstyle-constructivist",
+      "category": "art",
+      "render": "constructivist style, geometric shapes, bold colors, dynamic composition, propaganda art style",
+      "extra_avoid": [
+        "realistic",
+        "photorealistic",
+        "low contrast",
+        "plain",
+        "simple",
+        "abstract expressionism"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "构成主义海报",
+      "hint": "适合宣传海报和政治图像，几何分明，构图有强烈动势。"
+    },
+    {
+      "key": "artstyle-cubist",
+      "origin_name": "artstyle-cubist",
+      "category": "art",
+      "render": "cubist artwork, geometric shapes, abstract, innovative, revolutionary",
+      "extra_avoid": [
+        "anime",
+        "photorealistic",
+        "35mm film",
+        "deformed",
+        "glitch",
+        "low contrast",
+        "noisy"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "立体分解风格",
+      "hint": "适合人物与静物重构，画面被切分成多角度几何片段。"
+    },
+    {
+      "key": "artstyle-expressionist",
+      "origin_name": "artstyle-expressionist",
+      "category": "art",
+      "render": "expressionist, raw, emotional, dynamic, distortion for emotional effect, vibrant, use of unusual colors",
+      "extra_avoid": [
+        "realism",
+        "symmetry",
+        "quiet",
+        "calm",
+        "photo"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "表现主义绘画",
+      "hint": "适合刻画内心冲突与戏剧场景，形体夸张，色彩情绪化。"
+    },
+    {
+      "key": "artstyle-graffiti",
+      "origin_name": "artstyle-graffiti",
+      "category": "art",
+      "render": "graffiti style, street art, vibrant, urban, tag, mural",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "realism",
+        "photorealistic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "涂鸦街头风",
+      "hint": "适合街景、墙绘和潮流主题，色彩张扬，带强烈城市气息。"
+    },
+    {
+      "key": "artstyle-hyperrealism",
+      "origin_name": "artstyle-hyperrealism",
+      "category": "art",
+      "render": "hyperrealistic art, extremely high-resolution details, photographic, realism pushed to extreme, fine texture, incredibly lifelike",
+      "extra_avoid": [
+        "simplified",
+        "abstract",
+        "unrealistic",
+        "impressionistic",
+        "low resolution"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "超写实细节风",
+      "hint": "适合人物、金属和食物题材，细节密集，接近照片质感。"
+    },
+    {
+      "key": "artstyle-impressionist",
+      "origin_name": "artstyle-impressionist",
+      "category": "art",
+      "render": "impressionist painting, loose brushwork, vibrant color, light and shadow play, captures feeling over form",
+      "extra_avoid": [
+        "anime",
+        "photorealistic",
+        "35mm film",
+        "deformed",
+        "glitch",
+        "low contrast",
+        "noisy"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "印象派光色风",
+      "hint": "适合风景和日常瞬间，笔触松动，重在光影与氛围。"
+    },
+    {
+      "key": "artstyle-pointillism",
+      "origin_name": "artstyle-pointillism",
+      "category": "art",
+      "render": "pointillism style, composed entirely of small, distinct dots of color, vibrant",
+      "extra_avoid": [
+        "line drawing",
+        "smooth shading",
+        "large color fields",
+        "simplistic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "点彩画风",
+      "hint": "适合静物和风景，色点堆叠出明亮跳跃的画面"
+    },
+    {
+      "key": "artstyle-pop-art",
+      "origin_name": "artstyle-pop art",
+      "category": "art",
+      "render": "pop Art style, bright colors, bold outlines, popular culture themes, ironic or kitsch",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "realism",
+        "photorealistic",
+        "minimalist"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "波普漫画风",
+      "hint": "适合潮流人物和海报，色块鲜明带戏谑感"
+    },
+    {
+      "key": "artstyle-psychedelic",
+      "origin_name": "artstyle-psychedelic",
+      "category": "art",
+      "render": "psychedelic style, vibrant colors, swirling patterns, abstract forms, surreal, trippy",
+      "extra_avoid": [
+        "monochrome",
+        "black and white",
+        "low contrast",
+        "realistic",
+        "photorealistic",
+        "plain",
+        "simple"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "迷幻旋涡风",
+      "hint": "适合抽象海报和封面，色彩旋转流动感强"
+    },
+    {
+      "key": "artstyle-renaissance",
+      "origin_name": "artstyle-renaissance",
+      "category": "art",
+      "render": "renaissance style, realistic, perspective, light and shadow, religious or mythological themes",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "modernist",
+        "minimalist",
+        "abstract"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "文艺复兴风",
+      "hint": "适合宗教人物与神话场景，透视严谨光影写实"
+    },
+    {
+      "key": "artstyle-steampunk",
+      "origin_name": "artstyle-steampunk",
+      "category": "art",
+      "render": "steampunk style, antique, mechanical, brass and copper tones, gears, intricate",
+      "extra_avoid": [
+        "deformed",
+        "glitch",
+        "noisy",
+        "low contrast",
+        "anime",
+        "photorealistic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "蒸汽机械风",
+      "hint": "适合机械城市和冒险角色，铜铁齿轮感浓厚"
+    },
+    {
+      "key": "artstyle-surrealist",
+      "origin_name": "artstyle-surrealist",
+      "category": "art",
+      "render": "surrealist art, dreamlike, mysterious, provocative, symbolic, intricate",
+      "extra_avoid": [
+        "anime",
+        "photorealistic",
+        "realistic",
+        "deformed",
+        "glitch",
+        "noisy",
+        "low contrast"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "超现实梦境风",
+      "hint": "适合怪诞场景与象征题材，氛围神秘跳脱"
+    },
+    {
+      "key": "artstyle-typography",
+      "origin_name": "artstyle-typography",
+      "category": "art",
+      "render": "typographic art, stylized, intricate, artistic, text-based",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "realism",
+        "photorealistic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "字形排版风",
+      "hint": "适合海报标题与文字图形，排版本身就是画面"
+    },
+    {
+      "key": "artstyle-watercolor",
+      "origin_name": "artstyle-watercolor",
+      "category": "art",
+      "render": "watercolor painting, vibrant, painterly, textural, artistic",
+      "extra_avoid": [
+        "anime",
+        "photorealistic",
+        "35mm film",
+        "deformed",
+        "glitch",
+        "low contrast",
+        "noisy"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "水彩晕染风",
+      "hint": "适合花卉人物和插画，笔触轻柔有渗化层次"
+    },
+    {
+      "key": "ads-advertising",
+      "origin_name": "ads-advertising",
+      "category": "commerce",
+      "render": "advertising poster style, modern, product-focused, commercial, eye-catching",
+      "extra_avoid": [
+        "noisy",
+        "blurry",
+        "amateurish",
+        "sloppy",
+        "unattractive"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "广告海报风",
+      "hint": "适合产品展示和活动宣传，构图醒目，商业感直接"
+    },
+    {
+      "key": "ads-automotive",
+      "origin_name": "ads-automotive",
+      "category": "commerce",
+      "render": "automotive advertisement style, sleek, dynamic, commercial, vehicle-focused, high-resolution",
+      "extra_avoid": [
+        "noisy",
+        "blurry",
+        "unattractive",
+        "sloppy",
+        "unprofessional"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "汽车广告风",
+      "hint": "适合车辆宣传与速度主题，线条流畅，画面动感强烈"
+    },
+    {
+      "key": "ads-corporate",
+      "origin_name": "ads-corporate",
+      "category": "commerce",
+      "render": "corporate branding style, clean, modern, sleek, minimalist, business-oriented",
+      "extra_avoid": [
+        "noisy",
+        "blurry",
+        "grungy",
+        "sloppy",
+        "cluttered",
+        "disorganized"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "企业极简风",
+      "hint": "适合品牌官网和商务物料，干净克制，强调专业感"
+    },
+    {
+      "key": "ads-fashion-editorial",
+      "origin_name": "ads-fashion editorial",
+      "category": "commerce",
+      "render": "fashion editorial style, high fashion, trendy, stylish, editorial, magazine style",
+      "extra_avoid": [
+        "outdated",
+        "blurry",
+        "noisy",
+        "unattractive",
+        "sloppy"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "时尚杂志风",
+      "hint": "适合服装造型和封面人物，强调潮流搭配与镜头感"
+    },
+    {
+      "key": "ads-food-photography",
+      "origin_name": "ads-food photography",
+      "category": "commerce",
+      "render": "food photography style, appetizing, culinary, high-resolution, commercial",
+      "extra_avoid": [
+        "unappetizing",
+        "sloppy",
+        "unprofessional",
+        "noisy",
+        "blurry"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "美食摄影风",
+      "hint": "适合菜品和饮品展示，突出诱人色泽与商业摆盘"
+    },
+    {
+      "key": "ads-gourmet-food-photography",
+      "origin_name": "ads-gourmet food photography",
+      "category": "commerce",
+      "render": "gourmet food photo of, soft natural lighting, macro details, vibrant colors, fresh ingredients, glistening textures, bokeh background, styled plating, wooden tabletop, garnished, tantalizing, editorial quality",
+      "extra_avoid": [
+        "cartoon",
+        "anime",
+        "sketch",
+        "grayscale",
+        "dull",
+        "overexposed",
+        "cluttered",
+        "messy plate",
+        "deformed"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "精致美食风",
+      "hint": "适合高端料理与餐厅菜单，细节丰富，灯光温润"
+    },
+    {
+      "key": "ads-luxury",
+      "origin_name": "ads-luxury",
+      "category": "commerce",
+      "render": "luxury product style, elegant, sophisticated, high-end, luxurious",
+      "extra_avoid": [
+        "cheap",
+        "noisy",
+        "blurry",
+        "unattractive",
+        "amateurish"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "奢华产品风",
+      "hint": "适合珠宝腕表与高端用品，整体气质典雅而有分量"
+    },
+    {
+      "key": "ads-real-estate",
+      "origin_name": "ads-real estate",
+      "category": "commerce",
+      "render": "real estate photography style, inviting, well-lit, high-resolution, property-focused, commercial",
+      "extra_avoid": [
+        "dark",
+        "blurry",
+        "unappealing",
+        "noisy",
+        "unprofessional"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "房产广告写真",
+      "hint": "适合展示住宅、样板间和室内空间，画面明亮通透，强调购买感。"
+    },
+    {
+      "key": "ads-retail",
+      "origin_name": "ads-retail",
+      "category": "commerce",
+      "render": "retail packaging style, vibrant, enticing, commercial, product-focused, eye-catching",
+      "extra_avoid": [
+        "noisy",
+        "blurry",
+        "amateurish",
+        "sloppy",
+        "unattractive"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "零售促销海报",
+      "hint": "适合商品包装和货架陈列，色彩鲜活，突出吸引目光与购买欲。"
+    },
+    {
+      "key": "futuristic-biomechanical",
+      "origin_name": "futuristic-biomechanical",
+      "category": "concept",
+      "render": "biomechanical style, blend of organic and mechanical elements, futuristic, cybernetic, intricate",
+      "extra_avoid": [
+        "natural",
+        "rustic",
+        "primitive",
+        "organic",
+        "simplistic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "生物机械风",
+      "hint": "适合未来生物和装甲设定，肉体与机器交织"
+    },
+    {
+      "key": "futuristic-biomechanical-cyberpunk",
+      "origin_name": "futuristic-biomechanical cyberpunk",
+      "category": "concept",
+      "render": "biomechanical cyberpunk, cybernetics, human-machine fusion, dystopian, organic meets artificial, dark, intricate",
+      "extra_avoid": [
+        "natural",
+        "colorful",
+        "deformed",
+        "sketch",
+        "low contrast",
+        "watercolor"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "赛博生机械风",
+      "hint": "适合反乌托邦角色与城市，暗色中带机体融合感"
+    },
+    {
+      "key": "futuristic-cybernetic",
+      "origin_name": "futuristic-cybernetic",
+      "category": "concept",
+      "render": "cybernetic style, futuristic, technological, cybernetic enhancements, robotics, artificial intelligence themes",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "realism",
+        "photorealistic",
+        "historical",
+        "medieval"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "赛博增强风",
+      "hint": "适合未来战士与智能设备，科技改造感明显"
+    },
+    {
+      "key": "futuristic-cybernetic-robot",
+      "origin_name": "futuristic-cybernetic robot",
+      "category": "concept",
+      "render": "cybernetic robot, android, AI, machine, metal, wires, tech, futuristic",
+      "extra_avoid": [
+        "organic",
+        "natural",
+        "human",
+        "sketch",
+        "watercolor",
+        "low contrast"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "机器人未来风",
+      "hint": "适合安卓人和机械角色，金属结构与线路清晰"
+    },
+    {
+      "key": "futuristic-cyberpunk-cityscape",
+      "origin_name": "futuristic-cyberpunk cityscape",
+      "category": "concept",
+      "render": "cyberpunk cityscape, neon lights, dark alleys, skyscrapers, futuristic, vibrant colors, high contrast",
+      "extra_avoid": [
+        "natural",
+        "rural",
+        "deformed",
+        "low contrast",
+        "black and white",
+        "sketch",
+        "watercolor"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "赛博霓虹都市",
+      "hint": "适合画雨夜街区与高楼天际线，光影对比强烈。"
+    },
+    {
+      "key": "futuristic-futuristic",
+      "origin_name": "futuristic-futuristic",
+      "category": "concept",
+      "render": "futuristic style, sleek, modern, ultramodern, high tech",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "realism",
+        "photorealistic",
+        "vintage",
+        "antique"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "极简未来科技",
+      "hint": "适合画设备、建筑和界面，线条利落偏冷感。"
+    },
+    {
+      "key": "futuristic-retro-cyberpunk",
+      "origin_name": "futuristic-retro cyberpunk",
+      "category": "concept",
+      "render": "retro cyberpunk, 80's inspired, synthwave, neon, vibrant, retro futurism",
+      "extra_avoid": [
+        "modern",
+        "desaturated",
+        "black and white",
+        "realism",
+        "low contrast"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "复古赛博霓虹",
+      "hint": "适合画八十年代未来都市，霓虹浓烈带怀旧感。"
+    },
+    {
+      "key": "futuristic-retro-futurism",
+      "origin_name": "futuristic-retro futurism",
+      "category": "concept",
+      "render": "retro-futuristic, vintage sci-fi, 50s and 60s style, atomic age, vibrant",
+      "extra_avoid": [
+        "contemporary",
+        "realistic",
+        "rustic",
+        "primitive"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "复古太空未来",
+      "hint": "适合画原子时代想象中的科技场景，带老派科幻味。"
+    },
+    {
+      "key": "futuristic-sci-fi",
+      "origin_name": "futuristic-sci-fi",
+      "category": "concept",
+      "render": "sci-fi style, futuristic, technological, alien worlds, space themes, advanced civilizations",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "realism",
+        "photorealistic",
+        "historical",
+        "medieval"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "科幻星际世界",
+      "hint": "适合画外星文明和宇宙场景，充满科技想象。"
+    },
+    {
+      "key": "futuristic-vaporwave",
+      "origin_name": "futuristic-vaporwave",
+      "category": "concept",
+      "render": "vaporwave style, retro aesthetic, cyberpunk, vibrant, neon colors, vintage 80s and 90s style",
+      "extra_avoid": [
+        "monochrome",
+        "muted colors",
+        "realism",
+        "rustic",
+        "minimalist",
+        "dark"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "蒸汽波梦幻感",
+      "hint": "适合画粉紫霓虹与旧式电子元素，气氛迷离怀旧。"
+    },
+    {
+      "key": "papercraft-collage",
+      "origin_name": "papercraft-collage",
+      "category": "craft",
+      "render": "collage style, mixed media, layered, textural, artistic",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "realism",
+        "photorealistic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "纸艺拼贴风",
+      "hint": "适合手工感海报和角色设定，层次丰富，纹理明显。"
+    },
+    {
+      "key": "papercraft-flat-papercut",
+      "origin_name": "papercraft-flat papercut",
+      "category": "craft",
+      "render": "flat papercut style, silhouette, clean cuts, paper, sharp edges, minimalist, color block",
+      "extra_avoid": [
+        "3D",
+        "high detail",
+        "noise",
+        "grainy",
+        "blurry",
+        "painting",
+        "drawing",
+        "photo",
+        "disfigured"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "平面剪纸风",
+      "hint": "适合简洁图标与扁平场景，轮廓利落，色块鲜明。"
+    },
+    {
+      "key": "papercraft-kirigami",
+      "origin_name": "papercraft-kirigami",
+      "category": "craft",
+      "render": "kirigami representation of, 3D, paper folding, paper cutting, Japanese, intricate, symmetrical, precision, clean lines",
+      "extra_avoid": [
+        "painting",
+        "drawing",
+        "2D",
+        "noisy",
+        "blurry",
+        "deformed"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "立体切纸风",
+      "hint": "适合建筑景观和对称装饰，结构立体，线条整齐。"
+    },
+    {
+      "key": "papercraft-paper-mache",
+      "origin_name": "papercraft-paper mache",
+      "category": "craft",
+      "render": "paper mache representation of, 3D, sculptural, textured, handmade, vibrant, fun",
+      "extra_avoid": [
+        "2D",
+        "flat",
+        "photo",
+        "sketch",
+        "digital art",
+        "deformed",
+        "noisy",
+        "blurry"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "纸浆雕塑风",
+      "hint": "适合童趣角色和摆件造型，表面粗糙，手作感强。"
+    },
+    {
+      "key": "papercraft-paper-quilling",
+      "origin_name": "papercraft-paper quilling",
+      "category": "craft",
+      "render": "paper quilling art of, intricate, delicate, curling, rolling, shaping, coiling, loops, 3D, dimensional, ornamental",
+      "extra_avoid": [
+        "photo",
+        "painting",
+        "drawing",
+        "2D",
+        "flat",
+        "deformed",
+        "noisy",
+        "blurry"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "卷纸花饰风",
+      "hint": "适合花纹装饰与细密图案，卷曲层叠，柔和灵巧。"
+    },
+    {
+      "key": "papercraft-papercut-collage",
+      "origin_name": "papercraft-papercut collage",
+      "category": "craft",
+      "render": "papercut collage of, mixed media, textured paper, overlapping, asymmetrical, abstract, vibrant",
+      "extra_avoid": [
+        "photo",
+        "3D",
+        "realistic",
+        "drawing",
+        "painting",
+        "high detail",
+        "disfigured"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "剪纸拼贴风",
+      "hint": "适合抽象海报和视觉实验，叠层错落，色彩跳跃。"
+    },
+    {
+      "key": "papercraft-papercut-shadow-box",
+      "origin_name": "papercraft-papercut shadow box",
+      "category": "craft",
+      "render": "3D papercut shadow box of, layered, dimensional, depth, silhouette, shadow, papercut, handmade, high contrast",
+      "extra_avoid": [
+        "painting",
+        "drawing",
+        "photo",
+        "2D",
+        "flat",
+        "high detail",
+        "blurry",
+        "noisy",
+        "disfigured"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "剪纸光影盒",
+      "hint": "适合场景透视和小故事画面，层层递进，明暗对比强。"
+    },
+    {
+      "key": "papercraft-stacked-papercut",
+      "origin_name": "papercraft-stacked papercut",
+      "category": "craft",
+      "render": "stacked papercut art of, 3D, layered, dimensional, depth, precision cut, stacked layers, papercut, high contrast",
+      "extra_avoid": [
+        "2D",
+        "flat",
+        "noisy",
+        "blurry",
+        "painting",
+        "drawing",
+        "photo",
+        "deformed"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "叠层剪纸风",
+      "hint": "适合地景与建筑剖面图，分层清晰，纵深明显。"
+    },
+    {
+      "key": "papercraft-thick-layered-papercut",
+      "origin_name": "papercraft-thick layered papercut",
+      "category": "craft",
+      "render": "thick layered papercut art of, deep 3D, volumetric, dimensional, depth, thick paper, high stack, heavy texture, tangible layers",
+      "extra_avoid": [
+        "2D",
+        "flat",
+        "thin paper",
+        "low stack",
+        "smooth texture",
+        "painting",
+        "drawing",
+        "photo",
+        "deformed"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "厚层纸雕风",
+      "hint": "适合做立体场景和角色，层次分明，纸感厚重"
+    },
+    {
+      "key": "game-bubble-bobble",
+      "origin_name": "game-bubble bobble",
+      "category": "game",
+      "render": "Bubble Bobble style, 8-bit, cute, pixelated, fantasy, vibrant, reminiscent of Bubble Bobble game",
+      "extra_avoid": [
+        "realistic",
+        "modern",
+        "photorealistic",
+        "violent",
+        "horror"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "泡泡龙童趣像素",
+      "hint": "适合画可爱怪物和关卡道具，画面轻松活泼。"
+    },
+    {
+      "key": "game-cyberpunk-game",
+      "origin_name": "game-cyberpunk game",
+      "category": "game",
+      "render": "cyberpunk game style, neon, dystopian, futuristic, digital, vibrant, high contrast, reminiscent of cyberpunk genre video games",
+      "extra_avoid": [
+        "historical",
+        "natural",
+        "rustic",
+        "low detailed"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "游戏赛博朋克风",
+      "hint": "适合画动作游戏角色和街头关卡，节奏紧张炫目。"
+    },
+    {
+      "key": "game-fighting-game",
+      "origin_name": "game-fighting game",
+      "category": "game",
+      "render": "fighting game style, dynamic, vibrant, action-packed, detailed character design, reminiscent of fighting video games",
+      "extra_avoid": [
+        "peaceful",
+        "calm",
+        "minimalist",
+        "photorealistic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "格斗游戏热血风",
+      "hint": "适合画对战角色与必杀瞬间，动作夸张有冲击。"
+    },
+    {
+      "key": "game-gta",
+      "origin_name": "game-gta",
+      "category": "game",
+      "render": "GTA-style artwork, satirical, exaggerated, pop art style, vibrant colors, iconic characters, action-packed",
+      "extra_avoid": [
+        "realistic",
+        "black and white",
+        "low contrast",
+        "impressionist",
+        "cubist",
+        "noisy",
+        "blurry",
+        "deformed"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "罪恶都市讽刺风",
+      "hint": "适合画都市犯罪题材与群像，带戏谑漫画感。"
+    },
+    {
+      "key": "game-mario",
+      "origin_name": "game-mario",
+      "category": "game",
+      "render": "Super Mario style, vibrant, cute, cartoony, fantasy, playful, reminiscent of Super Mario series",
+      "extra_avoid": [
+        "realistic",
+        "modern",
+        "horror",
+        "dystopian",
+        "violent"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "马里奥童趣卡通",
+      "hint": "适合画跳跃冒险和蘑菇王国，色彩明快俏皮。"
+    },
+    {
+      "key": "game-minecraft",
+      "origin_name": "game-minecraft",
+      "category": "game",
+      "render": "Minecraft style, blocky, pixelated, vibrant colors, recognizable characters and objects, game assets",
+      "extra_avoid": [
+        "smooth",
+        "realistic",
+        "photorealistic",
+        "noise",
+        "blurry",
+        "deformed"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "方块沙盒像素风",
+      "hint": "适合画建筑、地形和道具，整体方正而清晰。"
+    },
+    {
+      "key": "game-pokemon",
+      "origin_name": "game-pokemon",
+      "category": "game",
+      "render": "Pokémon style, vibrant, cute, anime, fantasy, reminiscent of Pokémon series",
+      "extra_avoid": [
+        "realistic",
+        "modern",
+        "horror",
+        "dystopian",
+        "violent"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "宝可梦童话风",
+      "hint": "适合画可爱怪物和冒险伙伴，色彩明快，带童趣幻想感"
+    },
+    {
+      "key": "game-retro-arcade",
+      "origin_name": "game-retro arcade",
+      "category": "game",
+      "render": "retro arcade style, 8-bit, pixelated, vibrant, classic video game, old school gaming, reminiscent of 80s and 90s arcade games",
+      "extra_avoid": [
+        "modern",
+        "ultra-high resolution",
+        "photorealistic",
+        "3D"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "复古街机像素风",
+      "hint": "适合表现老式街机动作场景，像素颗粒感强，节奏热闹"
+    },
+    {
+      "key": "game-retro-game",
+      "origin_name": "game-retro game",
+      "category": "game",
+      "render": "retro game art, 16-bit, vibrant colors, pixelated, nostalgic, charming, fun",
+      "extra_avoid": [
+        "realistic",
+        "photorealistic",
+        "35mm film",
+        "deformed",
+        "glitch",
+        "low contrast",
+        "noisy"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "16位怀旧像素风",
+      "hint": "适合做经典关卡和角色设计，画面温暖，带浓厚回忆感"
+    },
+    {
+      "key": "game-rpg-fantasy-game",
+      "origin_name": "game-rpg fantasy game",
+      "category": "game",
+      "render": "role-playing game RPG style fantasy, vibrant, immersive, reminiscent of high fantasy RPG games",
+      "extra_avoid": [
+        "sci-fi",
+        "modern",
+        "urban",
+        "futuristic",
+        "low detailed"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "奇幻角色扮演风",
+      "hint": "适合史诗冒险与魔法世界，人物和场景都偏宏大奇幻"
+    },
+    {
+      "key": "game-strategy-game",
+      "origin_name": "game-strategy game",
+      "category": "game",
+      "render": "strategy game style, overhead view, detailed map, units, reminiscent of real-time strategy video games",
+      "extra_avoid": [
+        "first-person view",
+        "modern",
+        "photorealistic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "俯视策略地图风",
+      "hint": "适合战争沙盘和资源布局，强调全局视角与细节分布"
+    },
+    {
+      "key": "game-streetfighter",
+      "origin_name": "game-streetfighter",
+      "category": "game",
+      "render": "Street Fighter style, vibrant, dynamic, arcade, 2D fighting game, reminiscent of Street Fighter series",
+      "extra_avoid": [
+        "3D",
+        "realistic",
+        "modern",
+        "photorealistic",
+        "turn-based strategy"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "街机格斗热血风",
+      "hint": "适合双人格斗与招式对决，动作夸张，冲击感强烈"
+    },
+    {
+      "key": "game-zelda",
+      "origin_name": "game-zelda",
+      "category": "game",
+      "render": "Legend of Zelda style, vibrant, fantasy, heroic, reminiscent of The Legend of Zelda series",
+      "extra_avoid": [
+        "sci-fi",
+        "modern",
+        "realistic",
+        "horror"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "勇者冒险奇幻风",
+      "hint": "适合森林遗迹与英雄旅程，画面明亮，带探索感"
+    },
+    {
+      "key": "sai-3d-model",
+      "origin_name": "sai-3d-model",
+      "category": "general",
+      "render": "professional 3d model, octane render, volumetric, dramatic lighting",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "low poly",
+        "blurry",
+        "painting"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "写实三维模型",
+      "hint": "适合人物与物件建模，光影厚重，像游戏宣传图。"
+    },
+    {
+      "key": "sai-analog-film",
+      "origin_name": "sai-analog film",
+      "category": "general",
+      "render": "analog film photo, faded film, desaturated, 35mm photo, grainy, vignette, vintage, Kodachrome, Lomography, stained, found footage",
+      "extra_avoid": [
+        "painting",
+        "drawing",
+        "illustration",
+        "glitch",
+        "deformed",
+        "mutated",
+        "cross-eyed",
+        "ugly",
+        "disfigured"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "复古胶片摄影",
+      "hint": "适合街拍和生活纪实，色彩发旧，颗粒与漏光明显。"
+    },
+    {
+      "key": "sai-anime",
+      "origin_name": "sai-anime",
+      "category": "general",
+      "render": "anime artwork, anime style, key visual, vibrant, studio anime",
+      "extra_avoid": [
+        "photo",
+        "deformed",
+        "black and white",
+        "realism",
+        "disfigured",
+        "low contrast"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "日系动画插画",
+      "hint": "适合角色与海报构图，线条干净，色彩明快有冲击。"
+    },
+    {
+      "key": "sai-cinematic",
+      "origin_name": "sai-cinematic",
+      "category": "general",
+      "render": "cinematic film still, shallow depth of field, vignette, bokeh, cinemascope, moody, film grain, grainy",
+      "extra_avoid": [
+        "anime",
+        "cartoon",
+        "graphic",
+        "text",
+        "painting",
+        "crayon",
+        "graphite",
+        "abstract",
+        "glitch",
+        "deformed",
+        "mutated",
+        "ugly",
+        "disfigured"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "电影感镜头",
+      "hint": "适合故事场景和人物特写，景深浅，氛围偏克制。"
+    },
+    {
+      "key": "sai-comic-book",
+      "origin_name": "sai-comic book",
+      "category": "general",
+      "render": "comic, graphic illustration, comic art, graphic novel art, vibrant",
+      "extra_avoid": [
+        "photograph",
+        "deformed",
+        "glitch",
+        "noisy",
+        "realistic",
+        "stock photo"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "美漫图像叙事",
+      "hint": "适合动作角色和分镜画面，轮廓鲜明，色彩饱满。"
+    },
+    {
+      "key": "sai-craft-clay",
+      "origin_name": "sai-craft clay",
+      "category": "general",
+      "render": "play-doh style, sculpture, clay art, centered composition, Claymation",
+      "extra_avoid": [
+        "sloppy",
+        "messy",
+        "grainy",
+        "ultra textured",
+        "photo"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "黏土手作造型",
+      "hint": "适合玩偶和童趣场景，形体圆润，像手工定格动画。"
+    },
+    {
+      "key": "sai-digital-art",
+      "origin_name": "sai-digital art",
+      "category": "general",
+      "render": "concept art, digital artwork, illustrative, painterly, matte painting",
+      "extra_avoid": [
+        "photo",
+        "photorealistic",
+        "realism",
+        "ugly"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "数字概念绘画",
+      "hint": "适合设定图与场景草图，笔触自由，层次偏绘画感。"
+    },
+    {
+      "key": "sai-enhance",
+      "origin_name": "sai-enhance",
+      "category": "general",
+      "render": "breathtaking",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "distorted",
+        "grainy"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "细节强化优化",
+      "hint": "适合在原图上提升层次，让画面更聚焦更清晰。"
+    },
+    {
+      "key": "sai-fantasy-art",
+      "origin_name": "sai-fantasy art",
+      "category": "general",
+      "render": "ethereal fantasy concept art of, magnificent, celestial, ethereal, painterly, majestic, magical, fantasy art, cover art, dreamy",
+      "extra_avoid": [
+        "photographic",
+        "realistic",
+        "realism",
+        "35mm film",
+        "dslr",
+        "cropped",
+        "frame",
+        "text",
+        "deformed",
+        "glitch",
+        "noise",
+        "noisy",
+        "off-center",
+        "cross-eyed",
+        "closed eyes",
+        "bad anatomy",
+        "ugly",
+        "disfigured",
+        "sloppy",
+        "duplicate",
+        "mutated",
+        "black and white"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "奇幻史诗绘画",
+      "hint": "适合魔法世界与神话角色，气氛华丽，带梦幻感。"
+    },
+    {
+      "key": "sai-isometric",
+      "origin_name": "sai-isometric",
+      "category": "general",
+      "render": "isometric style, vibrant, crisp, intricate",
+      "extra_avoid": [
+        "deformed",
+        "mutated",
+        "ugly",
+        "disfigured",
+        "blur",
+        "blurry",
+        "noise",
+        "noisy",
+        "realistic",
+        "photographic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "等距视角插画",
+      "hint": "适合建筑、地图和物件展示，透视统一，结构清楚。"
+    },
+    {
+      "key": "sai-line-art",
+      "origin_name": "sai-line art",
+      "category": "general",
+      "render": "line art drawing, sleek, modern, minimalist, graphic, line art, vector graphics",
+      "extra_avoid": [
+        "anime",
+        "photorealistic",
+        "35mm film",
+        "deformed",
+        "glitch",
+        "blurry",
+        "noisy",
+        "off-center",
+        "cross-eyed",
+        "closed eyes",
+        "bad anatomy",
+        "ugly",
+        "disfigured",
+        "mutated",
+        "realism",
+        "realistic",
+        "impressionism",
+        "expressionism",
+        "oil",
+        "acrylic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "极简线描风格",
+      "hint": "适合标志、人物轮廓与说明图，线条利落，留白多。"
+    },
+    {
+      "key": "sai-lowpoly",
+      "origin_name": "sai-lowpoly",
+      "category": "general",
+      "render": "low-poly style, low-poly game art, polygon mesh, jagged, blocky, wireframe edges, centered composition",
+      "extra_avoid": [
+        "noisy",
+        "sloppy",
+        "messy",
+        "grainy",
+        "ultra textured",
+        "photo"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "低多边形风格",
+      "hint": "适合游戏场景和角色模型，形体块面化，几何感强。"
+    },
+    {
+      "key": "sai-neonpunk",
+      "origin_name": "sai-neonpunk",
+      "category": "general",
+      "render": "neonpunk style, cyberpunk, vaporwave, neon, vibes, vibrant, stunningly beautiful, crisp, sleek, ultramodern, magenta highlights, dark purple shadows, high contrast, cinematic, intricate",
+      "extra_avoid": [
+        "painting",
+        "drawing",
+        "illustration",
+        "glitch",
+        "deformed",
+        "mutated",
+        "cross-eyed",
+        "ugly",
+        "disfigured"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "霓虹赛博风",
+      "hint": "适合未来都市、机甲夜景，强对比霓虹与暗紫阴影"
+    },
+    {
+      "key": "sai-origami",
+      "origin_name": "sai-origami",
+      "category": "general",
+      "render": "origami style, paper art, pleated paper, folded, origami art, pleats, cut and fold, centered composition",
+      "extra_avoid": [
+        "noisy",
+        "sloppy",
+        "messy",
+        "grainy",
+        "ultra textured",
+        "photo"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "折纸纸艺风",
+      "hint": "适合人物或动物纸艺造型，画面以折痕层次和留白为主"
+    },
+    {
+      "key": "sai-photographic",
+      "origin_name": "sai-photographic",
+      "category": "general",
+      "render": "cinematic photo, 35mm photograph, film, bokeh",
+      "extra_avoid": [
+        "drawing",
+        "painting",
+        "crayon",
+        "sketch",
+        "graphite",
+        "impressionist",
+        "noisy",
+        "blurry",
+        "soft",
+        "deformed",
+        "ugly"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "电影感摄影风",
+      "hint": "适合人物街拍或场景纪实，带胶片颗粒与柔和虚化"
+    },
+    {
+      "key": "sai-pixel-art",
+      "origin_name": "sai-pixel art",
+      "category": "general",
+      "render": "pixel-art, low-res, blocky, pixel art style, 8-bit graphics",
+      "extra_avoid": [
+        "sloppy",
+        "messy",
+        "blurry",
+        "noisy",
+        "ultra textured",
+        "photo",
+        "realistic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "像素复古风",
+      "hint": "适合游戏角色和场景，画面由方块像素组成，复古感强"
+    },
+    {
+      "key": "sai-texture",
+      "origin_name": "sai-texture",
+      "category": "general",
+      "render": "texture top down close-up",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT) · Stability 官方风格",
+      "builtin": true,
+      "label": "俯视纹理风",
+      "hint": "适合材质、布料、地面细节，突出表面纹路与近景质感"
+    },
+    {
+      "key": "misc-architectural",
+      "origin_name": "misc-architectural",
+      "category": "misc",
+      "render": "architectural style, clean lines, geometric shapes, minimalist, modern, architectural drawing",
+      "extra_avoid": [
+        "curved lines",
+        "ornate",
+        "baroque",
+        "abstract",
+        "grunge"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "极简建筑线稿风",
+      "hint": "适合建筑草图和空间构成，线条干净，几何感清晰"
+    },
+    {
+      "key": "misc-disco",
+      "origin_name": "misc-disco",
+      "category": "misc",
+      "render": "disco-themed, vibrant, groovy, retro 70s style, shiny disco balls, neon lights, dance floor",
+      "extra_avoid": [
+        "minimalist",
+        "rustic",
+        "monochrome",
+        "contemporary",
+        "simplistic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "迪斯科霓虹风",
+      "hint": "适合舞池派对和闪亮装饰，色彩跳跃，带七十年代律动"
+    },
+    {
+      "key": "misc-dreamscape",
+      "origin_name": "misc-dreamscape",
+      "category": "misc",
+      "render": "dreamscape, surreal, ethereal, dreamy, mysterious, fantasy",
+      "extra_avoid": [
+        "realistic",
+        "concrete",
+        "ordinary",
+        "mundane"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "梦境幻游风",
+      "hint": "适合表现超现实场景和朦胧意象，气氛轻柔神秘"
+    },
+    {
+      "key": "misc-dystopian",
+      "origin_name": "misc-dystopian",
+      "category": "misc",
+      "render": "dystopian style, bleak, post-apocalyptic, somber, dramatic",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "cheerful",
+        "optimistic",
+        "vibrant",
+        "colorful"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "末世压抑风",
+      "hint": "适合废土城市和崩坏世界，色调阴冷，情绪沉重"
+    },
+    {
+      "key": "misc-fairy-tale",
+      "origin_name": "misc-fairy tale",
+      "category": "misc",
+      "render": "fairy tale, magical, fantastical, enchanting, storybook style",
+      "extra_avoid": [
+        "realistic",
+        "modern",
+        "ordinary",
+        "mundane"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "童话绘本风",
+      "hint": "适合讲述魔法故事和森林城堡，画面温柔，像插图"
+    },
+    {
+      "key": "misc-gothic",
+      "origin_name": "misc-gothic",
+      "category": "misc",
+      "render": "gothic style, dark, mysterious, haunting, dramatic, ornate",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "realism",
+        "photorealistic",
+        "cheerful",
+        "optimistic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "哥特暗黑风",
+      "hint": "适合教堂、古堡与人物特写，营造阴郁神秘氛围"
+    },
+    {
+      "key": "misc-grunge",
+      "origin_name": "misc-grunge",
+      "category": "misc",
+      "render": "grunge style, textured, distressed, vintage, edgy, punk rock vibe, dirty, noisy",
+      "extra_avoid": [
+        "smooth",
+        "clean",
+        "minimalist",
+        "sleek",
+        "modern",
+        "photorealistic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "做旧涂鸦风",
+      "hint": "适合街头海报和朋克人物，画面粗粝带噪点"
+    },
+    {
+      "key": "misc-horror",
+      "origin_name": "misc-horror",
+      "category": "misc",
+      "render": "horror-themed, eerie, unsettling, dark, spooky, suspenseful, grim",
+      "extra_avoid": [
+        "cheerful",
+        "bright",
+        "vibrant",
+        "light-hearted",
+        "cute"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "惊悚恐怖风",
+      "hint": "适合鬼屋、怪影与悬疑场景，压迫感强"
+    },
+    {
+      "key": "misc-kawaii",
+      "origin_name": "misc-kawaii",
+      "category": "misc",
+      "render": "kawaii style, cute, adorable, brightly colored, cheerful, anime influence",
+      "extra_avoid": [
+        "dark",
+        "scary",
+        "realistic",
+        "monochrome",
+        "abstract"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "可爱萌系风",
+      "hint": "适合少女、宠物和甜点题材，色彩明快活泼"
+    },
+    {
+      "key": "misc-lovecraftian",
+      "origin_name": "misc-lovecraftian",
+      "category": "misc",
+      "render": "lovecraftian horror, eldritch, cosmic horror, unknown, mysterious, surreal",
+      "extra_avoid": [
+        "light-hearted",
+        "mundane",
+        "familiar",
+        "simplistic",
+        "realistic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "克苏鲁怪诞风",
+      "hint": "适合深海异形与宇宙恐惧场景，神秘而扭曲"
+    },
+    {
+      "key": "misc-macabre",
+      "origin_name": "misc-macabre",
+      "category": "misc",
+      "render": "macabre style, dark, gothic, grim, haunting",
+      "extra_avoid": [
+        "bright",
+        "cheerful",
+        "light-hearted",
+        "cartoonish",
+        "cute"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "阴森死亡风",
+      "hint": "适合骷髅、墓地与黑暗寓言，气氛冷峻"
+    },
+    {
+      "key": "misc-manga",
+      "origin_name": "misc-manga",
+      "category": "misc",
+      "render": "manga style, vibrant, high-energy, iconic, Japanese comic style",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "realism",
+        "photorealistic",
+        "Western comic style"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "日漫热血风",
+      "hint": "适合动作角色和剧情分镜，线条鲜明节奏强"
+    },
+    {
+      "key": "misc-metropolis",
+      "origin_name": "misc-metropolis",
+      "category": "misc",
+      "render": "metropolis-themed, urban, cityscape, skyscrapers, modern, futuristic",
+      "extra_avoid": [
+        "rural",
+        "natural",
+        "rustic",
+        "historical",
+        "simple"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "都市未来风",
+      "hint": "适合摩天楼、霓虹街景和科幻城市，现代感强"
+    },
+    {
+      "key": "misc-minimalist",
+      "origin_name": "misc-minimalist",
+      "category": "misc",
+      "render": "minimalist style, simple, clean, uncluttered, modern, elegant",
+      "extra_avoid": [
+        "ornate",
+        "complicated",
+        "cluttered",
+        "disordered",
+        "messy",
+        "noisy"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "极简留白风",
+      "hint": "适合图标、海报和静物构图，画面干净克制"
+    },
+    {
+      "key": "misc-monochrome",
+      "origin_name": "misc-monochrome",
+      "category": "misc",
+      "render": "monochrome, black and white, contrast, tone, texture",
+      "extra_avoid": [
+        "colorful",
+        "vibrant",
+        "noisy",
+        "blurry",
+        "deformed"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "黑白单色风",
+      "hint": "适合肖像、建筑和情绪题材，强调明暗层次"
+    },
+    {
+      "key": "misc-nautical",
+      "origin_name": "misc-nautical",
+      "category": "misc",
+      "render": "nautical-themed, sea, ocean, ships, maritime, beach, marine life",
+      "extra_avoid": [
+        "landlocked",
+        "desert",
+        "mountains",
+        "urban",
+        "rustic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "海洋航海风",
+      "hint": "适合船只、海岸与海洋生物，带清爽冒险感"
+    },
+    {
+      "key": "misc-space",
+      "origin_name": "misc-space",
+      "category": "misc",
+      "render": "space-themed, cosmic, celestial, stars, galaxies, nebulas, planets, science fiction",
+      "extra_avoid": [
+        "earthly",
+        "mundane",
+        "ground-based",
+        "realism"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "星际宇宙风",
+      "hint": "适合星云、行星和太空场景，画面浩瀚梦幻"
+    },
+    {
+      "key": "misc-stained-glass",
+      "origin_name": "misc-stained glass",
+      "category": "misc",
+      "render": "stained glass style, vibrant, translucent, intricate",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "realism",
+        "photorealistic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "彩绘玻璃风",
+      "hint": "适合教堂窗饰和奇幻图案，色彩通透且线条分明。"
+    },
+    {
+      "key": "misc-techwear-fashion",
+      "origin_name": "misc-techwear fashion",
+      "category": "misc",
+      "render": "techwear fashion, futuristic, cyberpunk, urban, tactical, sleek, dark",
+      "extra_avoid": [
+        "vintage",
+        "rural",
+        "colorful",
+        "low contrast",
+        "realism",
+        "sketch",
+        "watercolor"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "机能都市风",
+      "hint": "适合未来街头穿搭，黑灰利落，带战术感。"
+    },
+    {
+      "key": "misc-tribal",
+      "origin_name": "misc-tribal",
+      "category": "misc",
+      "render": "tribal style, indigenous, ethnic, traditional patterns, bold, natural colors",
+      "extra_avoid": [
+        "modern",
+        "futuristic",
+        "minimalist",
+        "pastel"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "部落纹饰风",
+      "hint": "适合原住民题材与图腾服饰，线条粗犷，色调朴实。"
+    },
+    {
+      "key": "misc-zentangle",
+      "origin_name": "misc-zentangle",
+      "category": "misc",
+      "render": "zentangle, intricate, abstract, monochrome, patterns, meditative",
+      "extra_avoid": [
+        "colorful",
+        "representative",
+        "simplistic",
+        "large fields of color"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "禅绕线描风",
+      "hint": "适合抽象填充和冥想插画，黑白密集，图案繁复。"
+    },
+    {
+      "key": "photo-alien",
+      "origin_name": "photo-alien",
+      "category": "photo",
+      "render": "alien-themed, extraterrestrial, cosmic, otherworldly, mysterious, sci-fi",
+      "extra_avoid": [
+        "earthly",
+        "mundane",
+        "common",
+        "realistic",
+        "simple"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "外星科幻摄影",
+      "hint": "适合宇宙生物和异星场景，气氛神秘陌生"
+    },
+    {
+      "key": "photo-film-noir",
+      "origin_name": "photo-film noir",
+      "category": "photo",
+      "render": "film noir style, monochrome, high contrast, dramatic shadows, 1940s style, mysterious, cinematic",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "realism",
+        "photorealistic",
+        "vibrant",
+        "colorful"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "黑色电影摄影",
+      "hint": "适合悬疑人物与旧城夜景，强烈明暗对比"
+    },
+    {
+      "key": "photo-glamour",
+      "origin_name": "photo-glamour",
+      "category": "photo",
+      "render": "glamorous photo, high fashion, luxurious, extravagant, stylish, sensual, opulent, elegance, stunning beauty, high contrast",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "distorted",
+        "grainy",
+        "sketch",
+        "low contrast",
+        "dull",
+        "plain",
+        "modest"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "奢华时尚摄影",
+      "hint": "适合名模珠宝与派对场景，气质华丽性感"
+    },
+    {
+      "key": "photo-hdr",
+      "origin_name": "photo-hdr",
+      "category": "photo",
+      "render": "HDR photo of, High dynamic range, vivid, rich details, clear shadows and highlights, realistic, intense, enhanced contrast",
+      "extra_avoid": [
+        "flat",
+        "low contrast",
+        "oversaturated",
+        "underexposed",
+        "overexposed",
+        "blurred",
+        "noisy"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "高动态摄影风",
+      "hint": "适合风景建筑与细节展示，明暗层次丰富"
+    },
+    {
+      "key": "photo-iphone-photographic",
+      "origin_name": "photo-iphone photographic",
+      "category": "photo",
+      "render": "iphone photo, large depth of field, deep depth of field",
+      "extra_avoid": [
+        "drawing",
+        "painting",
+        "crayon",
+        "sketch",
+        "graphite",
+        "impressionist",
+        "noisy",
+        "blurry",
+        "soft",
+        "deformed",
+        "ugly",
+        "shallow depth of field",
+        "bokeh"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "手机纪实摄影",
+      "hint": "适合日常街拍和随手记录，画面自然清晰"
+    },
+    {
+      "key": "photo-long-exposure",
+      "origin_name": "photo-long exposure",
+      "category": "photo",
+      "render": "long exposure photo of, Blurred motion, streaks of light, surreal, dreamy, ghosting effect",
+      "extra_avoid": [
+        "static",
+        "noisy",
+        "deformed",
+        "shaky",
+        "abrupt",
+        "flat",
+        "low contrast"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "长曝光摄影风",
+      "hint": "适合车流夜景和水景，带出流动光轨感"
+    },
+    {
+      "key": "photo-neon-noir",
+      "origin_name": "photo-neon noir",
+      "category": "photo",
+      "render": "neon noir, cyberpunk, dark, rainy streets, neon signs, high contrast, low light, vibrant",
+      "extra_avoid": [
+        "bright",
+        "sunny",
+        "daytime",
+        "low contrast",
+        "black and white",
+        "sketch",
+        "watercolor"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "霓虹黑色摄影",
+      "hint": "适合赛博城市与雨夜街头，冷艳压抑又鲜亮"
+    },
+    {
+      "key": "photo-silhouette",
+      "origin_name": "photo-silhouette",
+      "category": "photo",
+      "render": "silhouette style, high contrast, minimalistic, black and white, stark, dramatic",
+      "extra_avoid": [
+        "ugly",
+        "deformed",
+        "noisy",
+        "blurry",
+        "low contrast",
+        "color",
+        "realism",
+        "photorealistic"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "剪影摄影风",
+      "hint": "适合人物轮廓和落日场景，强调形体对比"
+    },
+    {
+      "key": "photo-tilt-shift",
+      "origin_name": "photo-tilt-shift",
+      "category": "photo",
+      "render": "tilt-shift photo of, selective focus, miniature effect, blurred background, vibrant, perspective control",
+      "extra_avoid": [
+        "blurry",
+        "noisy",
+        "deformed",
+        "flat",
+        "low contrast",
+        "unrealistic",
+        "oversaturated",
+        "underexposed"
+      ],
+      "source": "twri/sdxl_prompt_styler (MIT)",
+      "builtin": true,
+      "label": "移轴微缩摄影",
+      "hint": "适合城市俯拍和玩具感画面，呈现微缩错觉"
+    }
+  ]
+}

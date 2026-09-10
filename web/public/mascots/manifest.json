@@ -1,0 +1,5 @@
+[
+  { "id": "shizuku", "name": "Shizuku", "path": "/mascots/shizuku/shizuku.model.json", "scale": 1.35, "offsetY": 0 },
+  { "id": "tororo", "name": "Tororo（白猫）", "path": "/mascots/tororo/tororo.model.json", "scale": 1, "offsetY": 10 },
+  { "id": "hijiki", "name": "Hijiki（黑猫）", "path": "/mascots/hijiki/hijiki.model.json", "scale": 1, "offsetY": 10 }
+]

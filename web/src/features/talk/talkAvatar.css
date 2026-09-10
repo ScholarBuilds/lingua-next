@@ -1,0 +1,96 @@
+.rt-center.rt-with-avatar {
+  position: relative;
+  isolation: isolate;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 20px 28px;
+  overflow: hidden;
+}
+.rt-with-avatar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: url('/brand/image2/conversation-room.webp') center / cover no-repeat;
+}
+.rt-with-avatar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent 50%, var(--bg-paper) 88%);
+}
+[data-theme='dark'] .rt-with-avatar::before { filter: brightness(0.38) saturate(0.65); }
+.rt-with-avatar .talk-avatar-toolbar {
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--bg-paper) 90%, transparent);
+  border-radius: var(--radius-md);
+  color: var(--ink-secondary);
+}
+.talk-avatar-toolbar {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+.talk-avatar {
+  position: relative;
+  flex: 1 1 340px;
+  min-height: 160px;
+  width: 100%;
+  max-width: 760px;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, black 90%, transparent);
+}
+.talk-avatar-canvas {
+  position: absolute;
+  inset: 0;
+}
+.talk-avatar-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.talk-avatar-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--ink-muted);
+}
+.talk-avatar-note {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+.rt-with-avatar .rt-caps {
+  flex: 0 1 160px;
+  min-height: 72px;
+  max-height: 26vh;
+  max-width: 760px;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  background: var(--bg-paper);
+}
+.rt-with-avatar .rt-status {
+  flex-shrink: 0;
+  color: var(--ink-secondary);
+}
+@media (max-height: 600px) {
+  .rt-center.rt-with-avatar { gap: 6px; padding: 8px 16px; }
+  .talk-avatar { min-height: 100px; }
+  .rt-with-avatar .rt-caps { flex-basis: 96px; min-height: 48px; }
+}
+@media (max-width: 760px) {
+  .rt-center.rt-with-avatar { padding-inline: 12px; }
+  .talk-avatar-toolbar { flex-wrap: wrap; gap: 6px; }
+}

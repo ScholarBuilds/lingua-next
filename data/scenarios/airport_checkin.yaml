@@ -1,0 +1,18 @@
+key: airport_checkin
+title: 机场值机
+title_en: Airport Check-in
+level: B1
+role_ai: 航空公司值机柜台职员
+role_user: 办理值机的旅客
+goal: 完成值机：出示护照和机票、托运行李、选座位、确认登机口和登机时间
+opening_line: "Good morning! May I see your passport and ticket, please?"
+key_sentences:
+  - en: "I'd like a window seat if possible."
+    zh: "如果可以的话，我想要靠窗的座位。"
+  - en: "How many bags can I check in for free?"
+    zh: "我可以免费托运几件行李？"
+  - en: "Which gate does the flight board from?"
+    zh: "航班在哪个登机口登机？"
+hints:
+  - 主动递上护照和行程单，说明目的地和航班号
+  - 托运前问清行李限重，最后确认登机口和登机时间

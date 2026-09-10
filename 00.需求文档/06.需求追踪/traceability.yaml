@@ -1,0 +1,273 @@
+schema_version: "1.0"
+items:
+  - requirement_id: REQ-NAV-LEARNING-FOCUS
+    design_refs: ["00.需求文档/02.功能需求/18.邮件与Google账号/需求说明.md"]
+    code_refs: ["web/src/App.tsx"]
+    test_refs: []
+    evidence: "内置浏览器主导航无邮件、账号与凭据、扩展及账号/系统分组；类型与 UI 检查通过。"
+    release_refs: []
+    status: implemented
+    owner: scholar
+  - requirement_id: REQ-DICT-SEARCH-RESPONSIVENESS
+    design_refs: ["00.需求文档/02.功能需求/01.词库与背单词/需求说明.md"]
+    code_refs: ["web/src/features/vocab/dict/DictPane.tsx", "web/src/lib/api.ts", "server/domain/dict_search.py", "server/migrations/versions/d0e1f2a3b4c5_dict_gloss_cover.py"]
+    test_refs: ["web/src/lib/dictSearch.test.ts", "server/tests/test_dict_search.py", "server/tests/test_dict_search_migration.py"]
+    release_refs: []
+    status: implemented
+    owner: scholar
+  - requirement_id: REQ-DECK-SCOPE-RETENTION
+    design_refs: ["00.需求文档/02.功能需求/01.词库与背单词/需求说明.md"]
+    code_refs: ["web/src/features/vocab/useDeckItems.ts", "web/src/features/vocab/DeckDetail.tsx", "web/src/features/vocab/DeckSelfTest.tsx"]
+    test_refs: ["web/src/features/vocab/useDeckItems.test.ts", "web/src/features/vocab/DeckSelfTest.test.tsx"]
+    release_refs: []
+    status: implemented
+    owner: scholar
+  - requirement_id: REQ-LEARNING-WORD-PERSISTENCE
+    design_refs: ["00.需求文档/02.功能需求/01.词库与背单词/需求说明.md"]
+    code_refs: ["server/app/routers/wordlists.py", "server/app/routers/practice.py", "server/migrations/versions/c9d0e1f2a3b4_normalize_learning_words.py", "web/src/features/vocab/DeckDetail.tsx"]
+    test_refs: ["server/tests/test_learning_word_normalization.py", "server/tests/test_practice.py", "server/tests/test_wordlist_sql_paging.py"]
+    release_refs: []
+    status: implemented
+    owner: scholar
+  - requirement_id: REQ-LEARNING-STATE-SYNCHRONIZATION
+    design_refs: ["00.需求文档/02.功能需求/01.词库与背单词/需求说明.md"]
+    code_refs: ["server/app/routers/wordlists.py", "server/domain/decks.py", "web/src/lib/learningSync.ts", "web/src/lib/http.ts", "web/src/features/vocab/DeckSelfTest.tsx"]
+    test_refs: ["server/tests/test_wordlist_sql_paging.py", "web/src/lib/learningSync.test.ts"]
+    release_refs: []
+    status: implemented
+    owner: scholar
+  - requirement_id: REQ-DICTIONARY-INDEPENDENT-PAGE
+    design_refs: ["00.需求文档/02.功能需求/01.词库与背单词/需求说明.md"]
+    code_refs: ["web/src/features/vocab/dict/DictPage.tsx", "web/src/features/reader/WordCard.tsx", "web/src/features/vocab/DeckSelfTest.tsx", "web/src/main.tsx", "server/app/routers/workspace.py"]
+    test_refs: ["web/src/features/vocab/DeckSelfTest.test.tsx", "web/src/lib/railTarget.test.ts", "server/tests/test_workspace_learning.py"]
+    release_refs: []
+    status: implemented
+    owner: scholar
+  - requirement_id: REQ-WORD-CARD-SHARED-AUDIO
+    design_refs: ["00.需求文档/02.功能需求/06.朗读与语音中心/需求说明.md"]
+    code_refs: ["web/src/features/reader/WordCard.tsx", "web/src/features/reader/WordBreakdown.tsx", "web/src/components/VoicePicker.tsx", "server/domain/tts_preload.py", "server/domain/mac_tts.py", "server/domain/deck_ai.py", "server/app/routers/workspace.py"]
+    test_refs: ["server/tests/test_tts_preload.py", "server/tests/test_deck_ai.py", "server/tests/test_vocab.py", "server/tests/test_default_model.py", "server/tests/test_workspace_learning.py"]
+    release_refs: []
+    status: implemented
+    owner: scholar
+  - requirement_id: REQ-ENGLISH-LECTURE-COLLECTIONS
+    design_refs: ["00.需求文档/02.功能需求/15.语法概念专栏与句子解构/需求说明.md"]
+    code_refs: ["server/app/routers/grammar_docs.py", "web/src/features/grammar/GrammarPage.tsx", "web/src/features/grammar/library/GrammarLibrary.tsx", "web/src/features/grammar/library/Outline.tsx", "web/src/lib/api-grammar-docs.ts", "web/src/features/settings/LectureLibrarySetup.tsx"]
+    test_refs: ["server/tests/test_grammar_docs.py", "web/src/features/grammar/GrammarPage.test.tsx"]
+    release_refs: []
+    status: implemented
+    owner: scholar
+  - requirement_id: REQ-VOCAB-MASK-SELF-TEST
+    design_refs: ["00.需求文档/02.功能需求/01.词库与背单词/02.单词本与AI场景本.md"]
+    code_refs: ["web/src/features/vocab/DeckSelfTest.tsx", "web/src/features/vocab/MaskedText.tsx", "web/src/features/vocab/DeckDetail.tsx", "web/src/features/vocab/deck.css", "web/src/lib/api-deck.ts", "server/domain/study_stage.py", "server/domain/decks.py", "server/app/routers/wordlists.py"]
+    test_refs: ["web/src/features/vocab/DeckSelfTest.test.tsx", "server/tests/test_study_stage.py", "server/tests/test_wordlist_sql_paging.py", "server/tests/test_reset_progress.py"]
+    release_refs: []
+    status: implemented
+    owner: scholar
+  - requirement_id: REQ-GRAMMAR-VOICE
+    design_refs: ["00.需求文档/07.需求变更/26.CR-026-语法分析上下文语音答疑.md"]
+    code_refs: ["web/src/features/grammar/GrammarVoice.tsx", "web/src/features/mascot/useInlineVoiceCompanion.ts", "server/domain/grammar_voice.py", "server/app/routers/realtime.py"]
+    test_refs: ["web/src/features/grammar/GrammarVoice.test.tsx", "web/src/features/mascot/useInlineVoiceCompanion.test.ts", "server/tests/test_grammar_voice.py"]
+    release_refs: []
+    status: implemented
+    owner: scholar
+  - requirement_id: REQ-PIPELINE
+    design_refs: ["00.需求文档/02.功能需求/12.管线编排/需求说明.md"]
+    code_refs: ["server/domain/pipeline.py", "server/domain/artifacts.py", "server/domain/scenario_decks.py"]
+    test_refs: []
+    release_refs: ["M24"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-VOCAB
+    design_refs: ["00.需求文档/02.功能需求/01.词库与背单词/需求说明.md", "00.需求文档/02.功能需求/01.词库与背单词/02.单词本与AI场景本.md"]
+    code_refs: ["web/src/features/vocab/listenStore.ts", "web/src/features/vocab/ListenBar.tsx", "web/src/features/vocab/ListenGlobal.tsx", "web/src/features/vocab/listenResume.ts", "web/src/features/vocab/listenKeys.ts", "web/src/features/vocab/spokenMeaning.ts", "web/src/features/vocab/DeckMaintenance.tsx", "web/src/features/vocab/DeckDetail.tsx", "web/src/features/vocab/VocabPage.tsx", "web/src/components/Topbar.tsx", "web/src/lib/navHistory.ts", "web/src/features/vocab/GroupDrillPane.tsx", "web/src/components/WordVoicePicker.tsx", "web/src/lib/api-tts.ts", "web/src/lib/api-deck.ts", "server/app/routers/tts.py", "server/app/routers/wordlists.py", "server/domain/decks.py", "server/domain/deck_ai.py", "server/domain/tts_cache.py", "server/domain/study_reset.py", "server/domain/models.py", "server/domain/dict_search.py", "server/domain/dict_search_build.py", "server/domain/dict_forms.py", "server/domain/dict_gloss.py", "server/scripts/seed_dict_search.py", "server/app/routers/dict.py", "server/app/routers/analyze.py", "web/src/features/vocab/dict/DictPane.tsx", "web/src/features/vocab/dict/DictResults.tsx", "web/src/features/vocab/dict/dictQuery.ts", "web/src/features/vocab/dict/dictStore.ts", "web/src/components/CommandPalette.tsx", "web/src/components/commandItems.ts"]
+    test_refs: ["web/src/features/vocab/listenStore.test.ts", "web/src/lib/navHistory.test.ts", "web/src/features/vocab/spokenMeaning.test.ts", "web/src/lib/audio.test.ts", "server/tests/test_word_voice.py", "server/tests/test_deck_words.py", "server/tests/test_tts_cache.py", "server/tests/test_deck_audio_cache.py", "server/tests/test_reset_progress.py", "server/tests/test_deck_ai.py", "server/tests/test_analysis_key.py", "server/tests/test_dict_search.py", "server/tests/test_dict_forms.py", "server/tests/test_dict_gloss.py", "server/tests/test_word_nuance.py", "web/src/features/vocab/dict/dictQuery.test.ts", "web/src/features/vocab/dict/dictStore.test.ts", "web/src/components/commandItems.test.ts"]
+    release_refs: ["M3", "M88", "M89", "M90"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-LIBRARY
+    design_refs: ["00.需求文档/02.功能需求/02.书库与内容导入/需求说明.md"]
+    code_refs: []
+    test_refs: []
+    release_refs: ["M1"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-GRAMMAR-LIBRARY
+    design_refs: ["00.需求文档/02.功能需求/15.语法概念专栏与句子解构/需求说明.md", "00.需求文档/07.需求变更/17.CR-017-桌面SQLite开发档与讲义目录迁移.md", "01.项目文档/02.架构/ADR/ADR-019-桌面SQLite作为默认开发运行档.md"]
+    code_refs: ["server/domain/grammar_library.py", "server/app/routers/grammar_docs.py", "server/scripts/import_grammar_library.py", "web/src/features/grammar/library/GrammarLibrary.tsx", "web/src/features/settings/LectureLibrarySetup.tsx", "web/src/features/settings/DataSection.tsx", "web/src/lib/api-grammar-docs.ts", "web/src/lib/shell.ts", "desktop/src/main.ts", "desktop/src/preload.ts", "tools/launch_nexus.py"]
+    test_refs: ["server/tests/test_grammar_docs.py", "server/tests/test_launch_nexus.py", "web/src/lib/shell.test.ts", "desktop/scripts/probe.mjs"]
+    release_refs: ["M88"]
+    status: implemented
+    owner: scholar
+  - requirement_id: REQ-READER
+    design_refs: ["00.需求文档/02.功能需求/03.精读阅读器与点词学习卡/需求说明.md"]
+    code_refs: []
+    test_refs: []
+    release_refs: ["M1"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-TRANSLATE
+    design_refs: ["00.需求文档/02.功能需求/04.翻译编排与供应商/需求说明.md"]
+    code_refs: []
+    test_refs: []
+    release_refs: ["M1"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-AIEXPLAIN
+    design_refs: ["00.需求文档/02.功能需求/05.AI解释与语法分析/需求说明.md", "01.项目文档/02.架构/ADR/ADR-006-AI解释与翻译结果持久化寻址.md"]
+    code_refs: []
+    test_refs: []
+    release_refs: ["M1"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-TTS
+    design_refs: ["00.需求文档/02.功能需求/06.朗读与语音中心/需求说明.md", "00.需求文档/07.需求变更/19.CR-019-学习交互视觉与对话辅助.md"]
+    code_refs: ["server/domain/azure_speech.py", "server/domain/cloud_tts.py", "server/domain/audio_runtime.py", "server/domain/azure_pronunciation.py", "server/app/routers/pronunciation.py", "server/app/routers/tts.py", "server/app/routers/service_probes.py", "web/src/components/VoicePicker.tsx", "web/src/components/RatePicker.tsx", "web/src/features/settings/VoiceSection.tsx", "web/src/features/settings/ProviderCatalog.tsx", "web/src/features/settings/VoiceProbeButton.tsx", "web/src/features/talk/PronunciationPractice.tsx", "web/src/lib/audio.ts", "web/src/lib/talkStream.ts", "web/src/lib/api-tts.ts", "web/src/components/WordVoicePicker.tsx"]
+    test_refs: ["server/tests/test_azure_speech.py", "server/tests/test_service_probes.py", "server/tests/test_speech_streaming.py", "web/src/features/settings/ProviderCatalog.test.tsx", "web/src/lib/voiceCatalog.test.ts", "web/src/lib/audio.test.ts", "web/src/lib/talkStream.test.ts", "server/tests/test_word_voice.py"]
+    release_refs: ["M1"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-TALK
+    design_refs: ["00.需求文档/02.功能需求/07.AI实时语音对话与陪读/需求说明.md", "01.项目文档/02.架构/ADR/ADR-005-实时语音对话方案.md"]
+    code_refs: ["web/src/features/talk/RealtimeSessionPage.tsx", "web/src/features/talk/TalkAvatar.tsx", "web/src/features/talk/avatarScene.ts", "web/src/features/talk/avatarMotion.ts", "web/src/features/talk/realtimeAudio.ts", "web/public/avatars/README.md", "web/src/features/settings/NetworkSection.tsx", "server/domain/network_policy.py", "server/domain/volc_realtime.py", "server/app/routers/config.py"]
+    test_refs: ["web/src/features/talk/TalkAvatar.test.tsx", "web/src/features/talk/avatarScene.test.ts", "web/src/features/talk/avatarMotion.test.ts", "web/src/features/talk/pcmPlayer.test.ts", "web/tests/fixtures/talk-avatar.html", "server/tests/test_network_policy.py", "server/tests/test_volc_asr.py"]
+    release_refs: ["M2"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-TALK-RECORDS
+    design_refs: ["00.需求文档/07.需求变更/19.CR-019-学习交互视觉与对话辅助.md"]
+    code_refs: ["server/app/routers/talk_records.py", "server/app/routers/realtime.py", "server/domain/models.py", "server/migrations/versions/e9f0a1b2c3d4_talk_records.py", "web/src/features/talk/useAutoCoach.ts", "web/src/features/talk/coachQueue.ts", "web/src/features/talk/TalkRecordsDialog.tsx", "web/src/features/talk/TalkReplaySettings.tsx", "web/src/features/reader/WordModal.tsx"]
+    test_refs: ["server/tests/test_talk_records.py", "server/tests/test_talk_records_migration.py", "web/src/features/talk/coachQueue.test.ts", "web/src/lib/audio.test.ts", "web/tests/fixtures/talk-records.tsx"]
+    release_refs: ["M90"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-SCENE
+    design_refs: ["00.需求文档/02.功能需求/08.场景学习/需求说明.md"]
+    code_refs: []
+    test_refs: []
+    release_refs: ["M2", "M4"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-VIDEO
+    design_refs: ["00.需求文档/02.功能需求/09.视频与字幕学习/需求说明.md"]
+    code_refs: []
+    test_refs: []
+    release_refs: ["M2"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-LLMCONF
+    design_refs: ["00.需求文档/02.功能需求/10.LLM动态配置与成本控制/需求说明.md", "01.项目文档/02.架构/ADR/ADR-004-LLM网关采用LiteLLM动态配置.md", "00.需求文档/07.需求变更/19.CR-019-学习交互视觉与对话辅助.md"]
+    code_refs: ["server/app/routers/usage.py", "web/src/features/settings/UsageSection.tsx", "server/domain/network_policy.py", "server/domain/translate.py", "desktop/src/main.ts", "web/src/features/settings/NetworkSection.tsx", "web/src/features/settings/ProviderCatalog.tsx", "web/src/features/settings/BindingTable.tsx"]
+    test_refs: ["server/tests/test_llm_probe_usage.py", "server/tests/test_network_policy.py", "server/tests/test_translate_free.py", "web/src/features/settings/ProviderCatalog.test.tsx", "desktop/src/api.test.ts"]
+    release_refs: ["M1"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-IMAGE
+    design_refs: ["00.需求文档/02.功能需求/16.生图与视觉资产/需求说明.md", "00.需求文档/02.功能需求/16.生图与视觉资产/调研报告.md", "01.项目文档/02.架构/ADR/ADR-009-生图能力经LiteLLM网关不引入本地扩散栈.md", "00.需求文档/07.需求变更/03.CR-003-token不再是约束.md"]
+    code_refs: ["server/domain/imagegen.py", "server/domain/image_prompts.py", "server/domain/image_assets.py", "server/domain/image_pipeline.py", "server/domain/image_apps.py", "server/domain/image_sizes.py", "server/domain/image_describe.py", "server/domain/image_stream.py", "server/domain/image_batch.py", "server/domain/image_coach.py", "server/domain/image_styles.py", "server/domain/gateway.py", "server/app/routers/images.py", "web/src/features/image/PromptStudio.tsx", "web/src/features/image/StyleStudio.tsx", "web/src/features/image/consoleStore.ts", "web/src/features/image/ResultViewer.tsx", "web/src/features/image/RatioDialog.tsx", "web/src/features/image/ImagePage.tsx"]
+    test_refs: ["server/tests/test_image_prompts.py", "server/tests/test_image_apps.py", "server/tests/test_image_describe.py", "server/tests/test_image_stream.py", "server/tests/test_image_batch.py", "server/tests/test_image_coach.py", "server/tests/test_image_styles.py"]
+    release_refs: ["M24"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-STUDIO
+    design_refs: ["00.需求文档/02.功能需求/17.创作工坊/需求说明.md", "00.需求文档/07.需求变更/04.CR-004-创作工坊立项.md"]
+    code_refs: ["server/domain/studio.py", "server/domain/studio_assets.py", "server/domain/studio_tools.py", "server/domain/studio_prompts.py", "server/domain/studio_gpt.py", "server/domain/studio_templates.py", "server/domain/studio_frames.py", "server/app/routers/studio.py", "web/src/features/studio/StudioHomePage.tsx", "web/src/features/studio/CanvasPage.tsx", "web/src/features/studio/ChatImagePage.tsx", "web/src/features/studio/AssetLibraryPage.tsx", "web/src/features/studio/EnhancePage.tsx", "web/src/features/studio/AnglePage.tsx", "web/src/features/studio/CanvasEditor.tsx", "web/src/features/studio/GptChatPage.tsx", "web/src/features/studio/PromptLibraryPage.tsx", "web/src/features/studio/PanoramaPage.tsx", "web/src/features/studio/GridToolPage.tsx", "web/src/features/studio/MentionInput.tsx"]
+    test_refs: ["server/tests/test_studio.py", "server/tests/test_studio_m2.py", "server/tests/test_studio_m3.py", "server/tests/test_studio_m4.py"]
+    release_refs: ["M53"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-ASSISTANT
+    design_refs: ["00.需求文档/02.功能需求/20.语音助理/需求说明.md", "00.需求文档/07.需求变更/07.CR-007-产品形态扩展为个人本地工作台.md", "00.需求文档/07.需求变更/08.CR-008-常听与唤醒词.md"]
+    code_refs: ["server/domain/assistant.py", "server/domain/briefing.py", "server/domain/routines.py", "server/app/routers/assistant.py", "web/src/features/home/TodayPage.tsx", "web/src/lib/api-assistant.ts", "web/src/lib/recorder.ts"]
+    test_refs: ["server/tests/test_assistant.py"]
+    release_refs: ["M76", "M80", "M87"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-EXTENSION
+    design_refs: ["00.需求文档/02.功能需求/22.扩展与例程/需求说明.md", "00.需求文档/07.需求变更/07.CR-007-产品形态扩展为个人本地工作台.md", "01.项目文档/02.架构/ADR/ADR-010-工具箱经MCP对外暴露.md"]
+    code_refs: ["server/domain/extensions.py", "server/domain/routines.py", "server/app/routers/extensions.py", "server/worker/tasks.py", "web/src/features/extensions/ExtensionsPage.tsx", "web/src/lib/api-extensions.ts", "data/extensions/example/manifest.yaml"]
+    test_refs: ["server/tests/test_extensions.py"]
+    release_refs: ["M78"]
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-VISUAL-SYSTEM
+    design_refs: ["00.需求文档/07.需求变更/18.CR-018-Image2统一视觉系统.md", "00.需求文档/07.需求变更/19.CR-019-学习交互视觉与对话辅助.md"]
+    code_refs: ["web/src/components/NexusIcon.tsx", "web/src/components/NexusVisual.tsx", "web/src/components/BrandIcon.tsx", "web/src/App.tsx", "web/src/styles/tokens.css", "web/src/styles/app.css", "web/public/brand/image2/action-atlas.webp", "web/public/brand/image2/domain-atlas.webp", "web/public/brand/image2/paper-grid.webp", "garden-gpt-image-2/source/app-mark.png", "garden-gpt-image-2/source/anime-action-atlas.png", "garden-gpt-image-2/source/anime-domain-atlas.png", "garden-gpt-image-2/prompt/nexus-anime-icon-system-20260903-120834.md", "desktop/assets/icon.png", "desktop/assets/icon-1024.png", "server/app/routers/vault.py"]
+    test_refs: ["server/tests/test_vault.py", "web/src/lib/shell.test.ts", "desktop/scripts/probe.mjs"]
+    release_refs: ["M89"]
+    status: implemented
+    owner: scholar
+  - requirement_id: REQ-LEARNING-INTERACTION
+    design_refs: ["00.需求文档/07.需求变更/19.CR-019-学习交互视觉与对话辅助.md", "00.需求文档/02.功能需求/01.词库与背单词/需求说明.md", "00.需求文档/02.功能需求/07.AI实时语音对话与陪读/需求说明.md", "00.需求文档/02.功能需求/09.视频与字幕学习/需求说明.md", "00.需求文档/02.功能需求/15.语法概念专栏与句子解构/需求说明.md"]
+    code_refs: ["web/src/components/LearningIcon.tsx", "web/src/features/video/PlayerMenus.tsx", "web/src/features/video/icons.tsx", "web/src/features/reader/PlayerBar.tsx", "web/src/features/vocab/VocabCover.tsx", "web/src/features/vocab/DeckCard.tsx", "web/src/features/vocab/DeckDetail.tsx", "web/src/features/vocab/DeckShelf.tsx", "web/src/features/vocab/deck.css", "server/domain/decks.py", "server/app/routers/wordlists.py", "web/src/features/grammar/GrammarPage.tsx", "web/src/features/grammar/grammar.css", "web/src/features/talk/TalkCoachPanel.tsx", "web/src/features/talk/coachQueue.ts", "web/src/features/talk/scenePanel.css", "web/src/features/talk/talkAvatar.css", "web/public/brand/image2/conversation-room.webp", "web/src/features/talk/ScenePanel.tsx", "web/src/features/talk/RealtimeSessionPage.tsx", "web/src/features/talk/TalkSessionPage.tsx", "web/src/lib/api.ts", "server/domain/talk.py", "server/app/routers/talk.py", "web/public/brand/image2/learning-action-atlas.webp", "web/public/brand/image2/vocab-cover-atlas.webp"]
+    test_refs: ["web/src/components/learning-assets.test.tsx", "web/src/features/talk/TalkWordText.test.tsx", "web/src/features/talk/coachQueue.test.ts", "web/tests/fixtures/talk-avatar.tsx", "server/tests/test_talk.py", "server/tests/test_deck_totals.py", "web/src/features/grammar/library/reader-scroll.test.ts", "web/src/features/grammar/library/doc-model.test.ts"]
+    release_refs: ["M90"]
+    status: implemented
+    owner: scholar
+  - requirement_id: REQ-TALK-LAYOUT
+    design_refs: ["00.需求文档/07.需求变更/23.CR-023-对话场景与助手布局.md"]
+    code_refs: ["web/src/features/talk/TalkScenariosPage.tsx", "web/src/features/talk/talkScenarios.css", "web/src/features/talk/TalkCoachPanel.tsx", "web/src/features/talk/ScenePanel.tsx", "web/src/features/talk/scenePanel.css", "web/src/App.tsx", "web/src/styles/workspace.css"]
+    test_refs: ["web/src/features/talk/TalkLayout.test.tsx", "web/tests/fixtures/talk-records.tsx"]
+    release_refs: []
+    status: implemented
+    owner: scholar
+  - requirement_id: REQ-VOCAB-KEYBOARD-DRILL
+    design_refs: ["00.需求文档/07.需求变更/24.CR-024-键盘速记与巩固闭环.md"]
+    code_refs: ["web/src/features/vocab/GroupDrillPane.tsx", "web/src/features/vocab/QuizStages.tsx", "web/src/features/vocab/drillSession.ts", "web/src/features/vocab/useDrillKeys.ts", "web/src/features/vocab/grouping.ts", "web/src/features/vocab/groupDrill.css"]
+    test_refs: ["web/src/features/vocab/drillSession.test.ts", "web/src/features/vocab/grouping.test.ts", "web/tests/fixtures/vocab-drill.tsx"]
+    release_refs: []
+    status: implemented
+    owner: scholar
+  - requirement_id: REQ-WORKSPACE-LEARNING
+    design_refs: ["00.需求文档/07.需求变更/21.CR-021-页面记忆与语法对话视频学习闭环.md", "01.项目文档/02.架构/ADR/ADR-020-桌面YouTube隔离浏览与在线收藏.md"]
+    code_refs: ["server/app/routers/workspace.py", "server/app/routers/grammar.py", "server/app/routers/grammar_concepts.py", "server/app/routers/videos.py", "server/migrations/versions/f2d3e4f5a6b7_workspace_snapshots.py", "web/src/components/WorkspaceMemory.tsx", "web/src/lib/workspaceStore.ts", "web/src/features/grammar/GrammarPracticePane.tsx", "web/src/features/grammar/library/GrammarLibrary.tsx", "web/src/features/talk/RealtimeSessionPage.tsx", "web/src/features/talk/TalkScenariosPage.tsx", "web/src/features/video/DiscoverPage.tsx", "web/src/features/video/OnlineVideoPanel.tsx"]
+    test_refs: ["server/tests/test_workspace_learning.py", "server/tests/test_workspace_migration.py", "web/src/lib/workspaceStore.test.ts", "01.项目文档/09.测试与质量/03.页面记忆与学习闭环验证.md"]
+    release_refs: []
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-LEARNING-RELIABILITY
+    design_refs: ["00.需求文档/07.需求变更/25.CR-025-数据可靠性与每日学习恢复.md"]
+    code_refs: ["server/domain/learning_receipts.py", "server/domain/study_stage.py", "server/app/routers/wordlists.py", "web/src/lib/prefStore.ts", "web/src/features/studio/canvasStore.ts"]
+    test_refs: ["server/tests/test_learning_reliability.py", "server/tests/test_image_asset_delete.py", "web/src/lib/prefStore.test.ts", "web/src/features/studio/remote-canvas-merge.test.ts"]
+    release_refs: []
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-TASK-RECOVERY
+    design_refs: ["00.需求文档/07.需求变更/25.CR-025-数据可靠性与每日学习恢复.md"]
+    code_refs: ["server/app/queue.py", "server/domain/import_dispatch.py", "server/domain/task_history.py", "server/domain/desktop_migrations.py", "desktop/src/runtime-policy.ts"]
+    test_refs: ["server/tests/test_local_queue.py", "server/tests/test_import_dispatch.py", "server/tests/test_task_history.py", "server/tests/test_desktop_migrations.py", "desktop/src/runtime-policy.test.ts"]
+    release_refs: []
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-TODAY-PLAN
+    design_refs: ["00.需求文档/07.需求变更/25.CR-025-数据可靠性与每日学习恢复.md"]
+    code_refs: ["server/app/routers/home.py", "web/src/features/home/TodayPlan.tsx", "web/src/features/home/dailyPlan.ts"]
+    test_refs: ["server/tests/test_home.py", "web/src/features/home/dailyPlan.test.ts"]
+    release_refs: []
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-MODULE-REFACTOR
+    design_refs: ["00.需求文档/07.需求变更/25.CR-025-数据可靠性与每日学习恢复.md"]
+    code_refs: ["server/domain/study_stage.py", "server/app/routers/wordlists.py", "web/src/main.tsx", "web/src/lib/http.ts", "web/src/features/studio/canvasSaveQueue.ts", "web/src/features/studio/canvasRemoteMerge.ts", "web/src/features/studio/canvasClipboard.ts", "web/src/features/studio/canvasRunState.ts"]
+    test_refs: ["server/tests/test_wordlist_sql_paging.py", "web/src/lib/http.test.ts", "web/src/components/RouteError.test.tsx", "web/src/features/studio/remote-canvas-merge.test.ts", "web/src/features/studio/cascade-run-waiter.test.ts", "desktop/src/update-manifest.test.ts"]
+    release_refs: []
+    status: partial
+    owner: scholar
+  - requirement_id: REQ-WORD-CARD-CONTINUITY
+    design_refs: ["00.需求文档/07.需求变更/25.CR-025-数据可靠性与每日学习恢复.md"]
+    code_refs: ["server/app/routers/analyze.py", "web/src/features/reader/WordCard.tsx", "web/src/features/reader/WordModal.tsx", "web/src/features/vocab/ListenBar.tsx", "web/src/components/model-picker/ModelPicker.tsx", "web/src/lib/railTarget.ts"]
+    test_refs: ["server/tests/test_default_model.py", "web/src/features/reader/wordModalStore.test.ts", "web/src/features/vocab/listenStore.test.ts", "web/src/lib/railTarget.test.ts"]
+    release_refs: []
+    status: implemented
+    owner: scholar
+# partial 不代表没有实现：实现、自动测试和实际页面验收分别记录在 CR-025 与覆盖盘点。
+# REQ-JARVIS / REQ-COMPUTER 已按 CR-016 退场，不再作为活跃需求；历史验收保留在原 CR。
+
+# REQ-SCENE-ATLAS-PROTOTYPE / PRODUCT 已按 CR-027 退役，菜单、页面和专用内容不再提供。
+  - requirement_id: REQ-SOFTWARE-ENGLISH
+    design_refs: ["00.需求文档/02.功能需求/23.软件英语/需求说明.md"]
+    code_refs: ["server/app/routers/grammar_docs.py", "server/app/routers/vocab.py", "web/src/features/grammar/GrammarPage.tsx", "web/src/features/grammar/library/SoftwareLibraryPicker.tsx", "web/src/features/grammar/library/GrammarLibrary.tsx", "web/src/features/grammar/library/ObsidianMarkdown.tsx", "web/src/features/grammar/SoftwareEnglishLegacyRedirect.tsx", "web/src/features/reader/WordCard.tsx"]
+    test_refs: ["server/tests/test_grammar_docs.py", "web/src/features/grammar/GrammarPage.test.tsx", "01.项目文档/09.测试与质量/04.软件英语验证.md"]
+    release_refs: []
+    status: partial
+    owner: scholar

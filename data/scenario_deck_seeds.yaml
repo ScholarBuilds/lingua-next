@@ -1,0 +1,70 @@
+# AI 场景本种子清单（需求 01 v2 FR-174）。
+# 每条已是归一化后的场景定义，批量生成时直接进候选词生成，省掉一次 LLM 调用。
+# cefr 是建议难度，实际词表由 ECDICT 词频兜底，不会因为标了 A2 就只给最简单的词。
+
+seeds:
+  # ---- 日常生活 ----
+  - {key: restaurant_order, title_zh: 餐厅点餐, title_en: Ordering at a Restaurant, emoji: 🍽, category: 日常生活, cefr: A2, description: 看懂菜单、点餐、加菜与结账, keywords: [menu, order, waiter, bill, appetizer]}
+  - {key: cafe_coffee, title_zh: 咖啡馆, title_en: Ordering Coffee, emoji: ☕, category: 日常生活, cefr: A2, description: 点咖啡、说明规格与口味偏好, keywords: [espresso, latte, size, milk, takeaway]}
+  - {key: supermarket, title_zh: 超市购物, title_en: Grocery Shopping, emoji: 🛒, category: 日常生活, cefr: A2, description: 找货架、比价、结账与退换, keywords: [aisle, cart, checkout, discount, receipt]}
+  - {key: weather_talk, title_zh: 天气, title_en: Talking about Weather, emoji: 🌦, category: 日常生活, cefr: A1, description: 描述天气、温度与季节变化, keywords: [forecast, humid, breeze, freezing, storm]}
+  - {key: home_items, title_zh: 家居用品, title_en: Household Items, emoji: 🏠, category: 日常生活, cefr: A2, description: 说清家里各个房间与常见物件, keywords: [furniture, appliance, drawer, laundry, faucet]}
+  - {key: time_date, title_zh: 时间与日期, title_en: Time and Dates, emoji: 🕒, category: 日常生活, cefr: A1, description: 约时间、说日期、表达频率, keywords: [schedule, deadline, weekday, quarter, fortnight]}
+  - {key: numbers_units, title_zh: 数字与度量, title_en: Numbers and Units, emoji: 📏, category: 日常生活, cefr: A2, description: 读数字、说尺寸重量与货币, keywords: [decimal, ounce, mile, percentage, currency]}
+  - {key: clothes_shopping, title_zh: 买衣服, title_en: Clothes Shopping, emoji: 👕, category: 日常生活, cefr: A2, description: 挑款式、试尺码、说材质与退换, keywords: [fitting, size, fabric, refund, sleeve]}
+
+  # ---- 出行旅游 ----
+  - {key: asking_directions, title_zh: 问路, title_en: Asking for Directions, emoji: 🧭, category: 出行旅游, cefr: A2, description: 问路、听懂指路、描述方位, keywords: [intersection, block, landmark, straight, opposite]}
+  - {key: airport_checkin, title_zh: 机场值机, title_en: Airport Check-in, emoji: ✈️, category: 出行旅游, cefr: B1, description: 值机、托运、安检与登机, keywords: [boarding, luggage, gate, security, delay]}
+  - {key: hotel_stay, title_zh: 酒店入住, title_en: Hotel Check-in, emoji: 🏨, category: 出行旅游, cefr: B1, description: 预订、入住、房间问题与退房, keywords: [reservation, suite, amenity, checkout, deposit]}
+  - {key: car_rental, title_zh: 租车, title_en: Renting a Car, emoji: 🚗, category: 出行旅游, cefr: B1, description: 租车手续、保险、油费与还车, keywords: [insurance, mileage, deposit, manual, fuel]}
+  - {key: sightseeing, title_zh: 景点游览, title_en: Sightseeing, emoji: 🗺, category: 出行旅游, cefr: B1, description: 买票、跟团、拍照与问讲解, keywords: [admission, guide, exhibit, souvenir, itinerary]}
+  - {key: customs_immigration, title_zh: 海关入境, title_en: Customs and Immigration, emoji: 🛂, category: 出行旅游, cefr: B2, description: 回答入境问题、申报物品, keywords: [declare, passport, visa, purpose, duration]}
+  - {key: public_transit, title_zh: 公共交通, title_en: Public Transport, emoji: 🚇, category: 出行旅游, cefr: A2, description: 买票、换乘、看线路与问站名, keywords: [platform, transfer, fare, terminal, timetable]}
+
+  # ---- 社交人际 ----
+  - {key: greetings, title_zh: 问候寒暄, title_en: Greetings and Small Talk, emoji: 👋, category: 社交人际, cefr: A1, description: 打招呼、寒暄与自然收尾, keywords: [greeting, acquaintance, casual, polite, chat]}
+  - {key: self_intro, title_zh: 自我介绍, title_en: Introducing Yourself, emoji: 🙋, category: 社交人际, cefr: A2, description: 介绍身份、经历与兴趣, keywords: [background, major, hobby, hometown, occupation]}
+  - {key: making_plans, title_zh: 邀约, title_en: Making Plans, emoji: 📅, category: 社交人际, cefr: B1, description: 发出邀请、约时间、婉拒与改期, keywords: [invite, available, reschedule, decline, confirm]}
+  - {key: apology_thanks, title_zh: 道歉与感谢, title_en: Apologies and Thanks, emoji: 🙏, category: 社交人际, cefr: A2, description: 得体地道歉、致谢与回应, keywords: [apologize, appreciate, sincere, favor, forgive]}
+  - {key: small_talk_topics, title_zh: 闲聊话题, title_en: Conversation Topics, emoji: 💬, category: 社交人际, cefr: B1, description: 展开话题、接话与转移话题, keywords: [opinion, recently, actually, anyway, mention]}
+  - {key: saying_goodbye, title_zh: 告别, title_en: Saying Goodbye, emoji: 👋, category: 社交人际, cefr: A1, description: 各种场合的告别与后会有期, keywords: [farewell, later, touch, soon, take care]}
+
+  # ---- 职场商务 ----
+  - {key: job_interview, title_zh: 面试, title_en: Job Interview, emoji: 💼, category: 职场商务, cefr: B2, description: 回答面试问题、谈经历与期望, keywords: [strength, experience, achievement, salary, teamwork]}
+  - {key: business_meeting, title_zh: 会议, title_en: Business Meetings, emoji: 📊, category: 职场商务, cefr: B2, description: 主持、发言、附议与异议, keywords: [agenda, minutes, proposal, consensus, follow-up]}
+  - {key: business_email, title_zh: 商务邮件, title_en: Business Email, emoji: 📧, category: 职场商务, cefr: B2, description: 写请求、跟进、致歉与附件说明, keywords: [regarding, attached, kindly, deadline, forward]}
+  - {key: negotiation, title_zh: 谈判, title_en: Negotiation, emoji: 🤝, category: 职场商务, cefr: C1, description: 报价、让步、条件交换与成交, keywords: [leverage, concession, counteroffer, terms, compromise]}
+  - {key: project_report, title_zh: 项目汇报, title_en: Project Reporting, emoji: 📈, category: 职场商务, cefr: B2, description: 讲进度、风险、里程碑与下一步, keywords: [milestone, blocker, scope, timeline, deliverable]}
+  - {key: office_supplies, title_zh: 办公用品与职级, title_en: Office and Job Titles, emoji: 🖇, category: 职场商务, cefr: B1, description: 办公室物品、部门与职位称呼, keywords: [stapler, department, supervisor, intern, executive]}
+  - {key: remote_work, title_zh: 远程办公, title_en: Remote Work, emoji: 💻, category: 职场商务, cefr: B2, description: 线上协作、会议工具与时区协调, keywords: [asynchronous, standup, timezone, bandwidth, onboarding]}
+
+  # ---- 学术教育 ----
+  - {key: classroom, title_zh: 课堂用语, title_en: Classroom Language, emoji: 🎒, category: 学术教育, cefr: A2, description: 提问、请假、交作业与小组活动, keywords: [assignment, handout, quiz, participate, absent]}
+  - {key: academic_writing, title_zh: 论文写作, title_en: Academic Writing, emoji: 📝, category: 学术教育, cefr: C1, description: 文献综述、论证、引用与结论, keywords: [hypothesis, methodology, citation, empirical, findings]}
+  - {key: lab_experiment, title_zh: 实验, title_en: Laboratory Work, emoji: 🔬, category: 学术教育, cefr: B2, description: 实验步骤、仪器、数据与安全, keywords: [apparatus, specimen, variable, calibrate, residue]}
+  - {key: exam_prep, title_zh: 考试, title_en: Exams and Grading, emoji: 📋, category: 学术教育, cefr: B1, description: 备考、评分、补考与成绩单, keywords: [transcript, credit, midterm, retake, grading]}
+  - {key: academic_subjects, title_zh: 学科名称, title_en: Academic Subjects, emoji: 🎓, category: 学术教育, cefr: B1, description: 各学科与专业方向的英文说法, keywords: [linguistics, economics, anthropology, statistics, philosophy]}
+
+  # ---- 健康医疗 ----
+  - {key: doctor_visit, title_zh: 就医问诊, title_en: Seeing a Doctor, emoji: 🩺, category: 健康医疗, cefr: B1, description: 挂号、描述病情、听医嘱, keywords: [appointment, prescription, diagnosis, referral, insurance]}
+  - {key: symptoms, title_zh: 症状描述, title_en: Describing Symptoms, emoji: 🤒, category: 健康医疗, cefr: B1, description: 说清哪里不舒服、程度与持续时间, keywords: [ache, swollen, dizzy, nausea, rash]}
+  - {key: pharmacy, title_zh: 药品, title_en: At the Pharmacy, emoji: 💊, category: 健康医疗, cefr: B1, description: 买药、问剂量与副作用, keywords: [dosage, tablet, ointment, side effect, refill]}
+  - {key: body_parts, title_zh: 身体部位, title_en: Body Parts, emoji: 🫀, category: 健康医疗, cefr: A2, description: 从头到脚的身体部位与器官, keywords: [wrist, ankle, spine, abdomen, joint]}
+  - {key: fitness, title_zh: 健身运动, title_en: Fitness and Exercise, emoji: 🏋, category: 健康医疗, cefr: B1, description: 器械、训练计划与身体感受, keywords: [workout, treadmill, stretch, reps, endurance]}
+
+  # ---- 科技编程 ----
+  - {key: programming_general, title_zh: 编程通用, title_en: Programming Basics, emoji: 👨‍💻, category: 科技编程, cefr: B2, description: 变量、函数、循环与调试的英文表达, keywords: [variable, function, iterate, debug, refactor]}
+  - {key: frontend_dev, title_zh: 前端开发, title_en: Frontend Development, emoji: 🎨, category: 科技编程, cefr: C1, description: 组件、样式、渲染与交互术语, keywords: [component, render, viewport, responsive, hydration]}
+  - {key: backend_dev, title_zh: 后端开发, title_en: Backend Development, emoji: ⚙️, category: 科技编程, cefr: C1, description: 接口、中间件、认证与并发, keywords: [endpoint, middleware, authentication, concurrency, throughput]}
+  - {key: database, title_zh: 数据库, title_en: Databases, emoji: 🗄, category: 科技编程, cefr: C1, description: 表、索引、事务与查询优化, keywords: [schema, index, transaction, migration, aggregate]}
+  - {key: machine_learning, title_zh: 机器学习, title_en: Machine Learning, emoji: 🤖, category: 科技编程, cefr: C1, description: 模型、训练、评估与推理术语, keywords: [inference, gradient, overfitting, embedding, benchmark]}
+  - {key: devops_security, title_zh: 运维与安全, title_en: DevOps and Security, emoji: 🔐, category: 科技编程, cefr: C1, description: 部署、监控、告警与安全防护, keywords: [deployment, rollback, vulnerability, encryption, latency]}
+
+  # ---- 兴趣娱乐 ----
+  - {key: movies, title_zh: 电影, title_en: Movies, emoji: 🎬, category: 兴趣娱乐, cefr: B1, description: 类型、剧情、评价与观影, keywords: [plot, sequel, cast, subtitle, thriller]}
+  - {key: music, title_zh: 音乐, title_en: Music, emoji: 🎵, category: 兴趣娱乐, cefr: B1, description: 曲风、乐器、演出与听感, keywords: [melody, lyrics, album, rhythm, gig]}
+  - {key: sports, title_zh: 体育, title_en: Sports, emoji: ⚽, category: 兴趣娱乐, cefr: B1, description: 项目、规则、比分与观赛, keywords: [tournament, referee, penalty, championship, tackle]}
+  - {key: video_games, title_zh: 游戏, title_en: Video Games, emoji: 🎮, category: 兴趣娱乐, cefr: B1, description: 类型、操作、段位与联机, keywords: [multiplayer, respawn, quest, achievement, lag]}
+  - {key: photography, title_zh: 摄影, title_en: Photography, emoji: 📷, category: 兴趣娱乐, cefr: B2, description: 器材、参数、构图与后期, keywords: [aperture, exposure, composition, lens, retouch]}
+  - {key: cooking, title_zh: 烹饪, title_en: Cooking, emoji: 🍳, category: 兴趣娱乐, cefr: B1, description: 食材、刀工、火候与调味, keywords: [simmer, marinate, whisk, seasoning, garnish]}

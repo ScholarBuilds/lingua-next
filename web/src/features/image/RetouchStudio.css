@@ -1,0 +1,163 @@
+/* 基础修图浮层外壳。编辑器内部的皮肤由 theme prop 注入，这里只管壳子与降级面板。
+   类名统一 rts- 前缀，别和 imgc-/image.css 那套撞上。 */
+
+.rts-root {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-app);
+}
+
+.rts-bar {
+  flex: 0 0 auto;
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.rts-title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.rts-file {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+/* 编辑器根节点是 height:100% 的，父级必须有确定高度才撑得开 */
+.rts-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: var(--bg-sunken);
+}
+
+.rts-stage .FIE_root {
+  height: 100%;
+  border-radius: 0;
+}
+
+/* ---- 加载中 / 启动失败 ---- */
+
+.rts-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+}
+
+.rts-hint-title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.rts-hint-text {
+  max-width: 460px;
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--ink-secondary);
+}
+
+.rts-hint-detail {
+  max-width: 560px;
+  max-height: 30vh;
+  overflow: auto;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  color: var(--ink-muted);
+  text-align: left;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.rts-spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: rts-spin 0.7s linear infinite;
+}
+
+@keyframes rts-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---- 放弃改动确认 ---- */
+
+.rts-confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--backdrop);
+}
+
+.rts-confirm-card {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.rts-confirm-title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.rts-confirm-text {
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--ink-secondary);
+}
+
+.rts-confirm-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 760px) {
+  .rts-bar {
+    padding: 0 10px;
+  }
+  .rts-file {
+    display: none;
+  }
+}

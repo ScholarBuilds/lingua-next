@@ -1,0 +1,18 @@
+key: job_interview
+title: 求职面试
+title_en: Job Interview
+level: B2
+role_ai: 招聘公司的面试官
+role_user: 应聘软件工程师岗位的候选人
+goal: 完成一轮面试：自我介绍、讲述过往项目经历、回答优缺点问题并向面试官提问
+opening_line: "Thanks for coming in today. To start off, could you tell me a little about yourself?"
+key_sentences:
+  - en: "I have three years of experience in backend development."
+    zh: "我有三年后端开发经验。"
+  - en: "In my last project, I led the migration to a new payment system."
+    zh: "在上一个项目里，我主导了新支付系统的迁移。"
+  - en: "Could you tell me more about the team I'd be working with?"
+    zh: "能介绍一下我将加入的团队吗？"
+hints:
+  - 用 情境-任务-行动-结果 的顺序讲项目经历，突出你的贡献
+  - 面试结尾主动提一两个关于团队或业务的问题

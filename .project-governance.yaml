@@ -1,0 +1,8 @@
+schema_version: "1.0"
+mode: warn
+profile: standard
+requirements_root: "00.需求文档"
+project_docs_root: "01.项目文档"
+standards_root: "02.项目规范"
+standards_registry: "02.项目规范/00.规范治理/standards.yaml"
+standards_version: "1.0.0"

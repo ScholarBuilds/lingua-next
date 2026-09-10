@@ -1,0 +1,244 @@
+/* 连接器安装页。前缀 stc- 独占（check:css 守卫）。 */
+
+.stc {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 28px 34px 48px;
+  overflow-y: auto;
+}
+
+/* ---- 页头 ---- */
+
+.stc-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.stc-head-text h1 {
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.stc-head-text p {
+  max-width: 56ch;
+  margin-top: 5px;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+}
+
+/* ---- 单个连接器 ---- */
+
+.stc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stc-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+}
+
+.stc-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stc-card-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ctl-h-lg);
+  height: var(--ctl-h-lg);
+  border-radius: var(--radius-md);
+  background: var(--bg-sunken);
+  color: var(--ink-secondary);
+}
+
+.stc-card-icon svg {
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+}
+
+.stc-card-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.stc-card-text h2 {
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.stc-card-text p {
+  margin-top: 2px;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+}
+
+/* 三种态各给一个颜色。「判不了」故意用中性灰，不许长得像连上了。 */
+.stc-badge {
+  flex: none;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.stc-badge-connected {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.stc-badge-disconnected {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.stc-badge-unknown {
+  background: var(--bg-sunken);
+  color: var(--ink-muted);
+}
+
+.stc-note {
+  color: var(--ink-secondary);
+  font-size: var(--text-sm);
+}
+
+/* ---- 安装引导 ---- */
+
+.stc-guide {
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.stc-guide summary {
+  min-height: var(--ctl-hit);
+  padding: 6px 0;
+  color: var(--ink-secondary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.stc-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stc-steps li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.stc-step-no {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border-radius: var(--radius-full);
+  background: var(--bg-sunken);
+  color: var(--ink-secondary);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.stc-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+}
+
+/* 路径要能整条读出来，所以允许换行；命中区靠 min-height 补足 */
+.stc-copy {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: var(--ctl-hit);
+  max-width: 100%;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  color: var(--ink-secondary);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+
+.stc-copy:hover {
+  border-color: var(--border-strong);
+}
+
+.stc-copy code {
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  overflow-wrap: anywhere;
+}
+
+.stc-copy svg {
+  flex: none;
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.stc-warn {
+  margin-top: 12px;
+  color: var(--err);
+  font-size: var(--text-xs);
+}
+
+.stc-package {
+  margin-top: 12px;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  overflow-wrap: anywhere;
+}
+
+.stc-foot {
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  line-height: 1.8;
+}
+
+@media (width < 48rem) {
+  .stc {
+    padding: 20px 16px 40px;
+  }
+
+  .stc-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+.stc-verify {
+  margin-top: 12px;
+  color: var(--ink-secondary);
+  font-size: var(--text-sm);
+}

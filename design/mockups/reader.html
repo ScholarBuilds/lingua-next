@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>精读工作台 · lingua-next</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .body-row { flex: 1; display: flex; min-height: 0; }
+
+  /* ---- 左：目录 ---- */
+  .toc {
+    width: 250px; flex-shrink: 0; overflow-y: auto;
+    border-right: 1px solid var(--border); background: var(--bg-app);
+    padding: 12px 8px;
+  }
+  .toc-group { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--ink-faint); padding: 12px 10px 6px; text-transform: uppercase; }
+  .toc-ch {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px; border-radius: var(--radius-sm);
+    font-size: var(--text-sm); color: var(--ink-secondary); cursor: pointer;
+    transition: background var(--dur-fast) var(--ease);
+  }
+  .toc-ch:hover { background: var(--bg-hover); }
+  .toc-ch.done { color: var(--ink-faint); }
+  .toc-ch.done .toc-num { color: var(--ok); }
+  .toc-ch.current { background: var(--bg-active); color: var(--ink); font-weight: 500; }
+  .toc-num { font-size: 11px; color: var(--ink-faint); width: 18px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  .toc-meta { margin-left: auto; font-size: 11px; color: var(--ink-faint); }
+  .toc-ch svg { width: 13px; height: 13px; color: var(--accent); flex-shrink: 0; }
+
+  /* ---- 中：纸面画布 ---- */
+  .canvas-wrap { flex: 1; min-width: 0; overflow-y: auto; background: var(--bg-paper); position: relative; }
+  .canvas { max-width: 660px; margin: 0 auto; padding: 48px 32px 140px; }
+  .ch-title { font-family: var(--font-reading); font-size: 26px; font-weight: 600; margin-bottom: 6px; }
+  .ch-sub { font-size: var(--text-sm); color: var(--ink-muted); margin-bottom: 36px; display: flex; gap: 10px; align-items: center; }
+  .prose p { margin-bottom: 18px; }
+
+  /* ---- 朗读控制条 ---- */
+  .player {
+    position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 4px;
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: var(--radius-full); box-shadow: var(--shadow-lg);
+    padding: 6px 10px; white-space: nowrap;
+  }
+  .player .play {
+    width: 36px; height: 36px; border-radius: var(--radius-full);
+    background: var(--accent); color: var(--on-accent); display: grid; place-items: center;
+  }
+  .player .play:hover { background: var(--accent-hover); }
+  .player .play svg { width: 16px; height: 16px; }
+  .player .meta { display: flex; flex-direction: column; padding: 0 8px 0 4px; }
+  .player .meta b { font-size: 12px; font-weight: 600; }
+  .player .meta span { font-size: 11px; color: var(--ink-muted); }
+  .player .sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+  /* ---- 学习卡（锚定弹出） ---- */
+  .wordcard {
+    position: absolute; width: 360px; z-index: 50;
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+    font-family: var(--font-ui); font-size: var(--text-base);
+  }
+  .wordcard::before {
+    content: ''; position: absolute; top: -6px; left: 40px;
+    width: 12px; height: 12px; background: var(--bg-surface);
+    border-left: 1px solid var(--border); border-top: 1px solid var(--border);
+    transform: rotate(45deg);
+  }
+  .wc-head { padding: 14px 16px 10px; display: flex; align-items: flex-start; gap: 10px; }
+  .wc-word { font-family: var(--font-reading); font-size: 24px; font-weight: 600; line-height: 1.2; }
+  .wc-phon { display: flex; align-items: center; gap: 8px; margin-top: 3px; font-size: var(--text-sm); color: var(--ink-secondary); font-family: var(--font-mono); }
+  .wc-close { margin-left: auto; }
+  .wc-chips { display: flex; gap: 5px; padding: 0 16px 10px; flex-wrap: wrap; }
+  .wc-sec { padding: 10px 16px; border-top: 1px solid var(--border); }
+  .wc-label { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; color: var(--ink-faint); display: flex; align-items: center; gap: 5px; margin-bottom: 6px; }
+  .wc-label svg { width: 12px; height: 12px; }
+  .wc-label .re { margin-left: auto; font-weight: 500; letter-spacing: 0; }
+  .wc-def { font-size: var(--text-md); line-height: 1.6; }
+  .wc-def .pos { color: var(--ink-muted); font-style: italic; margin-right: 6px; font-size: var(--text-sm); }
+  .wc-ai { background: var(--accent-soft); border-radius: var(--radius-md); padding: 10px 12px; font-size: var(--text-sm); line-height: 1.7; color: var(--ink); }
+  .wc-ex { font-family: var(--font-reading); font-size: var(--text-md); line-height: 1.6; }
+  .wc-ex .zh { font-family: var(--font-ui); font-size: var(--text-sm); color: var(--ink-secondary); display: block; margin-top: 2px; }
+  .wc-foot { display: flex; align-items: center; gap: 2px; padding: 8px 12px; border-top: 1px solid var(--border); }
+  .wc-foot .spacer { flex: 1; }
+
+  /* ---- 右：句子面板 ---- */
+  .panel {
+    width: 336px; flex-shrink: 0; overflow-y: auto;
+    border-left: 1px solid var(--border); background: var(--bg-app);
+    display: flex; flex-direction: column;
+  }
+  .panel-head { padding: 12px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .panel-head h3 { font-size: var(--text-sm); font-weight: 600; }
+  .panel-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; }
+  .p-sent { font-family: var(--font-reading); font-size: var(--text-lg); line-height: 1.7; }
+  .p-trans { font-size: var(--text-base); line-height: 1.8; color: var(--ink-secondary); padding: 10px 12px; background: var(--bg-sunken); border-radius: var(--radius-md); }
+  .p-trans .src { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 11px; color: var(--ink-faint); }
+  .gram-core { font-family: var(--font-reading); font-size: var(--text-md); line-height: 1.9; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-surface); }
+  .gr { padding: 1px 4px; border-radius: 4px; font-weight: 500; }
+  .gr-s { background: var(--hl-blue); } .gr-v { background: var(--hl-pink); } .gr-o { background: var(--hl-green); }
+  .gram-note { font-size: var(--text-sm); line-height: 1.8; color: var(--ink); }
+  .gram-note b { color: var(--accent-ink); font-weight: 600; }
+  .legend { display: flex; gap: 10px; font-size: 11px; color: var(--ink-muted); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; font-style: normal; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 左侧导航栏 -->
+  <nav class="rail">
+    <div class="rail-logo"><img src="../../web/public/brand/logo-96.png" alt="Lingua" /></div>
+    <button class="rail-item active" title="书架">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    </button>
+    <button class="rail-item" title="词库">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 20h10"/><path d="M8 8h8M8 12h5"/></svg>
+    </button>
+    <button class="rail-item" title="视频学习">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polygon points="10 9 15 12 10 15 10 9" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <button class="rail-item" title="AI 对话">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+    </button>
+    <button class="rail-item" title="场景学习">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
+    <div class="rail-spacer"></div>
+    <button class="rail-item" title="设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </nav>
+
+  <div class="main">
+    <!-- 顶栏 -->
+    <header class="topbar">
+      <div class="crumb">
+        <span>书架</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>傲慢与偏见</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <b>第 1 章</b>
+        <span class="chip" style="margin-left:6px">进度 23%</span>
+      </div>
+      <div style="flex:1"></div>
+      <div class="seg">
+        <button>原文</button><button class="active">双语</button><button>译文</button>
+      </div>
+      <button class="icon-btn active" title="词组标记">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h16"/><path d="M6 4h12M9 4v9a3 3 0 0 0 6 0V4" stroke-dasharray="3 2.5"/></svg>
+      </button>
+      <button class="icon-btn" title="字号与排版">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+      </button>
+      <button class="icon-btn" title="书内搜索">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="btn btn-soft">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+        AI 陪读
+      </button>
+    </header>
+
+    <div class="body-row">
+      <!-- 左：目录 -->
+      <aside class="toc">
+        <div class="toc-group">Pride and Prejudice</div>
+        <div class="toc-ch done"><span class="toc-num">✓</span>Chapter 1<span class="toc-meta">4 min</span></div>
+        <div class="toc-ch current">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>
+          Chapter 2<span class="toc-meta">6 min</span>
+        </div>
+        <div class="toc-ch"><span class="toc-num">3</span>Chapter 3<span class="toc-meta">9 min</span></div>
+        <div class="toc-ch"><span class="toc-num">4</span>Chapter 4<span class="toc-meta">7 min</span></div>
+        <div class="toc-ch"><span class="toc-num">5</span>Chapter 5<span class="toc-meta">8 min</span></div>
+        <div class="toc-ch"><span class="toc-num">6</span>Chapter 6<span class="toc-meta">11 min</span></div>
+        <div class="toc-ch"><span class="toc-num">7</span>Chapter 7<span class="toc-meta">10 min</span></div>
+        <div class="toc-ch"><span class="toc-num">8</span>Chapter 8<span class="toc-meta">9 min</span></div>
+      </aside>
+
+      <!-- 中：纸面 -->
+      <div class="canvas-wrap">
+        <div class="canvas">
+          <h1 class="ch-title">Chapter 1</h1>
+          <div class="ch-sub">
+            <span>Jane Austen · Pride and Prejudice</span>
+            <span class="chip">1,846 词</span>
+            <span class="chip warn">生词 12</span>
+          </div>
+
+          <div class="prose">
+            <p>
+              <span class="s-reading">It is a truth <span class="w vocab">universally</span> <span class="w w-selected" id="anchor">acknowledged</span>, that a single man <span class="phrase">in possession of</span> a good fortune, must be <span class="phrase">in want of</span> a wife.</span>
+              <span class="trans">有一条举世公认的真理：凡是有钱的单身汉，总想娶位太太。</span>
+            </p>
+            <p>
+              However little known the feelings or views of such a man may be on his first entering a <span class="w">neighbourhood</span>, this truth is so well fixed in the minds of the surrounding families, that he is considered as the <span class="w hl-y">rightful property</span> of some one or other of their daughters.
+              <span class="trans">这样的单身汉每逢新搬到一个地方，四邻八舍虽然完全不了解他的性情如何、见解如何，却把他视为自己某一个女儿理所应得的一笔财产。</span>
+            </p>
+            <p>
+              "My dear Mr. Bennet," said his lady to him one day, "have you heard that Netherfield Park is <span class="w vocab">let</span> at last?"
+            </p>
+            <p>
+              Mr. Bennet replied that he had not.
+            </p>
+            <p>
+              "But it is," returned she; "for Mrs. Long has just been here, and she told me all about it."
+            </p>
+          </div>
+        </div>
+
+        <!-- 学习卡：锚定在 acknowledged 旁 -->
+        <div class="wordcard" style="top: 150px; left: max(24px, calc(50% - 330px + 60px));">
+          <div class="wc-head">
+            <div>
+              <div class="wc-word">acknowledged</div>
+              <div class="wc-phon">
+                /əkˈnɒl.ɪdʒd/
+                <button class="icon-btn" title="播放发音" style="width:24px;height:24px">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+                </button>
+                <span style="font-family:var(--font-ui);color:var(--ink-faint);font-size:12px">原形 acknowledge</span>
+              </div>
+            </div>
+            <button class="icon-btn wc-close">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="wc-chips">
+            <span class="chip">CET6</span><span class="chip">考研</span><span class="chip">柯林斯 ★★★</span><span class="chip">较常见</span>
+          </div>
+          <div class="wc-sec">
+            <div class="wc-label">词典释义 <span class="re" style="color:var(--ink-faint)">ECDICT</span></div>
+            <div class="wc-def"><span class="pos">v.</span>承认；确认；答谢（acknowledge 的过去分词）</div>
+          </div>
+          <div class="wc-sec">
+            <div class="wc-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3L12 3z"/></svg>
+              AI 语境释义
+              <button class="btn-ghost-sm re">重新分析</button>
+            </div>
+            <div class="wc-ai">
+              在本句中作"（被普遍）公认的"讲：<b>universally acknowledged</b> 是固定搭配，直译"被普遍承认的"。这里是被动含义的过去分词作表语，奥斯汀用它营造一种一本正经的反讽语气。
+            </div>
+          </div>
+          <div class="wc-sec">
+            <div class="wc-label">例句</div>
+            <div class="wc-ex">
+              He <b>acknowledged</b> that the decision was a mistake.
+              <span class="zh">他承认这个决定是个错误。</span>
+            </div>
+          </div>
+          <div class="wc-foot">
+            <button class="btn btn-soft">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              收藏
+            </button>
+            <button class="btn">标熟</button>
+            <button class="btn">精讲</button>
+            <div class="spacer"></div>
+            <button class="icon-btn" title="更多">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/><circle cx="5" cy="12" r="1" fill="currentColor"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 朗读控制条 -->
+        <div class="player">
+          <button class="icon-btn" title="上一句">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20" fill="currentColor" stroke="none"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+          </button>
+          <button class="play" title="暂停">
+            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+          </button>
+          <button class="icon-btn" title="下一句">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4" fill="currentColor" stroke="none"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+          </button>
+          <div class="sep"></div>
+          <div class="meta"><b>Emma · en-US</b><span>正在朗读第 1 句</span></div>
+          <div class="sep"></div>
+          <button class="btn-ghost-sm">1.0×</button>
+          <button class="icon-btn" title="回到朗读位置">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 右：句子面板 -->
+      <aside class="panel">
+        <div class="panel-head">
+          <h3>当前句</h3>
+          <div style="flex:1"></div>
+          <div class="seg">
+            <button class="active">快速理解</button><button>结构</button><button>深度</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="p-sent">It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.</div>
+
+          <div class="p-trans">
+            有一条举世公认的真理：凡是有钱的单身汉，总想娶位太太。
+            <div class="src"><span>DeepL · 已缓存</span><button class="btn-ghost-sm">换引擎对比</button></div>
+          </div>
+
+          <div>
+            <div class="wc-label" style="margin-bottom:8px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3L12 3z"/></svg>
+              句子主干 <span class="re" style="color:var(--ink-faint)">grammar-deep · 已缓存</span>
+            </div>
+            <div class="gram-core">
+              <span class="gr gr-s">It</span> <span class="gr gr-v">is</span> <span class="gr gr-o">a truth</span> <i style="color:var(--ink-muted)">(universally acknowledged)</i>, that ...
+            </div>
+            <div class="legend" style="margin-top:8px">
+              <span><i style="background:var(--hl-blue)"></i>主语</span>
+              <span><i style="background:var(--hl-pink)"></i>谓语</span>
+              <span><i style="background:var(--hl-green)"></i>表语</span>
+            </div>
+          </div>
+
+          <div class="gram-note">
+            <b>形式主语句</b>：真正的主语是 that 引导的主语从句，it 只是占位。<b>难点</b>在 <b>universally acknowledged</b> 作后置定语修饰 truth——这是奥斯汀式反讽的开场白。
+          </div>
+
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-soft" style="flex:1;justify-content:center">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+              朗读本句
+            </button>
+            <button class="btn" style="flex:1;justify-content:center;border:1px solid var(--border);border-radius:var(--radius-md)">收藏句子</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<button class="theme-toggle" onclick="toggleTheme()" title="切换深浅色">
+  <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+</button>
+<script>
+  const saved = localStorage.getItem('ln-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? '' : 'dark';
+    cur ? document.documentElement.setAttribute('data-theme', cur) : document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('ln-theme', cur);
+  }
+</script>
+</body>
+</html>

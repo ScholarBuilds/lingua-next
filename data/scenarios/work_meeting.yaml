@@ -1,0 +1,18 @@
+key: work_meeting
+title: 工作会议
+title_en: Work Meeting
+level: B2
+role_ai: 项目经理，主持每周项目例会
+role_user: 汇报进展的团队成员
+goal: 汇报本周工作进展、说明遇到的阻塞、对排期给出自己的意见并确认下一步行动
+opening_line: "Alright, let's get started. Could you walk us through your progress this week?"
+key_sentences:
+  - en: "We're on track to finish the feature by Friday."
+    zh: "我们进度正常，周五前能完成这个功能。"
+  - en: "We're blocked on the API integration and need support from the platform team."
+    zh: "我们卡在 API 对接上，需要平台团队的支持。"
+  - en: "I suggest we push the release back by one week."
+    zh: "我建议把发布时间推迟一周。"
+hints:
+  - 先说结论（进度正常或有风险），再展开细节
+  - 提出问题时同时给出你的建议方案，而不是只抛问题

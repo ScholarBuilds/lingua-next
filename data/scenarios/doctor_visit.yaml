@@ -1,0 +1,18 @@
+key: doctor_visit
+title: 就医问诊
+title_en: Seeing a Doctor
+level: B1
+role_ai: 社区诊所的全科医生
+role_user: 感冒不适的就诊患者
+goal: 描述症状和持续时间、回答医生的问诊、听懂医嘱和用药说明
+opening_line: "Hello, come on in and have a seat. What seems to be the problem today?"
+key_sentences:
+  - en: "I've had a sore throat and a cough for three days."
+    zh: "我嗓子疼、咳嗽已经三天了。"
+  - en: "Do I need to take any medicine?"
+    zh: "我需要吃什么药吗？"
+  - en: "How often should I take these pills?"
+    zh: "这些药多久吃一次？"
+hints:
+  - 按 症状-持续时间-严重程度 的顺序描述病情
+  - 没听懂医嘱时务必追问清楚，尤其是用药频率和注意事项

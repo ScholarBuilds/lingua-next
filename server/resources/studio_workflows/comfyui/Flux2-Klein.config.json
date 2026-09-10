@@ -1,0 +1,79 @@
+{
+  "title": "Flux2 Klein 多参考生成",
+  "fields": [
+    {
+      "id": "f_prompt",
+      "node": "168",
+      "input": "text",
+      "name": "提示词",
+      "type": "textarea",
+      "default": "",
+      "required": false,
+      "bind_prompt": true
+    },
+    {
+      "id": "f_seed",
+      "node": "158",
+      "input": "noise_seed",
+      "name": "随机种子",
+      "type": "number",
+      "default": 1,
+      "min": 0,
+      "max": 999999,
+      "step": 1,
+      "random_enabled": true,
+      "hidden": true
+    },
+    {
+      "id": "f_main",
+      "node": "278",
+      "input": "image",
+      "name": "主图",
+      "type": "image",
+      "default": "",
+      "required": true
+    },
+    {
+      "id": "f_aux_a",
+      "node": "270",
+      "input": "image",
+      "name": "参考图 A",
+      "type": "image",
+      "default": "",
+      "required": false
+    },
+    {
+      "id": "f_aux_b",
+      "node": "292",
+      "input": "image",
+      "name": "参考图 B",
+      "type": "image",
+      "default": "",
+      "required": false
+    },
+    {
+      "id": "f_has_aux_a",
+      "node": "313",
+      "input": "value",
+      "name": "启用参考图 A",
+      "type": "boolean",
+      "default": false,
+      "hidden": true
+    },
+    {
+      "id": "f_has_aux_b",
+      "node": "314",
+      "input": "value",
+      "name": "启用参考图 B",
+      "type": "boolean",
+      "default": false,
+      "hidden": true
+    }
+  ],
+  "mini_cards": {
+    "prompt": { "x": 24, "y": 30 },
+    "image": { "x": 24, "y": 210 },
+    "custom": { "x": 280, "y": 78 },
+    "output": { "x": 540, "y": 120 }
+  }
+}

@@ -1,0 +1,92 @@
+[project]
+name = "lingua-server"
+version = "0.1.0"
+description = "lingua-next 服务端：FastAPI api 与 arq worker 共用代码库"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic-settings>=2.5",
+    "sqlalchemy[asyncio]>=2.0.35",
+    "asyncpg>=0.30",
+    "alembic>=1.13",
+    "arq>=0.26",
+    "redis>=5.0",
+    "httpx[socks]>=0.27",
+    "ebooklib>=0.20",
+    "lxml>=6.1.1",
+    "pysbd>=0.3.4",
+    "python-multipart>=0.0.32",
+    "translators>=6.0.4",
+    "edge-tts>=7.2.8",
+    "openai>=3.1.0",
+    "yt-dlp>=2026.7.4",
+    "faster-whisper>=1.2.1",
+    "pyyaml>=6.0.3",
+    "aiohttp>=3.11",
+    "fsrs>=6.3.2",
+    "trafilatura>=2.2.0",
+    "genanki>=0.13.1",
+    "pypdf>=6.16.1",
+    "cryptography>=50.0.0",
+    "playwright>=1.62.0",
+    "yt-dlp-ejs>=0.8.0",
+    "ctc-forced-aligner>=1.0.2",
+    "unidecode>=1.4.0",
+    "pydantic-ai-slim[mcp,openai]>=2.31.1",
+    "spacy>=3.8",
+    # 全局查词：拼写建议（编辑距离）与 WordNet 语料读取（只在 seed 里用）
+    "rapidfuzz>=3.14",
+    "nltk>=3.10",
+    "errant>=3.0.2",
+    "g2p-en>=2.1.0",
+    "pronouncing>=0.2.0",
+    "en-core-web-sm",
+    "pillow>=12.3.0",
+    "openpyxl>=3.1",
+    "jsonschema>=4.26.0",
+    "croniter>=6.2.4",
+    "mcp>=2.0.0",
+    "email-validator>=2.2.0",
+    "keyring>=25.7.0",
+    "aiosqlite>=0.22.1",
+    "fastmcp-slim[server]>=4.0.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "pytest-xdist>=3.8.0",
+    "pytest-timeout>=2.4.0",
+    "pyinstaller>=6.22.2",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"migrations/versions/*" = ["E501"]
+"scripts/*" = ["E501", "E402"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+# 单个用例超时兜底；并行（-n auto）只在 CI 开，本地默认串行
+timeout = 120
+
+[tool.mypy]
+python_version = "3.12"
+strict = false
+ignore_missing_imports = true
+# 只报命令行点名文件的错误；被 import 的模块照常参与推断但不计入门禁
+follow_imports = "silent"
+
+[tool.uv.sources]
+en-core-web-sm = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl" }

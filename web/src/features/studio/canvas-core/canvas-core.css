@@ -1,0 +1,974 @@
+/* 画布内核样式（模块 17 · CR-005 §3.1）
+ *
+   前缀 `cvc-` 独占本目录（STD 前缀规则：一个类只能有一个主人）。
+   蓝本的颜色是给它自己那套主题调的，这里全部映射到项目令牌并配暗色，
+   不硬编码十六进制——否则暗色主题下连线会糊在背景里看不见。 */
+
+:root {
+  /* 连线：flow 最淡（结构线），input 略重（参考图是真的会被发上去的），history 更淡 */
+  --cvc-flow: rgba(148, 163, 184, 0.62);
+  --cvc-input: rgba(100, 116, 139, 0.62);
+  --cvc-history: rgba(100, 116, 139, 0.46);
+  --cvc-cascade: #16a34a;
+  --cvc-erase: #dc2626;
+  --cvc-grid: rgba(120, 113, 100, 0.16);
+  --cvc-select-fill: rgba(79, 70, 229, 0.08);
+  --cvc-select-stroke: rgba(79, 70, 229, 0.55);
+  /* 对齐参考线单独一个颜色，**不能复用 --accent**：选中态已经是 accent，
+     两者常常同时出现（拖的就是选中的节点），同色的话分不出哪条是选中框、
+     哪条是「你现在对齐到了这里」 */
+  --cvc-guide: rgba(219, 39, 119, 0.8);
+}
+
+:root[data-theme='dark'] {
+  --cvc-flow: rgba(148, 163, 184, 0.5);
+  --cvc-input: rgba(165, 180, 252, 0.55);
+  --cvc-history: rgba(148, 163, 184, 0.34);
+  --cvc-cascade: #4ade80;
+  --cvc-erase: #f87171;
+  --cvc-grid: rgba(233, 230, 223, 0.1);
+  --cvc-select-fill: rgba(129, 140, 248, 0.12);
+  --cvc-select-stroke: rgba(129, 140, 248, 0.6);
+  --cvc-guide: rgba(244, 114, 182, 0.85);
+}
+
+/* ==================== 画布外壳 ==================== */
+
+/* 填满父容器，且不挑父容器是 flex 还是 block。
+   只写 `flex:1` 的话，放进 block 父容器（本仓的 .scv-stage 就是）高度直接塌成 0，
+   而且不报错——画布看着「没加载出来」，其实是 0 像素高。 */
+.cvc-board {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  overflow: hidden;
+  background-color: var(--bg-app);
+  /* 点阵底：24px 一格，和蓝本同尺寸。缩放时不跟着变，作为固定的空间参照 */
+  background-image: radial-gradient(var(--cvc-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  /* 常态就是 grab：光标形状本身在说「这块可以拖」，不用等按下去才知道 */
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.cvc-board.cvc-panning {
+  cursor: grabbing;
+}
+
+.cvc-board.cvc-erasing {
+  cursor: crosshair;
+}
+
+/* 按住空格：整块画布（含节点）都变成「可抓」。
+   光标不换的话，用户按住空格在节点上看到的还是拖动光标，
+   分不清这一下会拖节点还是拖画布——而两者的结果差得很远。 */
+.cvc-board.cvc-space,
+.cvc-board.cvc-space .cvc-node {
+  cursor: grab;
+}
+
+.cvc-board.cvc-space.cvc-panning,
+.cvc-board.cvc-space.cvc-panning .cvc-node {
+  cursor: grabbing;
+}
+
+.cvc-board.cvc-selecting {
+  cursor: crosshair;
+}
+
+/* 变换层：所有世界坐标的东西都挂在这里 */
+.cvc-world {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* ==================== 连线 ==================== */
+
+/* 连线层。坐标即世界坐标（world 已经做了 transform）。
+   **必须有非零尺寸**：`width=0 height=0` 的根 SVG 在 Chrome 里完全不绘制，
+   即使 overflow:visible、即使 getBoundingClientRect 量得到几何——
+   实测线在 DOM 里、颜色对、opacity 1，屏幕上就是没有。
+   蓝本钉死 6000×4000 的 viewBox 也是为了绕开这一点，代价是拖出范围的线会丢；
+   这里用 100% + overflow:visible，两头都占。 */
+.cvc-links {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.cvc-conn {
+  pointer-events: none;
+}
+
+.cvc-line {
+  stroke: var(--cvc-flow);
+  stroke-width: 1.6;
+  transition: stroke var(--dur-fast) var(--ease);
+}
+
+.cvc-kind-input {
+  stroke: var(--cvc-input);
+  stroke-width: 1.9;
+}
+
+.cvc-kind-history {
+  stroke: var(--cvc-history);
+  stroke-dasharray: 5 5;
+}
+
+/* 一条线背后压着好几条边（同源连到同一个分组的多个成员时合并成一条）。
+   不加粗的话跟普通线一模一样，用户拿橡皮擦断它会连带切掉看不见的那几条。 */
+.cvc-merged {
+  stroke-width: 3.2;
+  stroke-linecap: round;
+}
+
+/* loop 拖到连线中点附近的插入预览：断续线表示"松手就插这儿" */
+.cvc-inserting {
+  stroke: var(--cvc-input);
+  stroke-dasharray: 6 4;
+  opacity: 0.75;
+}
+
+/* 下游节点正在出图：入边高亮 + 虚线往前流。
+   之前只写了 `opacity: 0.82`——比不跑的时候还淡，用户完全看不出这条链在动。
+   动效与级联那条共用 `cvc-flow`，两者是同一件事的两种触发方式，
+   手感不该不一样。 */
+.cvc-pending {
+  stroke: var(--cvc-cascade);
+  stroke-width: 2.2;
+  stroke-dasharray: 8 6;
+  animation: cvc-flow 0.9s linear infinite;
+}
+
+/* 端点圆点跟着亮，否则线亮了、两头还是灰的，看着像没连上 */
+.cvc-pending ~ .cvc-end {
+  fill: var(--cvc-cascade);
+}
+
+.cvc-selected {
+  stroke: var(--accent);
+  stroke-width: 2.4;
+}
+
+.cvc-cascade {
+  stroke: var(--cvc-cascade);
+  stroke-width: 2.2;
+}
+
+.cvc-cascade-wait {
+  opacity: 0.5;
+}
+
+.cvc-cascade-done {
+  opacity: 0.72;
+}
+
+/* 正在跑的那一段：虚线往前流，一眼看出数据流向 */
+.cvc-cascade-active {
+  stroke-dasharray: 8 6;
+  animation: cvc-flow 0.9s linear infinite;
+}
+
+
+@keyframes cvc-flow {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+
+.cvc-erasing {
+  stroke: var(--cvc-erase);
+  stroke-dasharray: 4 4;
+  opacity: 0.9;
+}
+
+/* 命中区：看不见但能点。没有它，1.6px 的线要对准了才点得中 */
+.cvc-hit {
+  stroke: transparent;
+  stroke-width: 14;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.cvc-end {
+  fill: var(--cvc-flow);
+  opacity: 0.66;
+  pointer-events: none;
+}
+
+.cvc-kind-input ~ .cvc-end {
+  fill: var(--cvc-input);
+}
+
+.cvc-cascade ~ .cvc-end {
+  fill: var(--cvc-cascade);
+  opacity: 1;
+}
+
+/* 中点断开按钮：平时隐形，指针靠近这条线才显形 */
+.cvc-cut {
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+
+.cvc-cut > circle {
+  fill: var(--bg-surface);
+  stroke: var(--cvc-flow);
+  stroke-width: 1.4;
+}
+
+.cvc-cut > path {
+  stroke: var(--cvc-flow);
+  stroke-width: 1.5;
+}
+
+.cvc-conn:hover .cvc-cut {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cvc-conn:hover .cvc-line {
+  stroke: var(--accent);
+}
+
+.cvc-conn:hover .cvc-cut > circle,
+.cvc-conn:hover .cvc-cut > path {
+  stroke: var(--accent);
+}
+
+/* 关掉动效：用户偏好或系统设置。线还在、颜色还在，只是不流动 */
+/* 动效总开关关掉时只留静态高亮。**cvc-pending 要一起收进来**——
+   它和级联用的是同一个 cvc-flow 动画，漏一个就出现「关了动效还有一条在流」 */
+.cvc-links-still .cvc-cascade-active,
+.cvc-links-still .cvc-pending {
+  animation: none;
+  stroke-dasharray: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cvc-cascade-active,
+  .cvc-pending {
+    animation: none;
+    stroke-dasharray: none;
+  }
+}
+
+/* 拖拽中的临时线：虚线，还没落地 */
+.cvc-draft {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  opacity: 0.85;
+}
+
+/* 选中的连线：中点那个断开按钮常驻。
+   选中却还要把指针悬在线上才看得见删除入口，等于选中这件事没有任何用处 */
+.cvc-conn-on .cvc-cut {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cvc-conn-on .cvc-cut > circle,
+.cvc-conn-on .cvc-cut > path {
+  stroke: var(--accent);
+}
+
+/* ==================== 对齐参考线 ==================== */
+
+/* 在 .cvc-world 里，坐标即世界坐标。z-index 要压过拖动中的节点（12），
+   否则参考线会被正在拖的那个节点自己盖住——最需要看到它的时刻反而看不见 */
+.cvc-guides {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 14;
+}
+
+.cvc-guide {
+  stroke: var(--cvc-guide);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+/* ==================== 切线轨迹 ==================== */
+
+.cvc-erase-trail {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.cvc-erase-glow {
+  stroke: var(--cvc-erase);
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.18;
+  filter: blur(2px);
+}
+
+.cvc-erase-line {
+  stroke: var(--cvc-erase);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+
+/* ==================== 框选 ==================== */
+
+.cvc-marquee {
+  position: absolute;
+  border: 1.5px solid var(--cvc-select-stroke);
+  background: var(--cvc-select-fill);
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ==================== 上下文菜单 ==================== */
+
+.cvc-menu {
+  position: absolute;
+  z-index: 40;
+  padding: 6px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-ui);
+  outline: none;
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.cvc-menu-title {
+  padding: 6px 10px 8px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--ink-muted);
+  letter-spacing: 0.03em;
+}
+
+.cvc-menu-group {
+  padding: 8px 10px 4px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink-faint);
+}
+
+.cvc-menu-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: var(--ink);
+  font: inherit;
+}
+
+.cvc-menu-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.cvc-menu-active:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.cvc-menu-danger:not(:disabled).cvc-menu-active {
+  background: var(--err-soft);
+}
+
+.cvc-menu-danger .cvc-menu-label {
+  color: var(--err);
+}
+
+.cvc-menu-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  color: var(--ink-secondary);
+}
+
+/* 菜单图标保持固定尺寸。 */
+.cvc-menu-icon > svg {
+  width: 14px;
+  height: 14px;
+}
+
+.cvc-menu-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.cvc-menu-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+/* 说明文字：允许换行，不省略号。省略了等于没写 */
+.cvc-menu-hint {
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
+.cvc-menu-sep {
+  height: 1px;
+  margin: 5px 8px;
+  background: var(--border);
+}
+
+.cvc-menu-empty {
+  padding: 12px 10px;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+/* ==================== 节点外壳 ==================== */
+
+/* 节点容器**完全透明**（蓝本 smart-canvas.css:57 同款）。
+ *
+   这是「画布看起来像不像」的最大一处：蓝本画布上是一堆漂浮的裸图，
+   每张图自己有圆角和淡描边；容器不画任何东西。做成白卡片的话，
+   同样的图摆上去会变成一堆「文件管理器缩略图」，气质完全不同。
+
+   需要卡片外观的节点（提示词、循环、分组这些有表单的）自己加 `.cvc-node-card`。 */
+.cvc-node {
+  position: absolute;
+  /* 兜底宽度。几乎所有节点都会由 NodeShell 把实际 w 写进 style 覆盖它
+     （媒体节点按自然尺寸装进 520×440 的框算出来，见 canvasStore.mediaNodeBox），
+     这里只兜住「类型没有默认值又没存 w」的极少数情况。
+     曾经是 260px——那是蓝本 scale=1 时的数，而蓝本默认 scale 是 2。 */
+  width: 316px;
+  min-width: 120px;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  font-family: var(--font-ui);
+  color: var(--ink);
+  cursor: move;
+  user-select: none;
+  z-index: 2;
+  /* 不给 transition：拖动时每帧都在改 left/top，过渡会让节点追着指针慢半拍 */
+}
+
+/* 节点的 `overflow: visible` 是有意的，别改成 hidden/auto。
+   挂在节点外面的两样东西都是**布局外的装饰**，不是被挤出去的内容：
+   - `.cvc-port-out` 右移 8px（端口圆点骑在边框上，蓝本同款）
+   - `.cvc-node-tools` 悬浮在节点上方 38px、水平居中，比窄节点宽是常态
+   所以 `.cvc-node` 的 scrollWidth 天然比 clientWidth 大（实测图片节点 459 vs 418
+   = 工具条两侧各探出 41px，输出节点 384 vs 376 = 右端口的 8px）。
+   它们由 `.cvc-board` 的 overflow:hidden 统一裁掉，不会外溢到页面；
+   给节点加 overflow 只会把端口切成半圆、把工具条整条剪掉。
+   真正要防的是**内容**撑破节点，那些约束写在各节点的内层（`.scv-node` 一族）。 */
+
+/* 层级分层（蓝本 smart-canvas.css:715~719 同款）：
+   分组压在最底下，图片才能拖到它上面被吸收；选中的浮起来；拖动中的最高。
+   不分层的话，把图往组上拖时图会钻到组下面，看着像「没吸进去」。 */
+.cvc-node-group {
+  z-index: 0;
+}
+
+.cvc-node-on:not(.cvc-node-group) {
+  z-index: 10;
+}
+
+.cvc-node-dragging:not(.cvc-node-group) {
+  z-index: 12;
+}
+
+/* 拖动中的分组只抬到 1：**要压过静止的分组（0），但不能压过普通节点（2）**。
+   抬到 3 的话，拖分组时框会盖住自己的提示词成员，看着像成员被吃了。 */
+.cvc-node-dragging.cvc-node-group {
+  z-index: 1;
+}
+
+/* 带表单的节点（提示词/循环/分组）仍要卡片：一堆输入框浮在画布上没有边界会散 */
+.cvc-node-card {
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 选中态：**描的是图片不是容器**。给透明容器加外框会框出一圈比图大的空矩形 */
+.cvc-node-on.cvc-node-card {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), var(--shadow-md);
+}
+
+.cvc-node-on:not(.cvc-node-card) :is(img, video) {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.cvc-node-running {
+  animation: cvc-breathe 1.6s ease-in-out infinite;
+}
+
+.cvc-node-running.cvc-node-card {
+  border-color: var(--accent);
+}
+
+@keyframes cvc-breathe {
+  50% {
+    box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow-md);
+  }
+}
+
+.cvc-node-queued.cvc-node-card {
+  border-style: dashed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cvc-node-running {
+    animation: none;
+  }
+}
+
+/* 卡片节点的头部：有分隔线的标题栏 */
+.cvc-node-card > .cvc-node-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* 裸图节点的标题：**浮在图片左上角的小徽标**，不占布局
+   （蓝本 .image-name-badge，smart-canvas.css:609）。
+   做成标题栏的话每张图上面都顶着一条灰边，画布立刻变成表格。 */
+.cvc-node:not(.cvc-node-card) > .cvc-node-head {
+  position: absolute;
+  left: 6px;
+  top: 5px;
+  right: 6px;
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 14px;
+  pointer-events: none;
+}
+
+.cvc-node:not(.cvc-node-card) .cvc-node-title {
+  font-size: 9.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: rgba(100, 116, 139, 0.86);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+:root[data-theme='dark'] .cvc-node:not(.cvc-node-card) .cvc-node-title {
+  color: rgba(203, 213, 225, 0.82);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.cvc-node-title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cvc-node-badge {
+  flex: 0 0 auto;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+/* 节点悬浮工具条。尺寸与定位照蓝本实测值（smart-canvas.css:572、576）：
+   浮在节点**正上方 38px、水平居中**，30px 高的毛玻璃胶囊，
+   按钮是**图标 + 中文字**而不是纯图标——纯图标第一次用得挨个点开才知道是什么。 */
+.cvc-node-tools {
+  position: absolute;
+  left: 50%;
+  top: -38px;
+  z-index: 18;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  max-width: min(760px, calc(100vw - 48px));
+  /* 顶到 max-width 时的溢出策略：整条胶囊自己横滚，而不是让里面的按钮被压。
+     没有这两行的话，`white-space: nowrap` + 按钮可压缩 = 文字冲出按钮边界互相叠。
+     滚动条不显示：胶囊只有 30px 高，一条 15px 的滚动条会把按钮挤掉半截。 */
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  padding: 3px 5px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(18px);
+  white-space: nowrap;
+  cursor: default;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(3px);
+  transition: opacity 0.14s ease, transform 0.14s ease;
+}
+
+/* **只在选中时显形**，不跟 hover 走：鼠标扫过一排节点时逐个弹工具条很吵。
+   多选时整个不显示——那时该出现的是批量工具条。 */
+.cvc-node-on .cvc-node-tools {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.cvc-multi .cvc-node-tools {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* 拖动/缩放中藏起来：跟着节点飞的工具条很干扰 */
+.cvc-node-dragging .cvc-node-tools {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.cvc-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  height: 24px;
+  min-width: 34px;
+  white-space: nowrap;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.14s ease, color 0.14s ease, transform 0.14s ease;
+}
+
+.cvc-tool:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.cvc-tool:disabled {
+  opacity: 0.36;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cvc-tool-on {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+/* 工具栏图标保持固定尺寸。 */
+.cvc-tool > svg {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  stroke-width: 2.2;
+}
+
+/* 窄屏收起文字，按钮变方形——蓝本 @media(max-width:760px) 同款 */
+@media (max-width: 760px) {
+  .cvc-tool > span {
+    display: none;
+  }
+
+  .cvc-tool {
+    width: 30px;
+    min-width: 30px;
+    padding: 0;
+  }
+}
+
+/* ==================== 端口 ==================== */
+
+/* 空心圆（白底 + 深边框），默认**完全隐藏**——蓝本 smart-canvas.css:727。
+   常驻显示的话，画布上几十个节点就是几十对小圆点，视觉噪音压过图本身。 */
+.cvc-port {
+  position: absolute;
+  top: 50%;
+  z-index: 6;
+  width: 14px;
+  height: 14px;
+  border: 1.8px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--bg-surface);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+  transform: translateY(-50%);
+  cursor: crosshair;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cvc-port-in {
+  left: -8px;
+}
+
+.cvc-port-out {
+  right: -8px;
+}
+
+/* 悬停节点或选中时显形 */
+.cvc-node:hover .cvc-port,
+.cvc-node-on .cvc-port {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* **拖线时全画布的端口一起显形**：正在找落点，看不见目标端口在哪
+   就只能凭感觉往节点上撞（蓝本 .shell.port-dragging .node-port 同款） */
+.cvc-board.cvc-linking .cvc-port {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cvc-board.cvc-linking {
+  cursor: crosshair;
+}
+
+.cvc-port:hover,
+.cvc-port-hint {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-50%) scale(1.22);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.26);
+}
+
+/* 拖动中的节点不显端口：跟着飞的小圆点很干扰 */
+.cvc-node-dragging .cvc-port {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* 连线拖到这个节点上方：虚线外框告诉用户松手会落在这 */
+.cvc-node-drop {
+  outline: 2px dashed var(--accent);
+  outline-offset: 4px;
+  border-radius: 18px;
+}
+
+/* 八向缩放手柄（蓝本 canvas.js:12564 按 n/s/e/w 分解方向）。
+
+   两条规矩：
+   - **命中区一律 var(--ctl-hit)**（32），视觉只有中间那颗 9px 的小方块。
+     照着 1px 的边框去够太难，而把方块本身做到 32 又会盖住节点内容。
+   - **不悬停时 pointer-events: none**。手柄有大半探到节点外面，常亮的话
+     每个节点周围会围一圈看不见的拦截带——框选拉不动、点旁边的节点也点不中。
+     悬停节点或选中时才放开，与端口圆点同一套显隐规则。
+
+   四条边走「细长条」而不是四个小圆点：正中间被输入输出端口占着
+   （`.cvc-port` z-index 6 压在手柄之上），圆点画上去也是被盖住的，
+   而长条让开端口那一小段之后照样够得着。
+
+   指针形状不在这里写：`geometry.resizeCursor` 一张表，外壳设成行内样式。
+   同一张映射分两处各写一份，迟早出现「拖上边缘却显示斜向箭头」。 */
+.cvc-resize {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  touch-action: none;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+
+.cvc-resize::before {
+  content: '';
+  border-radius: 3px;
+  background: transparent;
+  transition: background var(--dur-fast) var(--ease);
+}
+
+.cvc-resize:hover::before {
+  background: var(--accent);
+}
+
+.cvc-node:hover .cvc-resize,
+.cvc-node-on .cvc-resize {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 四个角：32×32 骑在角上，一半在外一半在内 */
+.cvc-resize-nw,
+.cvc-resize-ne,
+.cvc-resize-sw,
+.cvc-resize-se {
+  width: var(--ctl-hit);
+  height: var(--ctl-hit);
+}
+
+.cvc-resize-nw::before,
+.cvc-resize-ne::before,
+.cvc-resize-sw::before,
+.cvc-resize-se::before {
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.cvc-resize-nw {
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+}
+
+.cvc-resize-ne {
+  top: 0;
+  right: 0;
+  transform: translate(50%, -50%);
+}
+
+.cvc-resize-sw {
+  bottom: 0;
+  left: 0;
+  transform: translate(-50%, 50%);
+}
+
+.cvc-resize-se {
+  bottom: 0;
+  right: 0;
+  transform: translate(50%, 50%);
+}
+
+/* 四条边：两端让开 --ctl-hit 给角手柄，厚度同样是 --ctl-hit，
+   但只有四分之一压在节点里（75% 探到外面），免得沿边一圈 32px
+   把节点内容自己的点击全吃掉。 */
+.cvc-resize-n,
+.cvc-resize-s {
+  left: var(--ctl-hit);
+  right: var(--ctl-hit);
+  height: var(--ctl-hit);
+}
+
+.cvc-resize-e,
+.cvc-resize-w {
+  top: var(--ctl-hit);
+  bottom: var(--ctl-hit);
+  width: var(--ctl-hit);
+}
+
+.cvc-resize-n::before,
+.cvc-resize-s::before {
+  width: min(48px, 40%);
+  height: 3px;
+}
+
+.cvc-resize-e::before,
+.cvc-resize-w::before {
+  width: 3px;
+  height: min(48px, 40%);
+}
+
+.cvc-resize-n {
+  top: 0;
+  transform: translateY(-75%);
+}
+
+.cvc-resize-s {
+  bottom: 0;
+  transform: translateY(75%);
+}
+
+.cvc-resize-w {
+  left: 0;
+  transform: translateX(-75%);
+}
+
+.cvc-resize-e {
+  right: 0;
+  transform: translateX(75%);
+}
+
+/* ==================== 缩略导航 ==================== */
+
+.cvc-minimap {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 12;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background-color: color-mix(in srgb, var(--bg-surface) 88%, transparent);
+  /* 缩略图里也铺点阵（蓝本 12px 一格）：一眼认出这是画布的缩影，
+     而不是一块随便的灰板 */
+  background-image: radial-gradient(var(--cvc-grid) 1px, transparent 1px);
+  background-size: 12px 12px;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.cvc-mini-node {
+  position: absolute;
+  border-radius: 2px;
+  background: var(--border-strong);
+}
+
+.cvc-mini-on {
+  background: var(--accent);
+}
+
+/* 视口窗：只画边框 + 极淡的填充，让底下的节点块透出来。
+   用 --accent-soft 是错的——它在亮色主题下是不透明的 #EEF2FF，
+   视口框铺满整个缩略图时会把所有节点块盖死，缩略图看着就是一片空白。 */
+.cvc-mini-view {
+  position: absolute;
+  border: 1.5px solid var(--accent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  pointer-events: none;
+}

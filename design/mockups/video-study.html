@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>视频学习页 · lingua-next</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .body-row { flex: 1; display: flex; min-height: 0; }
+
+  .topbar .stars { font-size: 12px; letter-spacing: 1px; color: var(--warn); line-height: 1; }
+  .topbar .stars i { font-style: normal; color: var(--border-strong); }
+
+  /* ============ 左：视频舞台 ============ */
+  .stage {
+    flex: 60; min-width: 0; overflow-y: auto;
+    padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;
+    background: var(--bg-app);
+  }
+
+  /* ---- 画面 ---- */
+  .screen {
+    position: relative; aspect-ratio: 16/9; flex-shrink: 0;
+    border-radius: var(--radius-lg); overflow: hidden;
+    background:
+      radial-gradient(circle at 74% 16%, rgba(255,255,255,0.14), transparent 42%),
+      radial-gradient(circle at 18% 92%, rgba(0,0,0,0.3), transparent 52%),
+      linear-gradient(145deg, #3E7C5B, #17332A);
+  }
+  .screen::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 42%;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.42)); pointer-events: none;
+  }
+  .screen .hud {
+    position: absolute; top: 12px; right: 12px; display: flex; gap: 6px;
+  }
+  .screen .hud span {
+    font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.75);
+    background: rgba(0,0,0,0.4); border-radius: var(--radius-sm); padding: 2px 6px;
+  }
+
+  /* 叠加字幕：词级卡拉OK + 逐词 IPA */
+  .caption { position: absolute; left: 0; right: 0; bottom: 16px; padding: 0 40px; text-align: center; z-index: 1; }
+  .cap-en { display: flex; flex-wrap: wrap; justify-content: center; column-gap: 7px; row-gap: 4px; }
+  .kw { display: inline-flex; flex-direction: column; align-items: center; cursor: pointer; }
+  .kw .t {
+    font-family: var(--font-reading); font-size: 19px; line-height: 1.4; font-style: normal;
+    color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+    border-radius: 4px; padding: 0 3px;
+  }
+  .kw.past .t { background: rgba(255,255,255,0.13); }
+  .kw.now .t { background: rgba(255,255,255,0.32); font-weight: 600; }
+  .kw .ipa {
+    font-family: var(--font-mono); font-size: 9.5px; font-style: normal;
+    color: rgba(255,255,255,0.62); text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    margin-top: 1px;
+  }
+  .cap-zh {
+    margin-top: 7px; font-size: 14px; color: rgba(255,255,255,0.88);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+  }
+
+  /* ---- 控制条（两行） ---- */
+  .ctl { flex-shrink: 0; }
+  .ctl-r1 { display: flex; align-items: center; gap: 4px; padding: 8px 12px; }
+  .ctl-time { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--ink-secondary); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ctl-time i { font-style: normal; color: var(--ink-faint); }
+  .track { flex: 1; height: 4px; border-radius: 2px; background: var(--bg-sunken); position: relative; margin: 0 12px; cursor: pointer; }
+  .track .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 29%; background: var(--accent); border-radius: 2px; }
+  .track .fill::after {
+    content: ''; position: absolute; right: -5px; top: 50%; transform: translateY(-50%);
+    width: 10px; height: 10px; border-radius: var(--radius-full);
+    background: var(--accent); box-shadow: var(--shadow-sm);
+  }
+  .track .amark {
+    position: absolute; left: 22%; top: -7px; width: 2px; height: 18px; border-radius: 1px;
+    background: var(--warn);
+  }
+  .track .amark::before {
+    content: 'A'; position: absolute; top: -11px; left: -4px;
+    font-family: var(--font-mono); font-size: 9px; font-weight: 700; color: var(--warn);
+  }
+  .track .bzone { position: absolute; left: 22%; width: 12%; top: 0; bottom: 0; background: var(--warn-soft); }
+
+  .ctl-r2 { display: flex; align-items: flex-start; justify-content: center; gap: 6px; padding: 8px 12px 9px; border-top: 1px solid var(--border); }
+  .tctl {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    min-width: 46px; padding: 5px 7px 4px; border-radius: var(--radius-md);
+    color: var(--ink-muted); transition: all var(--dur-fast) var(--ease);
+  }
+  .tctl:hover { background: var(--bg-hover); color: var(--ink); }
+  .tctl.on { background: var(--bg-active); color: var(--accent); }
+  .tctl svg { width: 18px; height: 18px; }
+  .tctl span { font-size: 10px; line-height: 1; }
+  .tctl-play {
+    width: 46px; height: 46px; border-radius: var(--radius-full); flex-shrink: 0;
+    background: var(--accent); color: var(--on-accent);
+    display: grid; place-items: center; margin: 0 6px;
+    transition: background var(--dur-fast) var(--ease);
+  }
+  .tctl-play:hover { background: var(--accent-hover); }
+  .tctl-play svg { width: 18px; height: 18px; }
+  .ctl-r2 .gap { width: 1px; align-self: stretch; margin: 4px 8px; background: var(--border); }
+
+  /* ---- 舞台底部信息行 ---- */
+  .stage-meta { display: flex; align-items: center; gap: 8px; padding: 0 2px; flex-shrink: 0; }
+  .stage-meta .lbl { font-size: var(--text-xs); color: var(--ink-muted); }
+
+  /* ============ 右：字幕列表 ============ */
+  .panel {
+    flex: 40; max-width: 460px; min-width: 380px; flex-shrink: 0;
+    border-left: 1px solid var(--border); background: var(--bg-app);
+    display: flex; flex-direction: column; min-height: 0;
+  }
+  .panel-head { padding: 11px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .panel-head h3 { font-size: var(--text-sm); font-weight: 600; }
+  .legend-bar {
+    display: flex; align-items: center; gap: 12px; padding: 7px 16px;
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+    font-size: 11px; color: var(--ink-muted); background: var(--bg-app);
+  }
+  .legend-bar i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; font-style: normal; }
+
+  .sub-list { flex: 1; overflow-y: auto; }
+
+  /* ---- 句卡 ---- */
+  .scard {
+    position: relative; padding: 11px 16px 9px;
+    border-bottom: 1px solid var(--border); cursor: pointer;
+    transition: background var(--dur-fast) var(--ease);
+  }
+  .scard:hover { background: var(--bg-hover); }
+  .scard.current { background: var(--bg-active); }
+  .scard.current::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2.5px; background: var(--accent); }
+
+  .sc-top { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+  .sc-num { font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); }
+  .sc-ts { font-family: var(--font-mono); font-size: 12px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+  .sc-top .spacer { flex: 1; }
+  .sc-top .mk { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; }
+  .sc-top .mk svg { width: 12px; height: 12px; }
+  .mk.learned { color: var(--ok); }
+  .mk.flagged { color: var(--warn); }
+  .mk.speaking { color: var(--accent); }
+
+  .sc-en { font-family: var(--font-reading); font-size: 17px; line-height: 1.6; color: var(--ink); }
+  .sc-en .hl { border-radius: 4px; padding: 0 3px; cursor: pointer; }
+  .hl.pv { background: var(--hl-blue); }
+  .hl.co { background: var(--hl-green); }
+  .hl.sl { background: var(--hl-pink); }
+  .sc-zh { font-size: 13px; line-height: 1.7; color: var(--ink-muted); margin-top: 3px; }
+
+  .sc-ops { display: flex; align-items: center; gap: 2px; margin-top: 5px; opacity: 0.4; transition: opacity var(--dur-fast) var(--ease); }
+  .scard:hover .sc-ops, .scard.current .sc-ops { opacity: 1; }
+  .sc-ops .icon-btn { width: 26px; height: 26px; }
+  .sc-ops .icon-btn svg { width: 14px; height: 14px; }
+
+  /* ---- 跟读展开态 ---- */
+  .fu { margin-top: 8px; background: var(--bg-sunken); border-radius: var(--radius-md); padding: 11px 12px; cursor: default; }
+  .fu-row { display: flex; align-items: center; gap: 8px; }
+  .fu-row + .fu-row { margin-top: 7px; }
+  .fu-lbl { width: 30px; flex-shrink: 0; font-size: 11px; color: var(--ink-muted); }
+  .wave { flex: 1; display: flex; align-items: center; gap: 2px; height: 24px; }
+  .wave i { flex: 1; border-radius: 1.5px; background: var(--ink-muted); opacity: 0.75; min-height: 2px; }
+  .wave.mine i { opacity: 1; }
+  .wave.mine i { background: var(--accent); }
+  .fu-diff { display: flex; flex-wrap: wrap; gap: 4px; margin: 10px 0 9px; }
+  .dw { font-family: var(--font-reading); font-size: 14px; line-height: 1.4; padding: 1px 5px; border-radius: 4px; border: 1px solid transparent; }
+  .dw.ok { color: var(--ok); }
+  .dw.miss { color: var(--err); border: 1px dashed var(--err); }
+  .dw.wrong { color: var(--err); background: var(--err-soft); }
+  .dw.wrong s { text-decoration: none; font-size: 11px; color: var(--ink-faint); margin-left: 3px; font-family: var(--font-ui); }
+  .fu-foot { display: flex; align-items: center; gap: 6px; }
+  .fu-foot .score { font-size: 11px; color: var(--ink-muted); }
+  .fu-foot .score b { color: var(--ink); font-weight: 600; }
+
+  /* ---- 编辑态 ---- */
+  .edit-area {
+    width: 100%; resize: none; margin-top: 6px;
+    background: var(--bg-surface); border: 1px solid var(--accent); border-radius: var(--radius-md);
+    padding: 9px 11px; font-family: var(--font-reading); font-size: 15px; line-height: 1.6;
+    color: var(--ink); outline: none;
+  }
+  .edit-hint { display: flex; align-items: center; gap: 5px; margin: 7px 0 8px; font-size: 11px; color: var(--warn); }
+  .edit-hint svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+  /* ============ 听写模式（右栏切换视图） ============ */
+  .dict-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .dict-play { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+  .dict-play .pbtn {
+    width: 40px; height: 40px; border-radius: var(--radius-full); flex-shrink: 0;
+    background: var(--accent); color: var(--on-accent); display: grid; place-items: center;
+  }
+  .dict-play .pbtn svg { width: 15px; height: 15px; margin-left: 2px; }
+  .dict-play .col { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+  .dict-play .col b { font-size: 12px; font-weight: 600; }
+  .dict-play .col span { font-size: 11px; color: var(--ink-muted); }
+  .dict-input {
+    width: 100%; height: 92px; resize: none;
+    background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+    padding: 12px 14px; font-family: var(--font-reading); font-size: 16px; line-height: 1.7;
+    color: var(--ink); outline: none;
+  }
+  .dict-input:focus { border-color: var(--accent); }
+  .dict-keys { display: flex; gap: 12px; font-size: 11px; color: var(--ink-muted); margin-top: 6px; }
+  .dict-keys kbd { font-family: var(--font-mono); font-size: 10px; border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; }
+
+  .dict-result { padding: 12px 14px; }
+  .dr-head { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+  .dr-head .ttl { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; color: var(--ink-faint); }
+  .dr-words { display: flex; flex-wrap: wrap; gap: 4px 5px; }
+  .dr-legend { display: flex; gap: 12px; margin-top: 10px; font-size: 11px; color: var(--ink-muted); }
+
+  .dict-acts { display: flex; gap: 8px; }
+  .dict-stats { display: flex; align-items: center; gap: 12px; font-size: var(--text-xs); color: var(--ink-muted); padding: 0 2px; }
+  .dict-stats b { color: var(--ink); font-weight: 600; }
+  .sess-bar { flex: 1; height: 4px; border-radius: 2px; background: var(--bg-sunken); overflow: hidden; }
+  .sess-bar i { display: block; height: 100%; width: 26%; background: var(--ok); border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 左侧导航栏 -->
+  <nav class="rail">
+    <div class="rail-logo"><img src="../../web/public/brand/logo-96.png" alt="Lingua" /></div>
+    <button class="rail-item" title="书架">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    </button>
+    <button class="rail-item" title="词库">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 20h10"/><path d="M8 8h8M8 12h5"/></svg>
+    </button>
+    <button class="rail-item active" title="视频学习">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polygon points="10 9 15 12 10 15 10 9" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <button class="rail-item" title="AI 对话">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+    </button>
+    <button class="rail-item" title="场景学习">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
+    <div class="rail-spacer"></div>
+    <button class="rail-item" title="设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </nav>
+
+  <div class="main">
+    <!-- 顶栏 -->
+    <header class="topbar">
+      <button class="icon-btn" title="返回视频库" onclick="location.href='video-library.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </button>
+      <div class="crumb">
+        <b>美国超市购物 Vlog：食品词汇大扫盲</b>
+        <span class="stars" style="margin-left:4px">★★<i>★★★</i></span>
+        <span class="chip accent">美音</span>
+      </div>
+      <div style="flex:1"></div>
+      <div class="seg" id="mode-seg">
+        <button class="active">双语</button><button>英语</button><button>中文</button><button>听写</button><button>挖空</button><button>阅读</button><button>中译英</button><button>词卡</button>
+      </div>
+      <button class="icon-btn" title="播放设置">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </header>
+
+    <div class="body-row">
+      <!-- ============ 左：视频舞台 ============ -->
+      <div class="stage">
+        <div class="screen">
+          <div class="hud"><span>1080P</span><span>CC 双语</span></div>
+          <div class="caption">
+            <div class="cap-en">
+              <span class="kw past"><i class="t">First</i><i class="ipa">/fɜːrst/</i></span>
+              <span class="kw past"><i class="t">thing</i><i class="ipa">/θɪŋ/</i></span>
+              <span class="kw past"><i class="t">on</i><i class="ipa">/ɑːn/</i></span>
+              <span class="kw past"><i class="t">my</i><i class="ipa">/maɪ/</i></span>
+              <span class="kw past"><i class="t">list</i><i class="ipa">/lɪst/</i></span>
+              <span class="kw past"><i class="t">is</i><i class="ipa">/ɪz/</i></span>
+              <span class="kw past"><i class="t">to</i><i class="ipa">/tə/</i></span>
+              <span class="kw now"><i class="t">stock</i><i class="ipa">/stɑːk/</i></span>
+              <span class="kw"><i class="t">up</i><i class="ipa">/ʌp/</i></span>
+              <span class="kw"><i class="t">on</i><i class="ipa">/ɑːn/</i></span>
+              <span class="kw"><i class="t">some</i><i class="ipa">/səm/</i></span>
+              <span class="kw"><i class="t">fresh</i><i class="ipa">/freʃ/</i></span>
+              <span class="kw"><i class="t">produce.</i><i class="ipa">/ˈproʊduːs/</i></span>
+            </div>
+            <div class="cap-zh">这周清单上的第一件事，就是囤一些新鲜农产品。</div>
+          </div>
+        </div>
+
+        <!-- 控制条 -->
+        <div class="card ctl">
+          <div class="ctl-r1">
+            <button class="btn-ghost-sm" title="倍速">1.0×</button>
+            <button class="icon-btn" title="隐藏视频（纯听力）">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+            <button class="icon-btn" title="全屏">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+            </button>
+            <button class="icon-btn active" title="音标（IPA）已开启">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            </button>
+            <div class="track">
+              <span class="bzone"></span>
+              <span class="amark"></span>
+              <span class="fill"></span>
+            </div>
+            <span class="ctl-time">03:42 <i>/ 12:38</i></span>
+          </div>
+          <div class="ctl-r2">
+            <button class="tctl" title="上一句">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20" fill="currentColor" stroke="none"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+              <span>上一句</span>
+            </button>
+            <button class="tctl-play" title="暂停">
+              <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+            </button>
+            <button class="tctl" title="下一句">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4" fill="currentColor" stroke="none"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+              <span>下一句</span>
+            </button>
+            <div class="gap"></div>
+            <button class="tctl" title="标记 A 点（已标于 02:47）">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.1-7-11a7 7 0 0 1 14 0c0 5.9-7 11-7 11z"/><text x="12" y="12.5" text-anchor="middle" font-size="8" font-weight="700" fill="currentColor" stroke="none" font-family="var(--font-mono)">A</text></svg>
+              <span>A 点</span>
+            </button>
+            <button class="tctl on" title="A-B 循环中">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+              <span>A-B 循环</span>
+            </button>
+            <button class="tctl" title="单句循环">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/><text x="12" y="14.5" text-anchor="middle" font-size="7.5" font-weight="700" fill="currentColor" stroke="none">1</text></svg>
+              <span>单句循环</span>
+            </button>
+            <div class="gap"></div>
+            <button class="tctl" title="句间间隔 1 秒">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><line x1="12" y1="13" x2="12" y2="9"/><line x1="9" y1="2" x2="15" y2="2"/></svg>
+              <span>间隔 1s</span>
+            </button>
+            <button class="tctl on" title="每句播完自动暂停">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="4" height="16" rx="1"/><rect x="15" y="4" width="4" height="16" rx="1"/></svg>
+              <span>单句暂停</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 底部信息行 -->
+        <div class="stage-meta">
+          <span class="chip">已学 12/46 句</span>
+          <span class="chip warn">生词 8</span>
+          <span class="chip">词组 14</span>
+          <span class="lbl">whisperX 词级对齐 · 双语字幕已缓存</span>
+          <div style="flex:1"></div>
+          <button class="btn btn-soft">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+            AI 陪读
+          </button>
+        </div>
+      </div>
+
+      <!-- ============ 右：字幕列表（双语模式） ============ -->
+      <aside class="panel" id="panel-subs">
+        <div class="panel-head">
+          <h3>字幕列表</h3>
+          <span class="chip">46 句</span>
+          <div style="flex:1"></div>
+          <button class="icon-btn" title="定位当前句">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>
+          </button>
+          <button class="icon-btn" title="只看旗标难句">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          </button>
+        </div>
+        <div class="legend-bar">
+          <span><i style="background:var(--hl-blue)"></i>短语动词</span>
+          <span><i style="background:var(--hl-green)"></i>搭配</span>
+          <span><i style="background:var(--hl-pink)"></i>俚语</span>
+          <div style="flex:1"></div>
+          <span>点击词组看解释</span>
+        </div>
+        <div class="sub-list">
+
+          <!-- 11 已学 -->
+          <div class="scard">
+            <div class="sc-top">
+              <span class="sc-num">11</span><span class="sc-ts">03:21.5</span>
+              <div class="spacer"></div>
+              <span class="mk learned" title="已学会"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            </div>
+            <div class="sc-en">Alright guys, welcome back to my channel!</div>
+            <div class="sc-zh">好啦各位，欢迎回到我的频道！</div>
+            <div class="sc-ops">
+              <button class="icon-btn" title="复制"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+              <button class="icon-btn" title="收藏句子"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+              <button class="icon-btn" title="编辑字幕"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
+              <button class="icon-btn" title="跟读录音"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
+              <button class="icon-btn" title="播放本句"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20 6 4"/></svg></button>
+            </div>
+          </div>
+
+          <!-- 12 已学 + 高亮 -->
+          <div class="scard">
+            <div class="sc-top">
+              <span class="sc-num">12</span><span class="sc-ts">03:28.9</span>
+              <div class="spacer"></div>
+              <span class="mk learned" title="已学会"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            </div>
+            <div class="sc-en">Today we're going to <span class="hl co">run some errands</span> and <span class="hl pv">pick up</span> a few groceries.</div>
+            <div class="sc-zh">今天我们要出门办点事，顺便买些日用杂货。</div>
+            <div class="sc-ops">
+              <button class="icon-btn" title="复制"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+              <button class="icon-btn" title="收藏句子"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+              <button class="icon-btn" title="编辑字幕"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
+              <button class="icon-btn" title="跟读录音"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
+              <button class="icon-btn" title="播放本句"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20 6 4"/></svg></button>
+            </div>
+          </div>
+
+          <!-- 13 当前句 -->
+          <div class="scard current">
+            <div class="sc-top">
+              <span class="sc-num">13</span><span class="sc-ts">03:36.2</span>
+              <div class="spacer"></div>
+              <span class="mk speaking" title="正在播放">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>
+              </span>
+            </div>
+            <div class="sc-en">First thing on my list is to <span class="hl pv">stock up on</span> some fresh <span class="hl co">produce</span> for the week.</div>
+            <div class="sc-zh">这周清单上的第一件事，就是囤一些新鲜农产品。</div>
+            <div class="sc-ops">
+              <button class="icon-btn" title="复制"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+              <button class="icon-btn" title="收藏句子"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+              <button class="icon-btn" title="编辑字幕"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
+              <button class="icon-btn" title="跟读录音"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
+              <button class="icon-btn" title="播放本句"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20 6 4"/></svg></button>
+            </div>
+          </div>
+
+          <!-- 14 跟读展开态 -->
+          <div class="scard">
+            <div class="sc-top">
+              <span class="sc-num">14</span><span class="sc-ts">03:44.8</span>
+              <div class="spacer"></div>
+              <span class="mk" style="color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>跟读中</span>
+            </div>
+            <div class="sc-en">The avocados here are <span class="hl co">ridiculously cheap</span> compared to my local store.</div>
+            <div class="sc-zh">这里的牛油果和我家附近的店比，便宜得离谱。</div>
+            <div class="fu">
+              <div class="fu-row">
+                <span class="fu-lbl">原句</span>
+                <div class="wave" data-seed="a"></div>
+                <button class="icon-btn" style="width:24px;height:24px" title="播放原句"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" style="width:12px;height:12px"><polygon points="6 4 20 12 6 20 6 4"/></svg></button>
+              </div>
+              <div class="fu-row">
+                <span class="fu-lbl">我的</span>
+                <div class="wave mine" data-seed="b"></div>
+                <button class="icon-btn" style="width:24px;height:24px" title="回放录音"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" style="width:12px;height:12px"><polygon points="6 4 20 12 6 20 6 4"/></svg></button>
+              </div>
+              <div class="fu-diff">
+                <span class="dw ok">The</span>
+                <span class="dw ok">avocados</span>
+                <span class="dw miss" title="漏读">here</span>
+                <span class="dw ok">are</span>
+                <span class="dw wrong" title="错读">ridiculously<s>→ridiculous</s></span>
+                <span class="dw ok">cheap</span>
+                <span class="dw ok">compared</span>
+                <span class="dw ok">to</span>
+                <span class="dw ok">my</span>
+                <span class="dw ok">local</span>
+                <span class="dw ok">store</span>
+              </div>
+              <div class="fu-foot">
+                <span class="score">相似度 <b>86%</b> · 漏读 1 · 错读 1</span>
+                <div style="flex:1"></div>
+                <button class="btn btn-soft btn-sm">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+                  重录
+                </button>
+                <button class="btn btn-sm">保存</button>
+                <button class="btn-ghost-sm">收起</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 15 旗标难句 -->
+          <div class="scard">
+            <div class="sc-top">
+              <span class="sc-num">15</span><span class="sc-ts">03:52.1</span>
+              <div class="spacer"></div>
+              <span class="mk flagged" title="难句已旗标，进复习清单"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><rect x="3" y="2" width="2" height="20" rx="1"/></svg></span>
+            </div>
+            <div class="sc-en">I always <span class="hl pv">keep an eye out</span> for the <span class="hl sl">BOGO</span> deals in this aisle.</div>
+            <div class="sc-zh">我总会留意这条货架上"买一送一"的折扣。</div>
+            <div class="sc-ops">
+              <button class="icon-btn" title="复制"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+              <button class="icon-btn active" title="已收藏"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+              <button class="icon-btn" title="编辑字幕"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
+              <button class="icon-btn" title="跟读录音"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
+              <button class="icon-btn" title="播放本句"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20 6 4"/></svg></button>
+            </div>
+          </div>
+
+          <!-- 16 编辑态 -->
+          <div class="scard" style="cursor:default">
+            <div class="sc-top">
+              <span class="sc-num">16</span><span class="sc-ts">04:01.6</span>
+              <div class="spacer"></div>
+              <span class="chip">编辑中</span>
+            </div>
+            <textarea class="edit-area" rows="2" spellcheck="false">Let's grab a cart and head straight to the produce section.</textarea>
+            <div class="edit-hint">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              保存后本句翻译与 AI 分析缓存将失效并重建，词组高亮随句重算
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-primary btn-sm">保存修改</button>
+              <button class="btn btn-sm">取消</button>
+              <span style="flex:1"></span>
+              <span class="chip" style="align-self:center">改后标注"已人工修正"</span>
+            </div>
+          </div>
+
+          <!-- 17 -->
+          <div class="scard">
+            <div class="sc-top">
+              <span class="sc-num">17</span><span class="sc-ts">04:09.3</span>
+              <div class="spacer"></div>
+            </div>
+            <div class="sc-en">Let's head over to the checkout before the lines <span class="hl co">get crazy</span>.</div>
+            <div class="sc-zh">趁排队的人还没多起来，我们去结账吧。</div>
+            <div class="sc-ops">
+              <button class="icon-btn" title="复制"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+              <button class="icon-btn" title="收藏句子"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+              <button class="icon-btn" title="编辑字幕"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
+              <button class="icon-btn" title="跟读录音"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
+              <button class="icon-btn" title="播放本句"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20 6 4"/></svg></button>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- ============ 右：听写模式（seg 点"听写"切换） ============ -->
+      <aside class="panel" id="panel-dict" style="display:none">
+        <div class="panel-head">
+          <h3>听写模式</h3>
+          <span class="chip accent">第 13 句 / 46</span>
+          <div style="flex:1"></div>
+          <span class="chip ok">平均正确率 78%</span>
+        </div>
+        <div class="dict-body">
+
+          <div class="card dict-play">
+            <button class="pbtn" title="重听本句">
+              <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+            </button>
+            <div class="wave" data-seed="c" style="flex:1"></div>
+            <div class="col">
+              <b>已听 2 遍</b>
+              <span>0.75× 慢速</span>
+            </div>
+          </div>
+
+          <div>
+            <textarea class="dict-input" spellcheck="false">First thing on my list is to stock up some fresh products for the week</textarea>
+            <div class="dict-keys">
+              <span><kbd>Enter</kbd> 提交批改</span>
+              <span><kbd>Ctrl R</kbd> 重听</span>
+              <span><kbd>Ctrl H</kbd> 提示一词</span>
+            </div>
+          </div>
+
+          <div class="card dict-result">
+            <div class="dr-head">
+              <span class="ttl">逐词批改</span>
+              <div style="flex:1"></div>
+              <span class="chip ok">13 / 15 词 · 87%</span>
+            </div>
+            <div class="dr-words">
+              <span class="dw ok">First</span>
+              <span class="dw ok">thing</span>
+              <span class="dw ok">on</span>
+              <span class="dw ok">my</span>
+              <span class="dw ok">list</span>
+              <span class="dw ok">is</span>
+              <span class="dw ok">to</span>
+              <span class="dw ok">stock</span>
+              <span class="dw ok">up</span>
+              <span class="dw miss" title="漏写">on</span>
+              <span class="dw ok">some</span>
+              <span class="dw ok">fresh</span>
+              <span class="dw wrong" title="写错">produce<s>→products</s></span>
+              <span class="dw ok">for</span>
+              <span class="dw ok">the</span>
+              <span class="dw ok">week</span>
+            </div>
+            <div class="dr-legend">
+              <span style="color:var(--ok)">绿 = 正确</span>
+              <span><span class="dw wrong" style="font-size:11px;padding:0 4px">红底</span> = 写错</span>
+              <span><span class="dw miss" style="font-size:11px;padding:0 4px">虚线框</span> = 漏写</span>
+            </div>
+          </div>
+
+          <div class="dict-acts">
+            <button class="btn btn-outline">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+              重听
+            </button>
+            <button class="btn">提示</button>
+            <button class="btn">看答案</button>
+            <div style="flex:1"></div>
+            <button class="btn btn-primary">
+              下一句
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="dict-stats">
+            <span>本次已听写 <b>12</b> 句</span>
+            <span>连对 <b>4</b> 句</span>
+            <div class="sess-bar"><i></i></div>
+            <span>12 / 46</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<button class="theme-toggle" onclick="toggleTheme()" title="切换深浅色">
+  <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+</button>
+<script>
+  const saved = localStorage.getItem('ln-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? '' : 'dark';
+    cur ? document.documentElement.setAttribute('data-theme', cur) : document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('ln-theme', cur);
+  }
+
+  // 八模式切换：听写切到听写面板，其余展示双语字幕列表
+  document.querySelectorAll('#mode-seg button').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('#mode-seg button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      const dict = b.textContent === '听写';
+      document.getElementById('panel-subs').style.display = dict ? 'none' : '';
+      document.getElementById('panel-dict').style.display = dict ? '' : 'none';
+    });
+  });
+
+  // 波形条：按 data-seed 生成确定性高度，模拟真实语音包络
+  document.querySelectorAll('.wave').forEach(w => {
+    const seedStr = w.dataset.seed || 'a';
+    let s = seedStr.charCodeAt(0) * 37;
+    const n = 34;
+    for (let i = 0; i < n; i++) {
+      s = (s * 9301 + 49297) % 233280;
+      const env = Math.sin((i / n) * Math.PI) * 0.7 + 0.3;   // 句子包络
+      const h = Math.max(2, Math.round((s / 233280) * 20 * env + 3));
+      const bar = document.createElement('i');
+      bar.style.height = h + 'px';
+      w.appendChild(bar);
+    }
+  });
+</script>
+</body>
+</html>

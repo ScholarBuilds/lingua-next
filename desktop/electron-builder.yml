@@ -1,0 +1,42 @@
+# 官网发布由 scripts/release-mac.mjs 预检 Developer ID、公证凭据和更新签名密钥。
+appId: com.lingua.nexus
+productName: NEXUS
+electronDist: node_modules/electron/dist
+directories:
+  output: release
+files:
+  - dist/**
+  - '!dist/**/*.test.js'
+  - assets/**
+  - package.json
+extraResources:
+  - from: runtime
+    to: runtime
+mac:
+  minimumSystemVersion: "14.0.0"
+  target:
+    - target: dmg
+      arch: [arm64]
+    - target: zip
+      arch: [arm64]
+  category: public.app-category.productivity
+  icon: assets/icon-1024.png
+  hardenedRuntime: true
+  notarize: true
+  sign: scripts/sign-mac.cjs
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.inherit.plist
+  extendInfo:
+    NSMicrophoneUsageDescription: "NEXUS 在口语练习和语音输入时使用麦克风。"
+electronFuses:
+  runAsNode: false
+  enableCookieEncryption: false
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  enableEmbeddedAsarIntegrityValidation: true
+  onlyLoadAppFromAsar: true
+  grantFileProtocolExtraPrivileges: false
+publish:
+  provider: generic
+  url: ${env.NEXUS_UPDATE_URL}

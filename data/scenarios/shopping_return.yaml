@@ -1,0 +1,18 @@
+key: shopping_return
+title: 购物退换
+title_en: Returning an Item
+level: B1
+role_ai: 商店客服柜台店员
+role_user: 要求退换货的顾客
+goal: 说明退换原因（尺码不合适或有质量问题）、出示小票，协商退款或换货方案
+opening_line: "Hello! How can I help you today?"
+key_sentences:
+  - en: "I'd like to return this sweater. It doesn't fit me well."
+    zh: "我想退这件毛衣，尺码不太合适。"
+  - en: "Here's my receipt. I bought it three days ago."
+    zh: "这是我的小票，我三天前买的。"
+  - en: "Could I exchange it for a larger size instead?"
+    zh: "我可以换一件大一号的吗？"
+hints:
+  - 说清楚退货原因，并主动出示购物小票
+  - 如果店员提出换货或代金券，权衡后再决定要不要坚持退款

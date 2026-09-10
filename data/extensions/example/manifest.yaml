@@ -1,0 +1,39 @@
+# 本地扩展示例（模块 22）。改完到「扩展」页点「重新扫描」就生效，不用重启。
+# 一个扩展能贡献什么、要什么权限，扩展页那张表就是按这份文件列的。
+id: example
+name: 示例扩展
+version: 0.1.0
+description: 演示三种贡献：⌘K 命令、例程、MCP 服务器。默认关着，开了才会同步例程与挂 MCP。
+default_enabled: false
+
+# 要的权限（network / credentials / screen_input / files）；没授权的扩展不会就绪
+permissions:
+  - network
+
+contributions:
+  commands:
+    - label: 打开 MDN 英语词典
+      url: https://www.merriam-webster.com/
+      keywords: dictionary 词典 mw
+  pages:
+    - label: 示例页
+      url: https://example.com
+
+# 例程：交给助理代理的一句话，按时间表跑，产出进 routine_run；speak 为 true 会在今天页可念
+routines:
+  - key: example_evening
+    label: 晚间一句
+    schedule: "21:00"
+    prompt: 用一句中文告诉我今天还有几张到期词、任务有没有失败的。
+    speak: false
+    detail: 到期词与失败任务
+
+# MCP 服务器（二选一：stdio 命令 或 http 地址）。启用后它的工具立刻进助理，工具名带前缀 example_
+# mcp:
+#   transport: stdio
+#   command: npx
+#   args: ["-y", "@modelcontextprotocol/server-filesystem", "/Users/your-user/Documents"]
+# mcp:
+#   transport: http
+#   url: http://127.0.0.1:8100/mcp
+#   headers: {Authorization: "Bearer ..."}

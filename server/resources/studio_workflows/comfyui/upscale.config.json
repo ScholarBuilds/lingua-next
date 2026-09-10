@@ -1,0 +1,41 @@
+{
+  "title": "SeedVR2 高清放大",
+  "fields": [
+    {
+      "id": "f_image",
+      "node": "15",
+      "input": "image",
+      "name": "输入图片",
+      "type": "image",
+      "default": "",
+      "required": true
+    },
+    {
+      "id": "f_seed",
+      "node": "172",
+      "input": "seed",
+      "name": "随机种子",
+      "type": "number",
+      "default": 1,
+      "min": 0,
+      "max": 4294967295,
+      "step": 1,
+      "random_enabled": true,
+      "hidden": true
+    },
+    {
+      "id": "f_resolution",
+      "node": "172",
+      "input": "resolution",
+      "name": "目标分辨率",
+      "type": "dropdown",
+      "default": 2048,
+      "options": [2048, 4096]
+    }
+  ],
+  "mini_cards": {
+    "image": { "x": 24, "y": 30 },
+    "custom": { "x": 280, "y": 78 },
+    "output": { "x": 540, "y": 120 }
+  }
+}

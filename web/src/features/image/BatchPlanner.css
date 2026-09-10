@@ -1,0 +1,159 @@
+/* 批量策划台（模块 16 FR-437）。
+
+   类名前缀 bp- 独占，加类前已 grep 全仓确认没被占用（STD-UI-003a）：浮层类同时
+   决定定位方式，撞名不报错，只是"样式莫名其妙"。 */
+
+.overlay-card.bp-modal {
+  max-width: 1120px; width: 95vw; max-height: 90vh;
+  display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden;
+}
+
+/* ---- 头 ---- */
+
+.bp-head {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 16px; border-bottom: 1px solid var(--border);
+}
+.bp-title { font-size: var(--text-md); font-weight: 600; }
+.bp-head-hint {
+  flex: 1; min-width: 0; font-size: var(--text-xs); color: var(--ink-muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.bp-modal .icon-btn:disabled { opacity: 0.45; pointer-events: none; }
+
+/* ---- 两栏主体 ---- */
+
+.bp-body {
+  flex: 1 1 auto; min-height: 0;
+  display: grid; grid-template-columns: 250px minmax(0, 1fr); overflow: hidden;
+}
+
+.bp-side {
+  display: flex; flex-direction: column; min-height: 0;
+  background: var(--bg-sunken); border-right: 1px solid var(--border);
+}
+.bp-side-block {
+  flex: 0 0 auto;
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 12px 14px; border-bottom: 1px solid var(--border);
+}
+.bp-side-title {
+  font-size: var(--text-xs); font-weight: 600; color: var(--ink-muted);
+  letter-spacing: 0.02em;
+}
+.bp-nav-title { padding: 12px 14px 6px; }
+
+.bp-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.bp-field > span { font-size: var(--text-xs); font-weight: 600; color: var(--ink-muted); }
+.bp-note { font-size: var(--text-xs); color: var(--ink-faint); line-height: 1.6; }
+.bp-mono { font-family: var(--font-mono); }
+
+/* ---- 任务导航 ---- */
+
+.bp-nav {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 0 8px 10px;
+}
+.bp-nav .bp-note { padding: 0 6px; }
+.bp-nav-item {
+  display: flex; align-items: center; gap: 8px; text-align: left;
+  padding: 6px 8px; border-radius: var(--radius-md);
+  color: var(--ink-secondary); transition: background var(--dur-fast) var(--ease);
+}
+.bp-nav-item:hover { background: var(--bg-hover); }
+.bp-nav-item.on { background: var(--bg-active); color: var(--accent); }
+.bp-nav-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.bp-nav-label {
+  font-size: var(--text-sm); font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.bp-nav-meta { font-size: 11px; font-family: var(--font-mono); color: var(--ink-muted); }
+.bp-nav-item.on .bp-nav-meta { color: var(--accent); }
+.bp-nav-warn {
+  flex: 0 0 auto; padding: 0 6px; border-radius: var(--radius-full);
+  background: var(--err-soft); color: var(--err); font-size: 11px; line-height: 18px;
+}
+
+.bp-idx {
+  flex: 0 0 auto;
+  width: 22px; height: 22px; border-radius: var(--radius-full);
+  display: grid; place-items: center;
+  background: var(--bg-sunken); color: var(--ink-muted);
+  font-family: var(--font-mono); font-size: 11px;
+}
+.bp-nav-item.on .bp-idx { background: var(--accent); color: var(--on-accent); }
+
+/* ---- 右上：想法 + 参考图 ---- */
+
+.bp-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+
+.bp-idea {
+  flex: 0 0 auto;
+  display: flex; gap: 14px; padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.bp-idea-col { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.bp-idea .field-textarea { min-height: 76px; font-size: var(--text-sm); }
+.bp-idea-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.bp-idea-bar .bp-plan-n { width: 110px; }
+
+.bp-ref { flex: 0 0 150px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.bp-ref-box {
+  width: 100%; height: 84px; border-radius: var(--radius-md);
+  border: 1px dashed var(--border-strong); background: var(--bg-sunken);
+  display: grid; place-items: center; color: var(--ink-faint); overflow: hidden;
+}
+.bp-ref-box img { width: 100%; height: 100%; object-fit: cover; }
+.bp-ref .bp-note { text-align: center; }
+
+/* ---- 右下：子任务卡片 ---- */
+
+.bp-tasks {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 10px; padding: 12px 16px 16px;
+}
+.bp-empty {
+  padding: 26px 16px; text-align: center;
+  border: 1px dashed var(--border-strong); border-radius: var(--radius-lg);
+  color: var(--ink-secondary); display: flex; flex-direction: column; gap: 6px;
+}
+
+.bp-card {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--bg-surface); transition: border-color var(--dur-fast) var(--ease);
+}
+.bp-card.on { border-color: var(--accent); }
+.bp-card.blank { border-color: var(--err); }
+.bp-card-head { display: flex; align-items: center; gap: 8px; }
+.bp-card .bp-label { flex: 1; min-width: 0; height: 30px; font-size: var(--text-sm); }
+.bp-card .bp-prompt { min-height: 62px; font-size: var(--text-sm); }
+.bp-card-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.bp-card-row .field-select { width: auto; min-width: 116px; height: 30px; font-size: var(--text-sm); }
+.bp-n { display: flex; align-items: center; gap: 6px; }
+.bp-n > span { font-size: var(--text-xs); color: var(--ink-muted); }
+.bp-n .field-input { width: 64px; height: 30px; font-size: var(--text-sm); padding: 0 8px; }
+.bp-add { align-self: flex-start; }
+
+/* ---- 底部合计（FR-439） ---- */
+
+.bp-foot {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-top: 1px solid var(--border); background: var(--bg-surface);
+}
+.bp-sum { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.bp-sum-line { font-size: var(--text-sm); color: var(--ink-secondary); }
+.bp-sum-line b { font-family: var(--font-mono); font-size: var(--text-md); color: var(--ink); }
+/* 更贵的档位在合计里标出来，别让 2K 混在一串数字里（BR-120） */
+.bp-sum-line .bp-hot { color: var(--warn); font-weight: 600; }
+
+@media (max-width: 900px) {
+  .bp-body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  .bp-side { border-right: 0; border-bottom: 1px solid var(--border); max-height: 34vh; }
+  .bp-idea { flex-direction: column; }
+  .bp-ref { flex: 0 0 auto; align-items: flex-start; }
+  .bp-ref-box { width: 130px; }
+}

@@ -1,0 +1,760 @@
+/* 画布图片编辑器（模块 17 · FR-466）。类名前缀 sced- 独占（pnpm check:css 守着）。
+   颜色一律取 tokens.css 的 var()，不新增色值；画布里画的白底是图像数据不是界面样式，
+   所以那处才写死 #FFFFFF。
+
+   布局骨架：卡片是 flex 列（页头 / 主体），主体是三列 grid。
+   grid 显式写了 `grid-template-rows: minmax(0, 1fr)`——不写的话隐式行按 max-content，
+   区域被内容撑开，子元素的 min-height:0 与画布的 height:100% 全部失效。 */
+
+/* 尺寸对齐蓝本（smart-canvas.css:1442 是 1480×980）：看图这件事，
+   舞台每少 100px 都直接体现在「看不看得清」上。 */
+.sced-card {
+  width: min(1480px, calc(100vw - 36px));
+  max-width: min(1480px, calc(100vw - 36px));
+  height: min(980px, calc(100vh - 36px));
+  max-height: calc(100vh - 36px);
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── 页头 ── */
+
+/* 三列：左标题 / 中模式 tab / 右关闭（蓝本 .image-edit-head 同款）。
+   两侧用 minmax(0,1fr) 撑对称，tab 才会真的居中而不是被标题推偏。 */
+.sced-head {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* 头部右侧一组：撤销 / 重做 / 关闭 */
+.sced-headacts {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-self: end;
+}
+
+/* 翻页与撤销共用的纯图标按钮，命中区补到 --ctl-hit。 */
+.sced-flip-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ctl-hit);
+  height: var(--ctl-hit);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease);
+}
+.sced-flip-btn > svg {
+  width: 16px;
+  height: 16px;
+}
+.sced-flip-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--ink);
+}
+.sced-flip-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* 标题下面的「‹ 3/8 ›」。方向键也能切，这里是它的可见对应物 */
+.sced-flip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 2px;
+  margin-left: -6px;
+}
+.sced-flip-num {
+  min-width: 46px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-secondary);
+}
+
+/* 模式 tab 组：一条圆角胶囊，装着一排小按钮 */
+.sced-mode-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-sunken);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.sced-mode-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+/* 窄屏收起文字只留图标，否则七个 tab 会把头部撑爆 */
+@media (max-width: 1180px) {
+  .sced-mode-tabs .sced-mode > span {
+    display: none;
+  }
+
+  .sced-mode-tabs .sced-mode {
+    padding: 0 8px;
+  }
+
+}
+.sced-headtext {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.sced-headtext h3 {
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+.sced-sub {
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+/* ── 三列骨架 ── */
+
+/* 模式挪到头部之后，主体只剩「舞台 + 参数栏」两列。
+   省下的 148px 全给舞台——看图工具里舞台最值钱。 */
+.sced-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 292px;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+/* 窄屏：参数栏从右侧移到舞台下方，舞台占满宽度 */
+@media (max-width: 1040px) {
+  .sced-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .sced-side {
+    grid-column: 1;
+    max-height: 46%;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+}
+
+/* 尺寸对齐蓝本 .image-edit-mode button（30px 高、11px 字） */
+.sced-mode {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  height: var(--ctl-h-sm);
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease);
+}
+.sced-mode:hover:not(:disabled) { background: var(--bg-hover); color: var(--ink); }
+.sced-mode:disabled { opacity: 0.45; cursor: not-allowed; }
+.sced-mode svg { flex: 0 0 auto; width: 15px; height: 15px; }
+.sced-mode span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.sced-mode-on {
+  background: var(--bg-surface);
+  color: var(--accent-ink);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── 主区 ── */
+
+.sced-main {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 画布舞台。display:flex 是给 MaskCanvas 用的——它的根是 width/height:100%，
+   需要一个能把它撑满的父层；裁剪/切分那两支用绝对定位，不受影响 */
+.sced-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+  background: var(--bg-sunken);
+}
+
+.sced-msg {
+  margin: auto;
+  padding: 24px;
+  max-width: 440px;
+  text-align: center;
+  font-size: var(--text-sm);
+  line-height: 1.9;
+  color: var(--ink-muted);
+}
+.sced-msg-bad { color: var(--err); }
+
+/* 图面：位置与尺寸由 JS 按容器实测尺寸算好后写在 style 上 */
+.sced-plate {
+  position: absolute;
+  user-select: none;
+  touch-action: none;
+  box-shadow: var(--shadow-md);
+}
+.sced-plate img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.sced-crop {
+  position: absolute;
+  cursor: move;
+  outline: 1px solid var(--accent);
+  /* 一圈超大扩散的阴影把选框以外压暗，省掉四块遮罩 div */
+  box-shadow: 0 0 0 9999px var(--backdrop);
+}
+.sced-grip {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  margin: -7px 0 0 -7px;
+  border: 2px solid var(--accent);
+  border-radius: 3px;
+  background: var(--bg-surface);
+}
+
+.sced-line {
+  position: absolute;
+  background: var(--accent);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+
+/* ── 右侧参数栏 ── */
+
+.sced-side {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px;
+  overflow-y: auto;
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border);
+}
+.sced-block {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.sced-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.sced-note {
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--ink-muted);
+}
+.sced-nums {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.9;
+  color: var(--ink-secondary);
+}
+
+.sced-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.sced-chip {
+  height: var(--ctl-h-sm);
+  min-width: var(--ctl-hit);
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  color: var(--ink-secondary);
+  transition: all var(--dur-fast) var(--ease);
+}
+.sced-chip:hover:not(:disabled) { border-color: var(--ink-faint); color: var(--ink); }
+.sced-chip:disabled { opacity: 0.45; cursor: not-allowed; }
+.sced-chip-on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.sced-prompt {
+  width: 100%;
+  min-height: 96px;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  resize: vertical;
+  outline: none;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.sced-prompt:focus { border-color: var(--accent); }
+.sced-prompt::placeholder { color: var(--ink-faint); }
+
+.sced-numbox {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+.sced-num {
+  flex: 1;
+  min-width: 0;
+  height: var(--ctl-h-sm);
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  outline: none;
+}
+.sced-num:focus { border-color: var(--accent); }
+
+/* 全局 .seg 没有禁用态，处理中要看得出来点不动 */
+.sced-side .seg button:disabled { opacity: 0.45; cursor: not-allowed; }
+/* 参数区里的按钮左对齐，只有动作条那颗才拉通栏 */
+.sced-block .btn { align-self: flex-start; }
+
+.sced-range {
+  width: 100%;
+  height: 4px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* 拼接的备选图。grid 里用 aspect-ratio 是安全的，
+   被压扁的那条坑发生在 flex 列 + width:100% 的组合上 */
+.sced-pick {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: 6px;
+}
+.sced-cell {
+  position: relative;
+  display: block;
+  padding: 0;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.sced-cell img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.sced-cell:disabled { opacity: 0.5; cursor: not-allowed; }
+.sced-cell-on { border-color: var(--accent); }
+
+/* ── 底部动作条 ── */
+
+.sced-act {
+  flex: 0 0 auto;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sced-status {
+  font-size: var(--text-xs);
+  line-height: 1.65;
+  color: var(--ink-muted);
+}
+.sced-status-bad { color: var(--warn); }
+.sced-act .btn { justify-content: center; }
+
+/* 画笔标注层：盖在图上的透明 canvas。
+   尺寸由 JS 按 view 算好写进 canvas 的 width/height 属性，
+   这里只负责铺满 plate —— CSS 尺寸和画布像素尺寸不一致会让笔迹整体拉伸。 */
+.sced-draw {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* 色板：只有颜色本身是信息，所以不写字，靠 title 与 aria-label 说明 */
+.sced-swatch {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid var(--bg-surface);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--border);
+  cursor: pointer;
+}
+
+.sced-swatch:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.sced-swatch-on {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+/* ==================== 预览 ==================== */
+
+/* 棋盘格底：透明图（抠图产物、扩图前的透明画布）在纯色底上看不出哪里是透明的 */
+.sced-preview-stage {
+  cursor: grab;
+  background-color: var(--bg-sunken);
+  background-image:
+    linear-gradient(45deg, var(--border) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--border) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--border) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--border) 75%);
+  background-size: 18px 18px;
+  background-position: 0 0, 0 9px, 9px -9px, -9px 0;
+}
+.sced-preview-stage:active { cursor: grabbing; }
+
+/* 图板绝对定位：平移改 left/top、缩放改 width/height，都不触发布局重算 */
+.sced-preview-plate {
+  position: absolute;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.18);
+}
+.sced-preview-plate > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* 放到 1:1 以上时不要糊：看原图细节正是放大的目的 */
+  image-rendering: -webkit-optimize-contrast;
+  user-select: none;
+}
+
+/* 对比原图：右盖一层，左边露出当前图 */
+.sced-compare-cut {
+  position: absolute;
+  inset: 0 auto 0 0;
+  overflow: hidden;
+}
+.sced-compare-cut > img { display: block; height: 100%; object-fit: cover; object-position: left top; }
+.sced-compare-grip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.25);
+  cursor: ew-resize;
+}
+.sced-compare-grip::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 26px;
+  height: 26px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.3);
+}
+
+/* 左下角百分比、右下角动作条：都浮在舞台上，不占布局也不随图平移 */
+.sced-zoom-badge {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-glass, rgb(255 255 255 / 0.72));
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+  pointer-events: none;
+}
+.sced-preview-acts {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 12px;
+  background: var(--surface-glass, rgb(255 255 255 / 0.72));
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 侧栏里的告警说明。只在真的越界时出现，不是常驻提示 */
+.sced-note-warn {
+  color: var(--warn);
+}
+
+/* ── 宫格切分：可拖的切割线 ── */
+.sced-plate-cuts {
+  /* 线本身要能接指针事件，但图不要拦住拖动 */
+  touch-action: none;
+}
+.sced-plate-cuts > img {
+  pointer-events: none;
+}
+
+/* 切分预览里每格的描边：有间隔时能直观看出缝隙留了多少。
+   **不能叫 .sced-cell**——那个名字已经归拼接面板的缩略图按钮所有，
+   同名会双向破坏（本仓踩过：.sst-edit 同时是铅笔按钮和新建弹窗）。 */
+.sced-slice {
+  position: absolute;
+  outline: 1px solid rgba(255, 255, 255, 0.55);
+  outline-offset: -1px;
+  pointer-events: none;
+}
+
+/* 线本体只有 1px，但命中区要够宽——1px 的线要对准了才拖得中
+   （与画布连线的 .cvc-hit 同一个道理） */
+.sced-line-v,
+.sced-line-h {
+  position: absolute;
+  background: none;
+  cursor: col-resize;
+}
+.sced-line-v {
+  top: 0;
+  height: 100%;
+  width: 13px;
+  margin-left: -6px;
+  cursor: col-resize;
+}
+.sced-line-h {
+  left: 0;
+  width: 100%;
+  height: 13px;
+  margin-top: -6px;
+  cursor: row-resize;
+}
+/* 看得见的那一根画在命中区中间 */
+.sced-line-v::before,
+.sced-line-h::before {
+  content: '';
+  position: absolute;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+.sced-line-v::before {
+  left: 6px;
+  top: 0;
+  width: 1px;
+  height: 100%;
+}
+.sced-line-h::before {
+  top: 6px;
+  left: 0;
+  height: 1px;
+  width: 100%;
+}
+.sced-line-v:hover::before,
+.sced-line-h:hover::before {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+/* 拼接：格子上的排布序号角标。
+   不标出来的话，用户看不出自己勾选的顺序就是最终排布顺序 */
+.sced-ord {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  min-width: 15px;
+  padding: 0 3px;
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.7);
+  color: #fff;
+  font-size: 10px;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* ==================== 舞台上方的工具条 ==================== */
+
+/* 遮罩的笔刷、扩图的比例预置、拼接的行列——这些是「手上的工具」，
+   放在画面正上方而不是右侧参数栏：右栏是「这次要出什么」，工具条是「现在怎么画」。 */
+.sced-tools {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: var(--ctl-h-lg);
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+/* 把后面的内容顶到右边 */
+.sced-toolgap {
+  flex: 1 1 auto;
+}
+.sced-toolnote {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+.sced-toolsize {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+/* 工具条里的滑杆不吃满宽，右栏那条才吃 */
+.sced-toolsize .sced-range {
+  width: 116px;
+}
+.sced-toolsize b {
+  min-width: 26px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-secondary);
+}
+.sced-toolcheck {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--ctl-hit);
+  font-size: var(--text-xs);
+  color: var(--ink-secondary);
+  cursor: pointer;
+}
+
+/* ==================== AI 扩图 ==================== */
+
+/* 外框铺棋盘格，原图盖在中间——露出来的格子就是要模型补画的那一圈。
+   不铺格子的话，透明区在纯色底上看着像「图变小了」而不是「这里要补画」。 */
+.sced-outframe {
+  position: absolute;
+  user-select: none;
+  touch-action: none;
+  outline: 1px dashed var(--accent);
+  background-color: var(--bg-sunken);
+  background-image:
+    linear-gradient(45deg, var(--border) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--border) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--border) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--border) 75%);
+  background-size: 18px 18px;
+  background-position: 0 0, 0 9px, 9px -9px, -9px 0;
+}
+.sced-outimg {
+  position: absolute;
+  display: block;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+/* ==================== 宫格拼接 ==================== */
+
+/* 预览板就是成品的等比缩小版：格子位置、间距、底色都和导出的一致，
+   所见即所得，不会出现「预览好好的、拼出来不是那样」。 */
+.sced-joinboard {
+  position: absolute;
+  touch-action: none;
+  box-shadow: var(--shadow-md);
+}
+/* 透明底：铺棋盘格，让人看出留白是透明而不是白色 */
+.sced-joinboard-alpha {
+  background-color: var(--bg-sunken);
+  background-image:
+    linear-gradient(45deg, var(--border) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--border) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--border) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--border) 75%);
+  background-size: 18px 18px;
+  background-position: 0 0, 0 9px, 9px -9px, -9px 0;
+}
+.sced-tile {
+  position: absolute;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+}
+.sced-tile > img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+/* 拖动中的那一格浮起来，且要压过别的格子 */
+.sced-tile-moving {
+  z-index: 3;
+  cursor: grabbing;
+  opacity: 0.86;
+  box-shadow: var(--shadow-lg);
+}
+/* 松手会和它换位的那一格 */
+.sced-tile-drop {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}

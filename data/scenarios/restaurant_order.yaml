@@ -1,0 +1,18 @@
+key: restaurant_order
+title: 餐厅点餐
+title_en: Ordering at a Restaurant
+level: A2
+role_ai: 餐厅服务员
+role_user: 用餐的顾客
+goal: 完成点餐：询问推荐菜、说明口味偏好或忌口、点主菜和饮品并确认订单
+opening_line: "Hi there! Welcome to Oak & Vine. Can I start you off with something to drink?"
+key_sentences:
+  - en: "What do you recommend for a main course?"
+    zh: "主菜你有什么推荐？"
+  - en: "I'm allergic to peanuts, does this dish contain any?"
+    zh: "我对花生过敏，这道菜里有花生吗？"
+  - en: "Could we get the check, please?"
+    zh: "可以帮我们结账吗？"
+hints:
+  - 可以先请服务员推荐招牌菜，再说明自己的忌口
+  - 点完后简单复述一遍订单，确认没有点错

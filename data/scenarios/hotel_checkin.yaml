@@ -1,0 +1,18 @@
+key: hotel_checkin
+title: 酒店入住
+title_en: Hotel Check-in
+level: A2
+role_ai: 酒店前台接待员
+role_user: 办理入住的客人
+goal: 完成入住登记：确认预订信息、提供证件、了解早餐时间和退房时间
+opening_line: "Good evening! Welcome to the Riverside Hotel. Do you have a reservation with us?"
+key_sentences:
+  - en: "I have a reservation under the name Li."
+    zh: "我有一个预订，名字是 Li。"
+  - en: "Could I have a room with a view, please?"
+    zh: "能给我一间有景观的房间吗？"
+  - en: "What time is breakfast served?"
+    zh: "早餐几点开始供应？"
+hints:
+  - 先报上预订姓名，再按前台要求出示护照或身份证件
+  - 别忘了问清早餐时间、Wi-Fi 密码和退房时间

@@ -1,0 +1,830 @@
+.flc-page {
+  min-height: 100%;
+  padding: clamp(20px, 3vw, 44px);
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 74% 0%, color-mix(in srgb, var(--accent) 11%, transparent), transparent 28%),
+    var(--bg-app);
+}
+
+.flc-back {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  margin: -10px 0 18px;
+  padding: 5px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-secondary);
+  cursor: pointer;
+}
+
+.flc-back svg,
+.flc-page .btn svg { width: 16px; }
+
+.flc-layout {
+  display: grid;
+  grid-template-columns: 244px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.flc-sidebar,
+.flc-editor {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.flc-sidebar {
+  position: sticky;
+  top: 18px;
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.flc-flow-list {
+  display: grid;
+  gap: 7px;
+}
+
+.flc-flow-list > span {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  padding: 10px;
+  color: var(--ink-secondary);
+  font-size: 12px;
+}
+
+.flc-flow-list > button {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 11px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.flc-flow-list > button:hover,
+.flc-flow-list > button.is-active {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--accent) 7%, var(--bg-paper));
+}
+
+.flc-flow-list span {
+  color: var(--ink-secondary);
+  font-size: 11px;
+}
+
+.flc-editor { padding: clamp(16px, 2vw, 24px); }
+
+.flc-meta {
+  display: grid;
+  grid-template-columns: minmax(min(100%, 160px), .75fr) minmax(min(100%, 240px), 1.5fr) auto auto;
+  gap: 12px;
+  align-items: end;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.flc-meta > label,
+.flc-node label,
+.flc-json {
+  display: grid;
+  gap: 6px;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.flc-meta input,
+.flc-node input,
+.flc-json textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg-paper);
+  color: var(--ink);
+  font: inherit;
+  outline: 0;
+}
+
+.flc-meta input,
+.flc-node input { min-width: 0; min-height: 38px; padding: 0 10px; }
+
+.flc-picker { width: 100%; min-width: 0; min-height: 38px; }
+
+.flc-meta input:focus,
+.flc-node input:focus,
+.flc-json textarea:focus { border-color: var(--accent); }
+
+.flc-check {
+  display: flex !important;
+  gap: 7px !important;
+  align-items: center;
+  min-height: 38px;
+  white-space: nowrap;
+}
+
+.flc-check input { width: 15px; min-height: 15px; }
+.flc-meta-actions { display: flex; gap: 7px; justify-content: flex-end; }
+
+.flc-reference {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 16px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--bg-sunken);
+  color: var(--ink-secondary);
+  font-size: 11px;
+}
+
+.flc-reference code {
+  padding: 3px 6px;
+  border-radius: 5px;
+  background: var(--bg-paper);
+  color: var(--accent);
+}
+
+.flc-reference span { width: 100%; }
+
+.flc-section-head {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 22px 0 12px;
+}
+
+.flc-section-head h2,
+.flc-section-head p { margin: 0; }
+.flc-section-head h2 { color: var(--ink); font-size: 16px; }
+.flc-section-head p { margin-top: 4px; color: var(--ink-secondary); font-size: 11px; }
+
+.flc-nodes { display: grid; gap: 12px; }
+
+.flc-node {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--bg-paper);
+}
+
+.flc-node > header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg-surface));
+}
+
+.flc-node > header b {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+}
+
+.flc-node > header span { min-width: 0; overflow: hidden; color: var(--ink); text-overflow: ellipsis; }
+/* 删除按钮只有一个 16px 图标，实测 24×32——命中区补到 32×32，图标尺寸不动 */
+.flc-node > header button,
+.flc-edges button {
+  display: grid;
+  place-items: center;
+  min-width: 32px;
+  min-height: 32px;
+  margin-left: auto;
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-secondary);
+  cursor: pointer;
+}
+.flc-node > header button svg,
+.flc-edges button svg { width: 16px; }
+
+.flc-node-grid {
+  display: grid;
+  grid-template-columns: minmax(min(100%, 130px), .7fr) minmax(min(100%, 150px), 1fr) minmax(min(100%, 150px), 1fr);
+  gap: 10px;
+  padding: 12px 12px 0;
+}
+
+.flc-json { padding: 12px; }
+.flc-json textarea {
+  min-height: 116px;
+  padding: 10px;
+  resize: vertical;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.flc-edges {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  color: var(--ink-secondary);
+  font-size: 12px;
+}
+
+.flc-edges > div {
+  display: grid;
+  grid-template-columns: minmax(min(100%, 120px), 1fr) 20px minmax(min(100%, 120px), 1fr) 32px;
+  gap: 8px;
+  align-items: center;
+}
+
+.flc-edges > div > svg { width: 17px; color: var(--accent); }
+
+.flc-run {
+  margin-top: 22px;
+  padding-top: 2px;
+  border-top: 1px solid var(--border);
+}
+
+.flc-run > .flc-json { padding: 0; }
+.flc-run > .flc-json textarea { min-height: 84px; }
+
+.flc-run-state {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--bg-paper);
+}
+
+.flc-run-state > header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flc-run-state > header > div { display: flex; gap: 8px; align-items: center; }
+.flc-run-state > header > div:first-child { display: grid; gap: 3px; }
+.flc-run-state > header strong { color: var(--ink); }
+.flc-run-state > header span { color: var(--ink-secondary); font-size: 11px; overflow-wrap: anywhere; }
+
+.flc-error { color: var(--err); font-size: 12px; }
+
+.flc-checkpoints {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.flc-checkpoints article {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--ink-faint);
+  border-radius: 9px;
+  background: var(--bg-surface);
+}
+
+.flc-checkpoints article.is-running,
+.flc-checkpoints article.is-submitting { border-left-color: var(--accent); }
+.flc-checkpoints article.is-succeeded { border-left-color: var(--ok); }
+.flc-checkpoints article.is-failed { border-left-color: var(--err); }
+.flc-checkpoints article.is-partial { border-left-color: var(--warn); }
+.flc-checkpoints article span,
+.flc-checkpoints article code,
+.flc-checkpoints article p { color: var(--ink-secondary); font-size: 10px; overflow-wrap: anywhere; }
+.flc-checkpoints article p { margin: 3px 0 0; color: var(--err); }
+.flc-checkpoints pre { max-height: 140px; margin: 4px 0 0; overflow: auto; color: var(--ink-secondary); font-size: 10px; }
+
+/* ==================== 编排 / 模板两个页签 ==================== */
+
+.flc-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  width: fit-content;
+}
+
+.flc-tab {
+  padding: 7px 18px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--ink-secondary);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.flc-tab-on { background: var(--accent); color: var(--on-accent); }
+
+/* ==================== 节点：输入表单与执行策略 ==================== */
+
+.flc-span { grid-column: 1 / -1; }
+
+.flc-node-input {
+  margin: 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-surface);
+}
+
+.flc-node-input-head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.flc-node-input-head .btn-ghost-sm { margin-left: auto; }
+.flc-node-input-head .btn-ghost-sm + .btn-ghost-sm { margin-left: 0; }
+.flc-node-input-head svg { width: 15px; }
+
+.flc-adv {
+  margin: 0 12px 12px;
+  padding: 8px 10px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  color: var(--ink-secondary);
+  font-size: 12px;
+}
+
+.flc-adv > summary { cursor: pointer; }
+
+.flc-adv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  gap: 10px;
+  padding-top: 10px;
+}
+
+/* ==================== 等待人工输入 / 运行产出 ==================== */
+
+.flc-waiting {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--accent);
+  border-radius: 11px;
+  background: var(--accent-soft);
+}
+
+.flc-waiting > header {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.flc-waiting > header strong { color: var(--ink); font-size: 13px; }
+.flc-waiting > header span { color: var(--ink-secondary); font-size: 11px; }
+.flc-waiting > .btn { justify-self: start; }
+
+.flc-outputs {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--bg-surface);
+}
+
+.flc-outputs h3 { margin: 0 0 6px; color: var(--ink); font-size: 13px; }
+.flc-outputs pre {
+  max-height: 220px;
+  margin: 0;
+  overflow: auto;
+  color: var(--ink-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+/* ==================== schema 表单 ==================== */
+
+.sfm-form {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.sfm-field {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.sfm-head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sfm-label {
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.sfm-label b { margin-left: 3px; color: var(--err); }
+
+.sfm-mode {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.sfm-mode svg { width: 12px; }
+.sfm-mode-on { border-color: var(--accent); color: var(--accent); }
+
+/* 宿主可能是节点卡片（`.flc-node input` 会给所有 input 铺 38px 高、100% 宽），
+   这里的控件用双类选择器压过去，别让复选框被撑成一整行 */
+.sfm-form .sfm-input,
+.sfm-form .sfm-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  outline: 0;
+}
+
+.sfm-form .sfm-textarea { resize: vertical; line-height: 1.6; }
+.sfm-form .sfm-input:focus,
+.sfm-form .sfm-textarea:focus { border-color: var(--accent); }
+
+.sfm-picker { width: 100%; min-width: 0; min-height: 34px; }
+
+.sfm-bool {
+  display: flex !important;
+  gap: 7px;
+  align-items: center;
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.sfm-form .sfm-bool input {
+  width: 15px;
+  min-height: 15px;
+  min-width: 15px;
+  padding: 0;
+}
+
+.sfm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-paper);
+}
+
+.sfm-chip {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+  padding: 2px 4px 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--bg-sunken);
+  color: var(--ink);
+  font-size: 11px;
+}
+
+.sfm-chip button {
+  display: grid;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.sfm-chip svg { width: 12px; }
+
+.sfm-chip-add {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 3px 9px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--ink-secondary);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.sfm-chip-add svg { width: 13px; }
+
+.sfm-form .sfm-chips > input {
+  flex: 1;
+  min-width: 84px;
+  min-height: 24px;
+  padding: 2px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 11px;
+  outline: 0;
+}
+
+.sfm-ref { display: grid; gap: 6px; }
+
+.sfm-json { display: grid; gap: 4px; }
+
+.sfm-form .sfm-json textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-paper);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.55;
+  resize: vertical;
+  outline: 0;
+}
+
+.sfm-hint { margin: 0; color: var(--ink-muted); font-size: 10px; }
+.sfm-error { margin: 0; color: var(--err); font-size: 11px; }
+.sfm-empty { margin: 0 0 6px; color: var(--ink-muted); font-size: 11px; }
+
+.sfm-object {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg-paper);
+}
+
+.sfm-object > summary {
+  color: var(--ink-secondary);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.sfm-object > .sfm-form { padding-top: 10px; }
+
+/* ==================== 模板与触发器面板 ==================== */
+
+.flt-panel {
+  display: grid;
+  grid-template-columns: 244px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.flt-list,
+.flt-detail {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.flt-list {
+  position: sticky;
+  top: 18px;
+  display: grid;
+  gap: 7px;
+  align-content: start;
+  padding: 14px;
+}
+
+.flt-list h3 { margin: 0 0 4px; color: var(--ink); font-size: 14px; }
+
+.flt-list > button {
+  display: grid;
+  gap: 3px;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--bg-paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.flt-list > button:hover,
+.flt-list > button.is-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.flt-list > button span { color: var(--ink-secondary); font-size: 10px; }
+
+.flt-detail { padding: clamp(16px, 2vw, 24px); }
+
+.flt-detail h4 {
+  margin: 20px 0 8px;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.flt-detail-head {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.flt-detail-head h3 { margin: 0; color: var(--ink); font-size: 16px; }
+.flt-detail-head p { margin: 4px 0 0; color: var(--ink-secondary); font-size: 11px; }
+
+.flt-empty {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.flt-triggers { display: grid; gap: 8px; }
+
+.flt-trigger {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg-paper);
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.flt-trigger > svg { width: 15px; color: var(--accent); }
+.flt-trigger small { color: var(--ink-muted); font-size: 10px; }
+/* 同上：纯图标按钮的命中区补到 32×32 */
+.flt-trigger > button {
+  display: grid;
+  place-items: center;
+  min-width: 32px;
+  min-height: 32px;
+  margin-left: auto;
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-secondary);
+  cursor: pointer;
+}
+.flt-trigger > button svg { width: 15px; }
+
+.flt-trigger-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+  padding: 10px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+}
+
+.flt-trigger-form label {
+  display: grid;
+  gap: 5px;
+  color: var(--ink-secondary);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.flt-trigger-form input {
+  /* 170px 是「想要多宽」不是「至少多宽」：容器更窄时按容器收，别顶穿 */
+  width: 170px;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  outline: 0;
+}
+
+.flt-trigger-form .btn { margin-left: auto; }
+.flt-picker { min-width: 0; width: 132px; max-width: 100%; min-height: 34px; }
+
+.flt-statuses { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.flt-status {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--ink-secondary);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.flt-status-on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+
+.flt-runs { display: grid; gap: 6px; }
+
+.flt-run {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg-paper);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.flt-run code { min-width: 0; overflow: hidden; color: var(--ink); font-size: 11px; text-overflow: ellipsis; }
+.flt-run small { margin-left: auto; color: var(--ink-secondary); font-size: 10px; white-space: nowrap; }
+
+.flt-chip {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--bg-sunken);
+  color: var(--ink-secondary);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.flt-chip.is-running,
+.flt-chip.is-queued,
+.flt-chip.is-submitting,
+.flt-chip.is-recovering { background: var(--accent-soft); color: var(--accent-ink); }
+.flt-chip.is-waiting_input { background: var(--warn-soft); color: var(--warn); }
+.flt-chip.is-succeeded { background: var(--ok-soft); color: var(--ok); }
+.flt-chip.is-partial { background: var(--warn-soft); color: var(--warn); }
+.flt-chip.is-failed { background: var(--err-soft); color: var(--err); }
+
+@media (max-width: 900px) {
+  .flc-layout { grid-template-columns: 1fr; }
+  .flc-sidebar { position: static; }
+  .flc-flow-list { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+  .flc-meta { grid-template-columns: 1fr 1fr; }
+  .flt-panel { grid-template-columns: 1fr; }
+  .flt-list { position: static; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+  .flt-list h3 { grid-column: 1 / -1; }
+}
+
+@media (max-width: 620px) {
+  .flc-page { padding: 14px; }
+  .flc-meta,
+  .flc-node-grid { grid-template-columns: 1fr; }
+  .flc-meta-actions { justify-content: stretch; }
+  .flc-meta-actions .btn { flex: 1; }
+  .flc-edges > div { grid-template-columns: 1fr 18px 1fr 32px; }
+  .flc-run-state > header { align-items: flex-start; flex-direction: column; }
+  .flc-tabs { width: 100%; }
+  .flc-tab { flex: 1; }
+  .flt-trigger-form input { min-width: 0; width: 100%; }
+}

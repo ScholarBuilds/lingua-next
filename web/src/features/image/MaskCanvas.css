@@ -1,0 +1,135 @@
+/* 蒙版画布（FR-431）。类名前缀 mk- 独占，撞名会连定位方式一起被覆盖且不报错 */
+
+.mk-root {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 10px;
+  /* 父层 .imgc-view 是 place-items:center 的网格，不撑开就只有内容那么大 */
+  align-self: stretch;
+  justify-self: stretch;
+}
+
+/* ---- 工具条 ---- */
+
+.mk-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.mk-label {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+.mk-ratios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.mk-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  font-size: var(--text-xs);
+  color: var(--ink-secondary);
+}
+.mk-size b {
+  min-width: 26px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  text-align: right;
+  color: var(--ink);
+}
+
+.mk-slider {
+  width: 110px;
+  height: 4px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* ---- 画布 ---- */
+
+.mk-area {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--bg-sunken);
+}
+
+.mk-stage {
+  position: relative;
+  z-index: 1;
+  /* 触屏拖手柄时别让页面跟着滚 */
+  touch-action: none;
+}
+
+/* 外扩区的透明底纹：让用户一眼看出空出来的那一圈是透明的 */
+.mk-checker {
+  position: absolute;
+  z-index: 0;
+  background-color: var(--bg-surface);
+  background-image:
+    linear-gradient(45deg, var(--bg-sunken) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--bg-sunken) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--bg-sunken) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--bg-sunken) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---- 状态与脚注 ---- */
+
+.mk-msg {
+  margin: auto;
+  padding: 24px;
+  max-width: 460px;
+  text-align: center;
+  line-height: 1.9;
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+.mk-msg-bad {
+  color: var(--err);
+}
+
+.mk-err {
+  flex: 0 0 auto;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--err-soft);
+  color: var(--err);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+}
+
+.mk-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--ink-secondary);
+}
+.mk-foot .mk-note {
+  font-family: var(--font-ui);
+  color: var(--ink-muted);
+}

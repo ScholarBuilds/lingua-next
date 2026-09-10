@@ -1,0 +1,24 @@
+.amt-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  overflow-x: auto;
+}
+
+.amt-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-md);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+.amt-tab:hover { background: var(--bg-hover); color: var(--ink); }
+.amt-tab.is-active { background: var(--bg-active); color: var(--accent); font-weight: 600; }
+.amt-tab svg { width: 15px; height: 15px; }

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lingua-next · UI 原型导航</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  body { background: var(--bg-paper); }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 64px 32px; }
+  h1 { font-family: var(--font-reading); font-size: 34px; font-weight: 700; }
+  .sub { color: var(--ink-secondary); margin: 10px 0 8px; font-size: var(--text-md); line-height: 1.7; }
+  .note { font-size: var(--text-sm); color: var(--ink-muted); margin-bottom: 36px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+  a.page { text-decoration: none; color: inherit; }
+  .page .card { padding: 18px; transition: all var(--dur-fast) var(--ease); height: 100%; }
+  .page:hover .card { box-shadow: var(--shadow-md); border-color: var(--border-strong); transform: translateY(-2px); }
+  .page h3 { font-size: var(--text-lg); font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .page h3 svg { width: 18px; height: 18px; color: var(--accent); }
+  .page p { font-size: var(--text-sm); color: var(--ink-muted); line-height: 1.65; }
+  .swatches { display: flex; gap: 8px; margin: 40px 0 12px; }
+  .sw { flex: 1; height: 44px; border-radius: var(--radius-md); border: 1px solid var(--border); position: relative; }
+  .sw span { position: absolute; left: 8px; bottom: 6px; font-size: 10px; color: var(--ink-muted); font-family: var(--font-mono); }
+  .type-demo { display: flex; gap: 24px; align-items: baseline; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; background: var(--bg-surface); }
+  .type-demo .serif { font-family: var(--font-reading); font-size: 22px; }
+  .type-demo .sans { font-size: var(--text-base); color: var(--ink-secondary); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>lingua-next 原型</h1>
+  <p class="sub">纸感阅读 + 现代工具壳 · 深浅色双主题（右下角切换，全站记忆）</p>
+  <p class="note">高保真静态原型，用于确认布局与交互方向；数据均为示意。</p>
+
+  <div class="grid">
+    <a class="page" href="workbench.html"><div class="card">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>本地工作台（CR-006 / CR-007 提案）</h3>
+      <p>一个入口、无登录 · 侧栏五组（今天 / 学习 / 创作 / 助理 / 账号） · 邮件三栏 · 账号与凭据保险箱 · 语音助理 HUD（⌥空格演示） · 电脑操控会话与审批 · 扩展页 · ⌘K。令牌直接读 web 侧。</p>
+    </div></a>
+    <a class="page" href="reader.html"><div class="card">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>精读工作台 ★</h3>
+      <p>三栏布局 · 点词学习卡 · 双语对照 · 朗读跟随 · 句子语法面板。产品核心页面。</p>
+    </div></a>
+    <a class="page" href="shelf.html"><div class="card">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="12" y="3" width="8" height="18" rx="1"/></svg>书架</h3>
+      <p>继续阅读横幅 · 在读/未开始/已读完分段 · 封面进度 · 内联导入卡。</p>
+    </div></a>
+    <a class="page" href="vocab.html"><div class="card">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 20h10"/><path d="M8 8h8M8 12h5"/></svg>词库 · 背单词</h3>
+      <p>FSRS 复习闪卡 · 语境句带出处回跳 · 三档反馈 · 词表管理。</p>
+    </div></a>
+    <a class="page" href="video.html"><div class="card">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polygon points="10 9 15 12 10 15 10 9" fill="currentColor" stroke="none"/></svg>视频学习</h3>
+      <p>双语字幕同步 · 字幕点读跳转 · 逐句精听 · 视频内点词。</p>
+    </div></a>
+    <a class="page" href="talk.html"><div class="card">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>AI 语音对话</h3>
+      <p>场景陪练 · 可打断 · 实时字幕与纠错 · 任务面板。</p>
+    </div></a>
+    <a class="page" href="components.html"><div class="card">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>组件样张</h3>
+      <p>按钮层级与状态 · 控件 · 标记体系 · 反馈组件。视觉验收基准。</p>
+    </div></a>
+  </div>
+
+  <div class="swatches">
+    <div class="sw" style="background:var(--bg-sunken)"><span>sunken</span></div>
+    <div class="sw" style="background:var(--bg-app)"><span>app</span></div>
+    <div class="sw" style="background:var(--bg-paper)"><span>paper</span></div>
+    <div class="sw" style="background:var(--bg-surface)"><span>surface</span></div>
+    <div class="sw" style="background:var(--accent)"><span style="color:var(--on-accent)">accent</span></div>
+  </div>
+  <div class="type-demo">
+    <span class="serif">Literata — reading text 阅读正文</span>
+    <span class="sans">Inter — 界面与译文 UI &amp; translations</span>
+  </div>
+</div>
+<button class="theme-toggle" onclick="toggleTheme()" title="切换深浅色">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+</button>
+<script>
+  const saved = localStorage.getItem('ln-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? '' : 'dark';
+    cur ? document.documentElement.setAttribute('data-theme', cur) : document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('ln-theme', cur);
+  }
+</script>
+</body>
+</html>

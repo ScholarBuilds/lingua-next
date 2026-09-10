@@ -1,0 +1,65 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  desktop:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: desktop/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - uses: astral-sh/setup-uv@v4
+      - run: uv sync --frozen
+        working-directory: server
+      - run: uv run pytest tests/test_desktop_migrations.py tests/test_desktop_content.py tests/test_desktop_runtime.py -q
+        working-directory: server
+  server:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      # 内核文件类型门禁；follow_imports=silent 让被 import 的模块不计入
+      - run: uv run mypy domain/plugin_runtime.py domain/model_runtime.py domain/tool_execution.py domain/tool_plugins.py domain/studio_flows.py domain/workflow_execution.py
+      - run: uv run pytest -q -n auto --timeout=120
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsc --noEmit
+      - run: pnpm test
+      - run: pnpm check:css
+      - run: pnpm check:scroll
+      - run: pnpm exec vite build
