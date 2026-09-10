@@ -1,0 +1,4 @@
+# Content hashes are computed over exact bytes, including line endings.
+starter-content/** -text
+*.bat text eol=crlf
+*.sh text eol=lf
