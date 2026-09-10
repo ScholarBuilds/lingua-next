@@ -9,6 +9,7 @@ import json
 import shutil
 import sqlite3
 import tempfile
+from contextlib import closing
 from pathlib import Path
 
 from domain.desktop_content import merge_bundled_content
@@ -41,7 +42,7 @@ def install(pack: Path, database: Path, media: Path, grammar: Path) -> dict:
         baseline = Path(temporary) / "content.sqlite3"
         with gzip.open(pack / "content.sqlite3.gz", "rb") as source, baseline.open("wb") as target:
             shutil.copyfileobj(source, target)
-        with sqlite3.connect(f"file:{baseline}?mode=ro", uri=True) as connection:
+        with closing(sqlite3.connect(baseline.as_uri() + "?mode=ro", uri=True)) as connection:
             actual = {
                 row[0]
                 for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")

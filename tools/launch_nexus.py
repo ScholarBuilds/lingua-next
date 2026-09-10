@@ -666,7 +666,7 @@ def ensure_desktop_database() -> None:
     revision = alembic_head()
     if DESKTOP_DATABASE.is_file():
         try:
-            with sqlite3.connect(DESKTOP_DATABASE) as connection:
+            with contextlib.closing(sqlite3.connect(DESKTOP_DATABASE)) as connection:
                 current = connection.execute("SELECT version_num FROM alembic_version").fetchone()
         except sqlite3.Error as exc:
             raise RuntimeError(f"桌面 SQLite 无法读取：{exc}") from exc
