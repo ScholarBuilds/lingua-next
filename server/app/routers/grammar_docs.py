@@ -89,6 +89,7 @@ def _front_matter_scalars(text: str) -> dict[str, str]:
 def _root() -> Path:
     return Path(get_settings().grammar_docs_root).resolve()
 
+
 Collection = Literal["grammar", "vocabulary", "patterns", "scenes", "software"]
 COLLECTION_DIRS = {
     "vocabulary": "01.英语词汇",
@@ -121,7 +122,11 @@ def _collection_root(root: Path, collection: Collection, library: str | None = N
         if not child.is_dir() or child.name.startswith("."):
             continue
         outlines = list(child.glob("00.*_大纲.md"))
-        if outlines and _front_matter_scalars(outlines[0].read_text(encoding="utf-8")).get("software_id") == library:
+        if (
+            outlines
+            and _front_matter_scalars(outlines[0].read_text(encoding="utf-8")).get("software_id")
+            == library
+        ):
             return child
     raise HTTPException(status_code=404, detail="软件讲义库不存在")
 
@@ -139,10 +144,16 @@ def _software_library_from_path(path: str) -> str | None:
         return None
     outline = _collection_root(_root(), "software") / parts[1]
     files = list(outline.glob("00.*_大纲.md")) if outline.is_dir() else []
-    return _front_matter_scalars(files[0].read_text(encoding="utf-8")).get("software_id") if files else None
+    return (
+        _front_matter_scalars(files[0].read_text(encoding="utf-8")).get("software_id")
+        if files
+        else None
+    )
 
 
-def _collection_scan(root: Path, collection: Collection, library: str | None = None) -> tuple[list[dict], list[dict]]:
+def _collection_scan(
+    root: Path, collection: Collection, library: str | None = None
+) -> tuple[list[dict], list[dict]]:
     source = _collection_root(root, collection, library)
     loose, chapters = _scan(source)
     if collection == "grammar":
@@ -180,7 +191,9 @@ def _scan(root: Path) -> tuple[list[dict], list[dict]]:
     return loose, chapters
 
 
-def _flat_order(root: Path, collection: Collection = "grammar", library: str | None = None) -> list[dict]:
+def _flat_order(
+    root: Path, collection: Collection = "grammar", library: str | None = None
+) -> list[dict]:
     """prev/next 用的全局顺序：loose 在前，章节按名字顺序接在其后。"""
     loose, chapters = _collection_scan(root, collection, library)
     out = list(loose)
@@ -209,7 +222,9 @@ def _resolve(root: Path, rel: str) -> Path:
     if not rel or Path(rel).is_absolute():
         raise HTTPException(status_code=400, detail="路径必须是 vault 内的相对路径")
     parts = Path(rel).parts
-    sibling = bool(parts and parts[0] in COLLECTION_DIRS.values() and root.name == "02.英语基础语法")
+    sibling = bool(
+        parts and parts[0] in COLLECTION_DIRS.values() and root.name == "02.英语基础语法"
+    )
     allowed_root = root.parent if sibling else root
     target = (allowed_root / rel).resolve()
     if target.suffix != ".md" or not target.is_relative_to(allowed_root):
@@ -228,7 +243,9 @@ def _existing_doc(root: Path, rel: str) -> Path:
 
 
 def _vault_relative(target: Path, root: Path) -> Path:
-    return target.relative_to(root) if target.is_relative_to(root) else target.relative_to(root.parent)
+    return (
+        target.relative_to(root) if target.is_relative_to(root) else target.relative_to(root.parent)
+    )
 
 
 def _parse_tags(text: str) -> list[str]:
@@ -308,20 +325,30 @@ def _software_outlines() -> list[tuple[Path, dict[str, str]]]:
 def software_libraries() -> dict:
     items: list[dict] = []
     for root, meta in _software_outlines():
-        docs = [path for path in root.rglob("*.md") if not any(part.startswith((".", "_")) for part in path.relative_to(root).parts)]
+        docs = [
+            path
+            for path in root.rglob("*.md")
+            if not any(part.startswith((".", "_")) for part in path.relative_to(root).parts)
+        ]
         screenshots = int(meta.get("screenshots", "0") or 0)
-        items.append({
-            "software_id": meta["software_id"],
-            "software_name": meta.get("software_name", root.name),
-            "platform": meta.get("platform", ""),
-            "version": meta.get("version", meta.get("software_version", "")),
-            "captured_at": meta.get("captured_at", ""),
-            "cover": meta.get("cover", ""),
-            "status": meta.get("status", "reviewed"),
-            "screenshots": screenshots,
-            "documents": len(docs),
-            "outline": str(Path(COLLECTION_DIRS["software"]) / root.name / root.glob("00.*_大纲.md").__next__().name),
-        })
+        items.append(
+            {
+                "software_id": meta["software_id"],
+                "software_name": meta.get("software_name", root.name),
+                "platform": meta.get("platform", ""),
+                "version": meta.get("version", meta.get("software_version", "")),
+                "captured_at": meta.get("captured_at", ""),
+                "cover": meta.get("cover", ""),
+                "status": meta.get("status", "reviewed"),
+                "screenshots": screenshots,
+                "documents": len(docs),
+                "outline": str(
+                    Path(COLLECTION_DIRS["software"])
+                    / root.name
+                    / root.glob("00.*_大纲.md").__next__().name
+                ),
+            }
+        )
     return {"items": items}
 
 
@@ -350,7 +377,9 @@ def software_asset(software_id: str, asset_path: str, request: Request) -> Respo
     if candidate.is_symlink():
         raise HTTPException(status_code=400, detail="图片路径不允许符号链接")
     target = candidate.resolve()
-    if not target.is_relative_to(assets_root) or any(part.startswith(".") for part in Path(asset_path).parts):
+    if not target.is_relative_to(assets_root) or any(
+        part.startswith(".") for part in Path(asset_path).parts
+    ):
         raise HTTPException(status_code=400, detail="图片路径不合法")
     cursor = candidate
     while cursor != assets_root:
@@ -363,7 +392,11 @@ def software_asset(software_id: str, asset_path: str, request: Request) -> Respo
     mime = _sniff_image(data)
     if mime is None:
         raise HTTPException(status_code=415, detail="只允许读取真实 PNG 或 JPEG 图片")
-    return Response(data, media_type=mime, headers={"Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff"})
+    return Response(
+        data,
+        media_type=mime,
+        headers={"Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff"},
+    )
 
 
 @router.get("/software/resolve-legacy-source")
@@ -414,7 +447,9 @@ def doc_content(path: str) -> dict:
 
     rel = str(_vault_relative(target, root))
     collection = _collection_of(rel)
-    order = _flat_order(root, collection, _software_library_from_path(rel) if collection == "software" else None)
+    order = _flat_order(
+        root, collection, _software_library_from_path(rel) if collection == "software" else None
+    )
     idx = next((i for i, d in enumerate(order) if d["path"] == rel), None)
     prev_doc = order[idx - 1] if idx is not None and idx > 0 else None
     next_doc = order[idx + 1] if idx is not None and idx + 1 < len(order) else None
@@ -435,7 +470,9 @@ def doc_content(path: str) -> dict:
 
 
 @router.get("/search")
-def search_docs(q: str = "", collection: Collection = "grammar", library: str | None = None) -> dict:
+def search_docs(
+    q: str = "", collection: Collection = "grammar", library: str | None = None
+) -> dict:
     query = q.strip().lower()
     if not query:
         return {"items": []}
@@ -457,8 +494,13 @@ def search_docs(q: str = "", collection: Collection = "grammar", library: str | 
                     hits.append({"line": lineno, "text": line.strip()[:SNIPPET_MAX_CHARS]})
         if total:
             items.append(
-                {"path": doc["path"], "name": doc["name"], "chapter": chapter_name,
-                 "n": total, "hits": hits}
+                {
+                    "path": doc["path"],
+                    "name": doc["name"],
+                    "chapter": chapter_name,
+                    "n": total,
+                    "hits": hits,
+                }
             )
     # sort 稳定：同命中数保持 tree 顺序
     items.sort(key=lambda x: -x["n"])
@@ -536,7 +578,11 @@ def _improve_messages(
     blocks: list[dict] | None = None,
     software: bool = False,
 ) -> list[dict]:
-    system = IMPROVE_SYSTEM + (SOFTWARE_IMPROVE_SYSTEM if software else "") + (IMPROVE_ATTACHMENT_SYSTEM if blocks else "")
+    system = (
+        IMPROVE_SYSTEM
+        + (SOFTWARE_IMPROVE_SYSTEM if software else "")
+        + (IMPROVE_ATTACHMENT_SYSTEM if blocks else "")
+    )
     if selection:
         user = (
             f"下面是讲义《{name}》正文中的一个小节（精确的 Markdown 源码切片）。"
@@ -569,7 +615,11 @@ async def improve_doc(
     doc_body = _doc_body(target.read_text(encoding="utf-8"))
     blocks = await _attachment_blocks(session, body.ref_asset_ids, body.file_asset_ids)
     messages = _improve_messages(
-        target.stem, doc_body, body.selection, body.instruction, blocks,
+        target.stem,
+        doc_body,
+        body.selection,
+        body.instruction,
+        blocks,
         _collection_of(body.path) == "software",
     )
 
@@ -790,9 +840,7 @@ async def create_annotation(body: AnnotationCreate, session: SessionDep) -> dict
 
 
 @router.patch("/annotations/{annotation_id}")
-async def update_annotation(
-    annotation_id: int, body: AnnotationPatch, session: SessionDep
-) -> dict:
+async def update_annotation(annotation_id: int, body: AnnotationPatch, session: SessionDep) -> dict:
     row = await session.get(GrammarDocAnnotation, annotation_id)
     if row is None:
         raise HTTPException(status_code=404, detail="批注不存在")
@@ -919,9 +967,7 @@ async def analyze_annotation(
     cached = None if body.refresh else _cached_analysis(row, kind)
     # 生成器跑起来时请求会话可能已在拆，ORM 属性一律先取成普通值
     row_id = row.id
-    messages = (
-        [] if cached else _analyze_messages(kind, row, _current_body(_root(), row.doc_path))
-    )
+    messages = [] if cached else _analyze_messages(kind, row, _current_body(_root(), row.doc_path))
 
     if not stream:
         if cached:

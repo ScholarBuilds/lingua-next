@@ -126,9 +126,7 @@ async def test_library_status(client, vault):
     assert resp.json()["documents"] == 4
 
 
-async def test_import_library_copies_active_docs_without_overwriting(
-    client, vault, tmp_path
-):
+async def test_import_library_copies_active_docs_without_overwriting(client, vault, tmp_path):
     source = tmp_path / "old-vault"
     (source / "01.章节").mkdir(parents=True)
     (source / "01.章节" / "01.新讲义.md").write_text("# 新讲义\n", encoding="utf-8")
@@ -137,12 +135,8 @@ async def test_import_library_copies_active_docs_without_overwriting(
     (source / "_归档-旧版").mkdir()
     (source / "_归档-旧版" / "old.md").write_text("old", encoding="utf-8")
 
-    first = await client.post(
-        "/grammar/docs/library/import", json={"source_path": str(source)}
-    )
-    second = await client.post(
-        "/grammar/docs/library/import", json={"source_path": str(source)}
-    )
+    first = await client.post("/grammar/docs/library/import", json={"source_path": str(source)})
+    second = await client.post("/grammar/docs/library/import", json={"source_path": str(source)})
 
     assert first.status_code == 200
     assert first.json()["discovered"] == 1
@@ -153,16 +147,12 @@ async def test_import_library_copies_active_docs_without_overwriting(
     assert not (vault / ".obsidian").exists()
 
 
-async def test_import_library_reports_conflict_and_keeps_current_doc(
-    client, vault, tmp_path
-):
+async def test_import_library_reports_conflict_and_keeps_current_doc(client, vault, tmp_path):
     source = tmp_path / "old-vault"
     source.mkdir()
     (source / "00.测试大纲.md").write_text("# 不应覆盖\n", encoding="utf-8")
 
-    resp = await client.post(
-        "/grammar/docs/library/import", json={"source_path": str(source)}
-    )
+    resp = await client.post("/grammar/docs/library/import", json={"source_path": str(source)})
 
     assert resp.status_code == 200
     assert resp.json()["conflicts"] == ["00.测试大纲.md"]
@@ -231,21 +221,30 @@ async def test_collections_isolate_tree_search_and_pagination(client, vault):
         (folder / "02.讲义.md").write_text("# 第二篇\n共同检索词", encoding="utf-8")
         tree = (await client.get("/grammar/docs/tree", params={"collection": collection})).json()
         assert [doc["path"] for doc in tree["loose"]] == [
-            f"{directory}/01.讲义.md", f"{directory}/02.讲义.md",
+            f"{directory}/01.讲义.md",
+            f"{directory}/02.讲义.md",
         ]
-        search = (await client.get(
-            "/grammar/docs/search", params={"collection": collection, "q": "共同检索词"},
-        )).json()
+        search = (
+            await client.get(
+                "/grammar/docs/search",
+                params={"collection": collection, "q": "共同检索词"},
+            )
+        ).json()
         assert len(search["items"]) == 2
         assert all(doc["path"].startswith(directory + "/") for doc in search["items"])
-        content = (await client.get(
-            "/grammar/docs/content", params={"path": tree["loose"][0]["path"]},
-        )).json()
+        content = (
+            await client.get(
+                "/grammar/docs/content",
+                params={"path": tree["loose"][0]["path"]},
+            )
+        ).json()
         assert content["prev"] is None
         assert content["next"]["path"] == f"{directory}/02.讲义.md"
     grammar = (await client.get("/grammar/docs/tree")).json()
-    assert all(chapter["name"] not in grammar_docs.COLLECTION_DIRS.values()
-               for chapter in grammar["chapters"])
+    assert all(
+        chapter["name"] not in grammar_docs.COLLECTION_DIRS.values()
+        for chapter in grammar["chapters"]
+    )
     assert (await client.get("/grammar/docs/tree?collection=unknown")).status_code == 422
 
 
@@ -254,7 +253,8 @@ async def test_software_catalog_tree_asset_and_legacy_source(client, vault, monk
     (library / "01.基础入门").mkdir(parents=True)
     (library / "_assets/screenshots").mkdir(parents=True)
     (library / "_meta").mkdir()
-    (library / "00.macOS系统设置_大纲.md").write_text("""---
+    (library / "00.macOS系统设置_大纲.md").write_text(
+        """---
 software_id: macos-system-settings
 software_name: macOS 系统设置
 platform: macOS
@@ -265,38 +265,70 @@ status: reviewed
 screenshots: 1
 ---
 # 大纲
-""", encoding="utf-8")
-    (library / "01.基础入门/01.入门.md").write_text("# 入门\n\n![Wi-Fi](../../_assets/screenshots/wifi.png)\n", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
+    (library / "01.基础入门/01.入门.md").write_text(
+        "# 入门\n\n![Wi-Fi](../../_assets/screenshots/wifi.png)\n", encoding="utf-8"
+    )
     (library / "_assets/screenshots/wifi.png").write_bytes(noise_png())
-    (library / "_meta/legacy-source-map.json").write_text(json.dumps({
-        "mappings": {"macos-27|wifi|wifi|": {
-            "document": "05.软件英语/01.macOS系统设置/01.基础入门/01.入门.md",
-            "anchor": "capture-wifi",
-        }},
-    }), encoding="utf-8")
+    (library / "_meta/legacy-source-map.json").write_text(
+        json.dumps(
+            {
+                "mappings": {
+                    "macos-27|wifi|wifi|": {
+                        "document": "05.软件英语/01.macOS系统设置/01.基础入门/01.入门.md",
+                        "anchor": "capture-wifi",
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
     monkeypatch.setattr(get_settings(), "runtime_profile", "desktop", raising=False)
 
     catalog = (await client.get("/grammar/docs/software/libraries")).json()["items"]
     assert catalog[0]["software_id"] == "macos-system-settings"
     assert catalog[0]["documents"] == 2
-    tree = (await client.get("/grammar/docs/tree", params={"collection": "software", "library": "macos-system-settings"})).json()
+    tree = (
+        await client.get(
+            "/grammar/docs/tree",
+            params={"collection": "software", "library": "macos-system-settings"},
+        )
+    ).json()
     assert tree["loose"][0]["path"].startswith("05.软件英语/01.macOS系统设置/")
     image = await client.get("/grammar/docs/assets/macos-system-settings/wifi.png")
     assert image.status_code == 200
     assert image.headers["cache-control"] == "private, no-store"
     assert image.headers["x-content-type-options"] == "nosniff"
-    legacy = (await client.get("/grammar/docs/software/resolve-legacy-source", params={"collection": "macos-27", "page": "wifi", "capture": "wifi"})).json()
-    assert legacy == {"found": True, "library": "macos-system-settings", "document": "05.软件英语/01.macOS系统设置/01.基础入门/01.入门.md", "anchor": "capture-wifi"}
+    legacy = (
+        await client.get(
+            "/grammar/docs/software/resolve-legacy-source",
+            params={"collection": "macos-27", "page": "wifi", "capture": "wifi"},
+        )
+    ).json()
+    assert legacy == {
+        "found": True,
+        "library": "macos-system-settings",
+        "document": "05.软件英语/01.macOS系统设置/01.基础入门/01.入门.md",
+        "anchor": "capture-wifi",
+    }
 
 
 async def test_software_assets_reject_traversal_and_non_image(client, vault, monkeypatch):
     library = vault / "05.软件英语/01.macOS系统设置"
     (library / "_assets/screenshots").mkdir(parents=True)
-    (library / "00.macOS系统设置_大纲.md").write_text("---\nsoftware_id: macos-system-settings\n---\n# 大纲\n")
+    (library / "00.macOS系统设置_大纲.md").write_text(
+        "---\nsoftware_id: macos-system-settings\n---\n# 大纲\n"
+    )
     (library / "_assets/screenshots/not-image.png").write_text("secret")
     monkeypatch.setattr(get_settings(), "runtime_profile", "desktop", raising=False)
-    assert (await client.get("/grammar/docs/assets/macos-system-settings/not-image.png")).status_code == 415
-    assert (await client.get("/grammar/docs/assets/macos-system-settings/.private.png")).status_code == 400
+    assert (
+        await client.get("/grammar/docs/assets/macos-system-settings/not-image.png")
+    ).status_code == 415
+    assert (
+        await client.get("/grammar/docs/assets/macos-system-settings/.private.png")
+    ).status_code == 400
 
 
 async def test_collection_import_preserves_original_and_scopes_destination(client, vault, tmp_path):
@@ -313,9 +345,7 @@ async def test_collection_import_preserves_original_and_scopes_destination(clien
 
 
 async def test_absolute_and_non_md_rejected(client, vault):
-    resp = await client.get(
-        "/grammar/docs/content", params={"path": str(vault / "00.测试大纲.md")}
-    )
+    resp = await client.get("/grammar/docs/content", params={"path": str(vault / "00.测试大纲.md")})
     assert resp.status_code == 400
     resp = await client.get("/grammar/docs/content", params={"path": "01.第一章/01.名词.txt"})
     assert resp.status_code == 400
@@ -372,9 +402,7 @@ async def test_apply_backs_up_then_writes(client, vault, tmp_path):
 
 
 async def test_apply_traversal_rejected(client, vault, tmp_path):
-    resp = await client.post(
-        "/grammar/docs/apply", json={"path": "../外部.md", "content": "x"}
-    )
+    resp = await client.post("/grammar/docs/apply", json={"path": "../外部.md", "content": "x"})
     assert resp.status_code == 400
     assert not (tmp_path / "backups").exists()
 
@@ -427,9 +455,7 @@ async def test_improve_truncates_long_doc(client, vault, monkeypatch):
     assert len(user) < len(long_body)
 
 
-async def test_improve_without_attachments_keeps_plain_string_content(
-    client, vault, monkeypatch
-):
+async def test_improve_without_attachments_keeps_plain_string_content(client, vault, monkeypatch):
     """不带附件的完善必须保持纯字符串 content。
 
     无条件改成块数组的话，每一次普通完善都变成多模态请求——回归保护。
