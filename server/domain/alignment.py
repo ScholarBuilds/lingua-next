@@ -9,6 +9,7 @@ whisper 的词级时间戳由 cross-attention DTW 推出，被吸附到模型的
 """
 
 import logging
+import sys
 import threading
 
 logger = logging.getLogger(__name__)
@@ -19,8 +20,17 @@ _aligner = None
 _lock = threading.Lock()
 
 
+def _require_supported_platform() -> None:
+    if sys.platform == "win32":
+        raise RuntimeError(
+            "Windows 暂不支持本地 CTC 强制对齐及依赖它的发音评测；"
+            "请使用 macOS/Linux 服务端。已有字幕仍可阅读播放。"
+        )
+
+
 def _get_aligner():
     """进程级单例：ONNX 模型 1.2GB，重复加载会拖垮 worker。"""
+    _require_supported_platform()
     global _aligner
     if _aligner is None:
         with _lock:
@@ -167,6 +177,7 @@ def align_text(media_path: str, text: str) -> list[dict]:
     `score` 是区间求和不是均值，长词天然高分——调用方必须按 `frames` 归一化
     才能横向比较（BR-92）。这里把帧数一并返回，就是为了不让调用方漏掉这步。
     """
+    _require_supported_platform()
     from ctc_forced_aligner import (
         generate_emissions,
         get_alignments,

@@ -31,7 +31,7 @@ dependencies = [
     "cryptography>=50.0.0",
     "playwright>=1.62.0",
     "yt-dlp-ejs>=0.8.0",
-    "ctc-forced-aligner>=1.0.2",
+    "ctc-forced-aligner>=1.0.2; sys_platform != 'win32'",
     "unidecode>=1.4.0",
     "pydantic-ai-slim[mcp,openai]>=2.31.1",
     "spacy>=3.8",

@@ -32,3 +32,5 @@ npm install -g pnpm@11
 `--browser` 可只打开浏览器；macOS 的 `--installed`、`--dist` 不适用于 Windows。本机 macOS 声音不可在 Windows 使用，其他平台专属功能仍受原有可用性提示约束。
 
 Windows CI 验证源码启动链路与进程存活，不代表所有音频、外设和桌面交互都完成 Windows 实机验收。
+
+Windows 当前不安装上游无法通过 Windows 编译的 `ctc-forced-aligner`；本地 CTC 字幕强制对齐与依赖它的发音评测会明确报不支持。已有字幕学习、视频播放不需要这个库。
