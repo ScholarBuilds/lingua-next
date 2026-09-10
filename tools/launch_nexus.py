@@ -977,6 +977,13 @@ def start_docker(args: argparse.Namespace) -> int:
 
 
 def main() -> int:
+    if IS_WIN:
+        # CI and redirected Windows terminals may default to cp1252.
+        # Apply this to direct Python invocations as well as the batch entry.
+        os.environ["PYTHONUTF8"] = "1"
+        os.environ["PYTHONIOENCODING"] = "utf-8"
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
     args = parse_args()
     if args.print_only:
         print_urls(DOCKER_PORT if args.mode == "docker" else LOCAL_PORT)
