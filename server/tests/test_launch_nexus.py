@@ -211,3 +211,38 @@ def test_launcher_has_no_retired_runtime_prerequisites() -> None:
 
     for command in ("interpreter", "agent-browser", "cua-driver"):
         assert command not in source
+
+
+def test_windows_pnpm_uses_node_without_shell(monkeypatch, tmp_path):
+    launcher = load_launcher()
+    base = tmp_path / "Program Files & 中文"
+    entry = base / "node_modules/pnpm/bin/pnpm.cjs"
+    entry.parent.mkdir(parents=True)
+    entry.touch()
+    monkeypatch.setattr(launcher, "IS_WIN", True)
+    monkeypatch.setattr(
+        launcher.shutil,
+        "which",
+        lambda name: str(base / f"{name}.cmd") if name == "pnpm" else "node.exe",
+    )
+    assert launcher.pnpm_command("install", "--frozen-lockfile") == [
+        "node.exe",
+        str(entry),
+        "install",
+        "--frozen-lockfile",
+    ]
+
+
+def test_windows_electron_is_native_executable(monkeypatch, tmp_path):
+    launcher = load_launcher()
+    monkeypatch.setattr(launcher, "IS_WIN", True)
+    monkeypatch.setattr(launcher, "DESKTOP_DIR", tmp_path)
+    assert launcher.electron_bin() == tmp_path / "node_modules/electron/dist/electron.exe"
+
+
+def test_windows_pnpm_missing_entry_has_actionable_error(monkeypatch, tmp_path):
+    launcher = load_launcher()
+    monkeypatch.setattr(launcher, "IS_WIN", True)
+    monkeypatch.setattr(launcher.shutil, "which", lambda name: str(tmp_path / f"{name}.cmd"))
+    with pytest.raises(RuntimeError, match="npm install -g pnpm@11"):
+        launcher.pnpm_command("build")

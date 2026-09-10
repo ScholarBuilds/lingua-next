@@ -1,0 +1,42 @@
+name: Windows Electron launch
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows-launch:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install -g pnpm@11
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: '3.12'
+      - name: Check batch entry
+        run: cmd /c start-nexus.bat --help
+      - name: Launch API, Web and Electron
+        run: uv run --no-project --python 3.12 tools/launch_nexus.py --timeout 180
+      - name: Verify live services and native Electron
+        shell: pwsh
+        run: |
+          $health = Invoke-RestMethod http://127.0.0.1:8100/healthz
+          if ($health.status -ne 'ok') { throw 'API is not healthy' }
+          $page = Invoke-WebRequest http://127.0.0.1:5173/
+          if ($page.StatusCode -ne 200) { throw 'Web is not ready' }
+          $electronId = [int](Get-Content data/run/desktop.pid)
+          $process = Get-Process -Id $electronId -ErrorAction Stop
+          if ($process.ProcessName -ne 'electron') { throw 'Native Electron is not running' }
+      - name: Stop services
+        if: always()
+        run: uv run --no-project --python 3.12 tools/launch_nexus.py --stop
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: windows-launch-logs
+          path: data/logs/*.log

@@ -248,26 +248,52 @@ def venv_bin(tool: str) -> Path:
     return SERVER_DIR / ".venv" / scripts / f"{tool}{suffix}"
 
 
+def pnpm_command(*args: str) -> list[str]:
+    executable = shutil.which("pnpm")
+    if executable is None:
+        raise RuntimeError("没有 pnpm：先安装 Node.js 22，再执行 npm install -g pnpm@11")
+    if IS_WIN and Path(executable).suffix.lower() in {".cmd", ".bat", ".ps1"}:
+        # Run the JS entry directly: CreateProcess cannot execute npm's batch shim.
+        # This also keeps spaces and shell metacharacters in project paths literal.
+        base = Path(executable).parent
+        candidates = (
+            base / "node_modules/pnpm/bin/pnpm.cjs",
+            base / "node_modules/corepack/dist/pnpm.js",
+        )
+        node = shutil.which("node")
+        for candidate in candidates:
+            if node and candidate.is_file():
+                return [node, str(candidate), *args]
+        raise RuntimeError("无法定位 pnpm 的 Node 入口，请执行 npm install -g pnpm@11 后重试")
+    return [executable, *args]
+
+
 def ensure_deps() -> None:
     """首次跑：服务端 uv sync、前端与壳 pnpm install。已经装好的什么都不做。"""
     if not venv_bin("uvicorn").is_file():
         if shutil.which("uv") is None:
-            raise RuntimeError("没有 uv：brew install uv，或 https://docs.astral.sh/uv/")
+            raise RuntimeError(
+                "没有 uv：Windows 执行 winget install --id astral-sh.uv -e；"
+                "macOS 执行 brew install uv"
+            )
         log("DEPS", "server/.venv 不在，uv sync")
         subprocess.run(["uv", "sync"], cwd=SERVER_DIR, check=True)
     if shutil.which("pnpm") is None:
-        raise RuntimeError("没有 pnpm：brew install pnpm，或 corepack enable")
+        raise RuntimeError("没有 pnpm：安装 Node.js 22 后执行 npm install -g pnpm@11")
     if not (WEB_DIR / "node_modules").is_dir():
         log("DEPS", "web/node_modules 不在，pnpm install")
-        subprocess.run(["pnpm", "install"], cwd=WEB_DIR, check=True)
+        subprocess.run(pnpm_command("install", "--frozen-lockfile"), cwd=WEB_DIR, check=True)
     if not electron_bin().is_file():
         log("DEPS", "desktop/node_modules 不在，pnpm install（Electron 二进制走 npmmirror）")
         env = {**os.environ, "ELECTRON_MIRROR": ELECTRON_MIRROR}
-        subprocess.run(["pnpm", "install"], cwd=DESKTOP_DIR, check=True, env=env)
+        subprocess.run(
+            pnpm_command("install", "--frozen-lockfile"), cwd=DESKTOP_DIR, check=True, env=env
+        )
 
 def electron_bin() -> Path:
-    name = "electron.cmd" if IS_WIN else "electron"
-    return DESKTOP_DIR / "node_modules" / ".bin" / name
+    if IS_WIN:
+        return DESKTOP_DIR / "node_modules/electron/dist/electron.exe"
+    return DESKTOP_DIR / "node_modules/.bin/electron"
 
 
 def desktop_build_required() -> bool:
@@ -421,11 +447,14 @@ def dist_desktop(identity: str | None, replace_legacy: bool) -> int:
     if not IS_MAC:
         raise RuntimeError("--dist 只做 macOS 包")
     if shutil.which("pnpm") is None:
-        raise RuntimeError("没有 pnpm：brew install pnpm，或 corepack enable")
+        raise RuntimeError("没有 pnpm：安装 Node.js 22 后执行 npm install -g pnpm@11")
     if not electron_bin().is_file():
         log("DEPS", "desktop/node_modules 不在，pnpm install（Electron 二进制走 npmmirror）")
         install_env = {**os.environ, "ELECTRON_MIRROR": ELECTRON_MIRROR}
-        subprocess.run(["pnpm", "install"], cwd=DESKTOP_DIR, check=True, env=install_env)
+        subprocess.run(
+            pnpm_command("install", "--frozen-lockfile"),
+            cwd=DESKTOP_DIR, check=True, env=install_env,
+        )
     name = pick_identity(identity)
     display_name = identity_display_name(name)
     env = {**os.environ, "CSC_NAME": name, "ELECTRON_MIRROR": ELECTRON_MIRROR}
@@ -440,7 +469,7 @@ def dist_desktop(identity: str | None, replace_legacy: bool) -> int:
         }
         unsigned_env["CSC_IDENTITY_AUTO_DISCOVERY"] = "false"
         commands = (
-            ["pnpm", "build"],
+            pnpm_command("build"),
             ["pnpm", "exec", "electron-builder", "--mac", "--arm64", "--dir"],
         )
         for command in commands:
@@ -643,7 +672,8 @@ def ensure_desktop_database() -> None:
             raise RuntimeError(f"桌面 SQLite 无法读取：{exc}") from exc
         if current is None or current[0] != revision:
             result = subprocess.run(
-                [str(venv_bin("python")), "-m", "scripts.upgrade_desktop", str(DESKTOP_DATABASE), "--backups", str(DESKTOP_BACKUPS)],
+                [str(venv_bin("python")), "-m", "scripts.upgrade_desktop",
+                 str(DESKTOP_DATABASE), "--backups", str(DESKTOP_BACKUPS)],
                 cwd=SERVER_DIR, capture_output=True, text=True, check=False,
             )
             if result.returncode:
@@ -681,8 +711,6 @@ def install_public_content() -> None:
 
 
 def start_services(timeout: float, *, desktop: bool) -> None:
-    pnpm = shutil.which("pnpm")
-    assert pnpm is not None
     api_env = desktop_api_env() if desktop else {
         **os.environ,
         "LINGUA_API_BASE_URL": f"http://127.0.0.1:{API_PORT}",
@@ -705,7 +733,7 @@ def start_services(timeout: float, *, desktop: bool) -> None:
         )
     web_pid = spawn(
         "web",
-        [pnpm, "dev", "--host", "0.0.0.0", "--port", str(LOCAL_PORT), "--strictPort"],
+        pnpm_command("dev", "--host", "0.0.0.0", "--port", str(LOCAL_PORT), "--strictPort"),
         WEB_DIR,
     )
     if not wait_http(f"http://127.0.0.1:{API_PORT}/healthz", timeout):
@@ -764,7 +792,7 @@ def start_desktop(use_installed: bool = False) -> None:
         raise RuntimeError("桌面壳没安装：desktop/node_modules 缺少 electron")
     if desktop_build_required():
         log("DESKTOP", "源码或构建配置已变更，tsc 编译壳")
-        if subprocess.run(["pnpm", "build"], cwd=DESKTOP_DIR, check=False).returncode != 0:
+        if subprocess.run(pnpm_command("build"), cwd=DESKTOP_DIR, check=False).returncode != 0:
             raise RuntimeError("桌面壳编译失败：cd desktop && pnpm build")
     else:
         log("DESKTOP", "复用未过期的 desktop/dist")
@@ -855,7 +883,8 @@ def parse_args() -> argparse.Namespace:
         "--mode",
         choices=("desktop", "developer", "docker", "local"),
         default="desktop",
-        help="desktop SQLite（默认）；developer PostgreSQL/Redis；docker 全容器；local 为 desktop 兼容别名",
+        help=("desktop SQLite（默认）；developer PostgreSQL/Redis；"
+              "docker 全容器；local 为 desktop 兼容别名"),
     )
     parser.add_argument("--timeout", type=float, default=180, help="每一步最长等待秒数")
     parser.add_argument(
